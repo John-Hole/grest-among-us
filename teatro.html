@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GREST Among Us - Maxischermo</title>
+    <link rel="stylesheet" href="css/global.css">
+</head>
+<body>
+    <!-- Fullscreen Video (Hidden by default, triggered on load or game start) -->
+    <video id="intro-video" class="hidden" autoplay muted playsinline>
+        <source src="public/assets/intro.mp4" type="video/mp4">
+        Il tuo browser non supporta i video.
+    </video>
+
+    <!-- Meeting / Alert Overlays -->
+    <div id="overlay-meeting" class="overlay-screen hidden">
+        <h1 id="overlay-text" class="alert-text">RIUNIONE CHIAMATA</h1>
+    </div>
+    
+    <div id="overlay-ejected" class="overlay-screen hidden">
+        <h1 id="ejected-text" style="color: white; font-size: 3rem;">Nessuno è stato espulso</h1>
+    </div>
+
+    <!-- Main Teatro Interface -->
+    <div class="teatro-header">
+        <div id="global-timer">10:00</div>
+    </div>
+
+    <div class="teatro-layout">
+        <!-- Left: Task Progress Bar -->
+        <div class="task-bar-container">
+            <h2 style="font-size: 1rem; text-align: center; margin-bottom: 0.5rem; color: var(--accent-cyan);">Task Globali</h2>
+            <div class="task-progress-wrap">
+                <div id="task-progress-fill" class="task-progress-fill"></div>
+            </div>
+            <p id="task-progress-text" style="text-align: center; margin-top: 0.5rem; font-weight: bold;">0 / 100%</p>
+        </div>
+
+        <!-- Center: Map -->
+        <div class="map-container">
+            <img src="public/assets/mappa.jpg" alt="Mappa della navicella">
+        </div>
+
+        <!-- Right: Player List -->
+        <div class="players-sidebar">
+            <h2 style="font-size: 1rem; text-align: center; margin-bottom: 1rem; color: var(--accent-cyan);">Equipaggio</h2>
+            <div id="players-list-container">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Script as module to use import -->
+    <script type="module" src="js/teatro.js"></script>
+</body>
+</html>

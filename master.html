@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GREST Among Us - Dashboard Master</title>
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        .master-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            margin-top: 2rem;
+        }
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background: var(--dead-gray);
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .voting-section {
+            background: rgba(0,0,0,0.3);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+        }
+        select {
+            padding: 0.8rem;
+            font-size: 1rem;
+            border-radius: 4px;
+            background: #333;
+            color: white;
+            border: 1px solid var(--accent-cyan);
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        .danger-zone {
+            margin-top: 3rem;
+            border-top: 2px solid var(--accent-red);
+            padding-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="master-container">
+        <h1 style="margin-bottom: 1rem; color: var(--accent-cyan);">DASHBOARD MASTER</h1>
+        
+        <div>Stato Attuale: <span id="current-status" class="status-badge">Caricamento...</span></div>
+        <div>Round: <span id="current-round">1</span></div>
+
+        <div class="controls" style="margin-top: 2rem;">
+            <button id="btn-start" class="btn">Avvia Gioco (Round 1)</button>
+            <button id="btn-call-meeting" class="btn" style="background-color: #ff9800;">Chiama Riunione (Forzata)</button>
+            <button id="btn-start-meeting" class="btn" style="background-color: #9c27b0;">Inizia Discussione</button>
+        </div>
+
+        <div id="voting-section" class="voting-section hidden">
+            <h2 style="font-size: 1.2rem; margin-bottom: 1rem;">Risoluzione Riunione</h2>
+            <label for="eject-select">Chi viene espulso?</label>
+            <select id="eject-select">
+                <option value="none">Nessuno (Skip)</option>
+                <!-- Populated by JS -->
+            </select>
+            <button id="btn-end-meeting" class="btn">Termina Riunione & Riprendi Gioco</button>
+        </div>
+        
+        <div class="danger-zone">
+            <h2 style="font-size: 1rem; color: var(--accent-red); margin-bottom: 1rem;">Zona Pericolo (Reset)</h2>
+            <button id="btn-reset" class="btn btn-danger">Azzera Tutto (Torna in attesa)</button>
+        </div>
+    </div>
+
+    <!-- Script as module -->
+    <script type="module" src="js/master.js"></script>
+</body>
+</html>

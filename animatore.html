@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GREST Among Us - App Animatore</title>
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        .login-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        
+        .role-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .role-text {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .role-impostor { color: var(--accent-red); }
+        .role-crewmate { color: var(--accent-cyan); }
+        
+        select {
+            padding: 1rem;
+            font-size: 1.2rem;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+        }
+        
+        /* Mobile adjustments */
+        body { padding-bottom: 2rem; }
+    </style>
+</head>
+<body>
+    
+    <!-- Meeting Overlay -->
+    <div id="overlay-meeting" class="overlay-screen hidden">
+        <h1 class="alert-text">RIUNIONE CHIAMATA</h1>
+        <p style="margin-top: 2rem; font-size: 1.5rem;">Segui il maxischermo e attendi disposizioni.</p>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-screen">
+        <h1 style="color: var(--accent-cyan); font-size: 1.5rem; margin-bottom: 2rem; text-align: center;">SELEZIONA GIOCATORE</h1>
+        <select id="player-select">
+            <option value="">-- Scegli nome --</option>
+            <!-- Populated by JS -->
+        </select>
+        <button id="btn-login" class="btn">CONFERMA</button>
+    </div>
+
+    <!-- Role Reveal Screen -->
+    <div id="role-screen" class="role-screen hidden">
+        <h2 style="color: white; margin-bottom: 1rem;">Tu sei...</h2>
+        <h1 id="role-text" class="role-text">CREWMATE</h1>
+        <button id="btn-hide-role" class="btn">HO CAPITO (Nascondi)</button>
+    </div>
+
+    <!-- Main Game App -->
+    <div id="game-screen" class="mobile-app hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2 id="player-name-display" style="color: var(--accent-cyan); font-size: 1.2rem;">Nome</h2>
+            <div id="status-badge" style="background: var(--accent-green); padding: 0.5rem; border-radius: 4px; font-weight: bold;">ALIVE</div>
+        </div>
+
+        <div id="crewmate-ui" class="hidden">
+            <h3 style="margin-bottom: 1rem;">Le tue Task</h3>
+            <ul id="task-list" class="task-list">
+                <!-- Tasks populated by JS -->
+            </ul>
+        </div>
+
+        <div id="impostor-ui" class="hidden">
+            <h3 style="margin-bottom: 1rem; color: var(--accent-red);">Task Finte (Copertura)</h3>
+            <ul id="fake-task-list" class="task-list">
+                <!-- Fake Tasks populated by JS -->
+            </ul>
+
+            <div style="margin-top: 3rem; background: rgba(255,0,0,0.1); padding: 1rem; border-radius: 8px; border: 1px solid var(--accent-red);">
+                <h3 style="color: var(--accent-red); margin-bottom: 1rem;">Uccidi Giocatore</h3>
+                <select id="kill-target-select" style="width: 100%; max-width: 100%; margin-bottom: 1rem;">
+                    <!-- Populated by JS -->
+                </select>
+                <button id="btn-kill" class="btn btn-danger kill-btn">KILL (2:00)</button>
+            </div>
+        </div>
+        
+        <div id="waiting-screen" class="hidden" style="text-align: center; margin-top: 5rem;">
+            <h2>In attesa dell'inizio della partita...</h2>
+        </div>
+    </div>
+
+    <!-- Script as module -->
+    <script type="module" src="js/animatore.js"></script>
+</body>
+</html>

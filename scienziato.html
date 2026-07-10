@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GREST Among Us - Scienziato</title>
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        .scienziato-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            border: 2px solid var(--accent-cyan);
+        }
+
+        .btn-call-meeting {
+            background-color: var(--accent-red);
+            font-size: 1.2rem;
+            padding: 1rem 2rem;
+            animation: none;
+        }
+        .btn-call-meeting.available {
+            animation: pulse-red 2s infinite;
+        }
+        
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(211, 47, 47, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="scienziato-container">
+        <div class="header-panel">
+            <div>
+                <h1 style="color: var(--accent-cyan); font-size: 1.5rem;">MONITOR PARAMETRI VITALI</h1>
+                <p id="game-status-text" style="margin-top: 0.5rem;">Stato: IN ATTESA</p>
+            </div>
+            
+            <button id="btn-emergency" class="btn btn-call-meeting" disabled>CHIAMA RIUNIONE (1/Round)</button>
+        </div>
+
+        <div id="vitals-container" class="vitals-grid">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- Script as module -->
+    <script type="module" src="js/scienziato.js"></script>
+</body>
+</html>
