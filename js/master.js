@@ -6,6 +6,7 @@ import { PLAYERS_LIST, IMPOSTORS_LIST, SCIENTIST_LIST, getRandomTasks, ROUND_TIM
 const statusBadge = document.getElementById('current-status');
 const currentRoundEl = document.getElementById('current-round');
 const btnStart = document.getElementById('btn-start');
+const btnStartRandom = document.getElementById('btn-start-random');
 const btnCallMeeting = document.getElementById('btn-call-meeting');
 const btnStartMeeting = document.getElementById('btn-start-meeting');
 const btnEndMeeting = document.getElementById('btn-end-meeting');
@@ -34,16 +35,18 @@ function updateUI(state) {
     // Reset styles
     statusBadge.style.backgroundColor = "var(--dead-gray)";
     btnStart.disabled = false;
+    btnStartRandom.disabled = false;
     btnCallMeeting.disabled = true;
     btnStartMeeting.disabled = true;
     votingSection.classList.add('hidden');
 
     if (state.game_status === 'waiting') {
-        btnStart.textContent = "Avvia Gioco (Round 1)";
+        btnStart.textContent = "Avvia (Ruoli Fissi)";
     } 
     else if (state.game_status === 'playing') {
         statusBadge.style.backgroundColor = "var(--accent-green)";
         btnStart.disabled = true;
+        btnStartRandom.disabled = true;
         btnCallMeeting.disabled = false;
     } 
     else if (state.game_status === 'meeting_called') {
@@ -83,6 +86,39 @@ btnStart.addEventListener('click', async () => {
         let role = 'crewmate';
         if (IMPOSTORS_LIST.includes(name)) role = 'impostor';
         if (SCIENTIST_LIST.includes(name)) role = 'scientist';
+
+        playersMap[name] = {
+            role: role,
+            status: 'alive',
+            tasks: getRandomTasks(),
+            completed_tasks: []
+        };
+    });
+
+    const roundDuration = ROUND_TIMES[0];
+    const endTime = Date.now() + roundDuration;
+
+    await setDoc(gameRef, {
+        game_status: 'playing',
+        round: 1,
+        timer: endTime,
+        last_ejected: null,
+        players: playersMap
+    });
+});
+
+btnStartRandom.addEventListener('click', async () => {
+    if(!confirm("Sei sicuro di voler avviare il gioco con ruoli CASUALI? (3 Impostori, 1 Scienziato)")) return;
+    
+    const shuffledPlayers = [...PLAYERS_LIST].sort(() => 0.5 - Math.random());
+    const randomImpostors = shuffledPlayers.slice(0, 3);
+    const randomScientist = shuffledPlayers[3];
+
+    const playersMap = {};
+    PLAYERS_LIST.forEach(name => {
+        let role = 'crewmate';
+        if (randomImpostors.includes(name)) role = 'impostor';
+        else if (name === randomScientist) role = 'scientist';
 
         playersMap[name] = {
             role: role,

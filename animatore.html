@@ -26,9 +26,12 @@
         }
 
         .role-text {
-            font-size: 3rem;
+            font-size: clamp(2rem, 10vw, 5rem);
             margin-bottom: 2rem;
             text-align: center;
+            word-wrap: break-word;
+            max-width: 90%;
+            padding: 0 1rem;
         }
 
         .role-impostor { color: var(--accent-red); }

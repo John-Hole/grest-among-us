@@ -12,6 +12,7 @@ const globalTimer = document.getElementById('global-timer');
 const taskProgressFill = document.getElementById('task-progress-fill');
 const taskProgressText = document.getElementById('task-progress-text');
 const playersListContainer = document.getElementById('players-list-container');
+const sirenAudio = document.getElementById('siren-audio');
 
 let previousStatus = null;
 let timerInterval = null;
@@ -143,6 +144,12 @@ onSnapshot(gameRef, (docSnap) => {
             overlayText.textContent = "RIUNIONE CHIAMATA";
             overlayText.classList.add('alert-text');
             clearInterval(timerInterval);
+            
+            // Play siren if we just entered this state
+            if (previousStatus !== 'meeting_called' && sirenAudio) {
+                sirenAudio.volume = 1.0;
+                sirenAudio.play().catch(e => console.log("Siren autoplay blocked", e));
+            }
         }
         else if (status === 'meeting_in_progress') {
             overlayMeeting.classList.add('hidden'); // map and players become visible again
