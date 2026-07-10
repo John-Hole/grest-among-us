@@ -100,6 +100,17 @@
                 <button id="btn-kill" class="btn btn-danger kill-btn">KILL (2:00)</button>
             </div>
         </div>
+
+        <div id="scientist-ui" class="hidden" style="margin-top: 2rem; border-top: 2px solid var(--accent-cyan); padding-top: 1rem;">
+            <h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">Monitor Parametri Vitali</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <p id="game-status-text" style="font-size: 0.9rem; font-weight: bold;"></p>
+                <button id="btn-emergency" class="btn btn-call-meeting" disabled style="padding: 0.5rem 1rem; font-size: 0.9rem;">CHIAMA RIUNIONE</button>
+            </div>
+            <div id="vitals-container" class="vitals-grid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
         
         <div id="waiting-screen" class="hidden" style="text-align: center; margin-top: 5rem;">
             <h2>In attesa dell'inizio della partita...</h2>

@@ -43,7 +43,7 @@ function updateTaskBar(playersData) {
         const pData = playersData[name];
         if (pData && pData.role !== 'impostor') { // Impostors don't contribute to the real task bar
             totalTasks += 8;
-            completedTasks += pData.tasks_completed || 0;
+            completedTasks += pData.completed_tasks ? pData.completed_tasks.length : 0;
         }
     });
 

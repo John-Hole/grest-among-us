@@ -88,7 +88,7 @@ btnStart.addEventListener('click', async () => {
             role: role,
             status: 'alive',
             tasks: getRandomTasks(),
-            tasks_completed: 0
+            completed_tasks: []
         };
     });
 
@@ -156,7 +156,7 @@ btnReset.addEventListener('click', async () => {
             role: 'crewmate',
             status: 'alive',
             tasks: [],
-            tasks_completed: 0
+            completed_tasks: []
         }
     });
 

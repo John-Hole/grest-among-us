@@ -18,6 +18,11 @@ const impostorUI = document.getElementById('impostor-ui');
 const waitingScreen = document.getElementById('waiting-screen');
 const overlayMeeting = document.getElementById('overlay-meeting');
 
+const scientistUI = document.getElementById('scientist-ui');
+const vitalsContainer = document.getElementById('vitals-container');
+const btnEmergency = document.getElementById('btn-emergency');
+const gameStatusText = document.getElementById('game-status-text');
+
 const taskList = document.getElementById('task-list');
 const fakeTaskList = document.getElementById('fake-task-list');
 const killTargetSelect = document.getElementById('kill-target-select');
@@ -31,6 +36,9 @@ let hasSeenRoleThisRound = false;
 let killCooldownEnd = 0;
 let killInterval = null;
 const KILL_COOLDOWN_MS = 2 * 60 * 1000; // 2 minutes
+
+let hasUsedMeetingThisRound = false;
+let currentRoundTracker = 0;
 
 // Setup Login
 PLAYERS_LIST.forEach(name => {
@@ -96,6 +104,7 @@ function updateUI(state) {
     if (state.game_status === 'waiting') {
         crewmateUI.classList.add('hidden');
         impostorUI.classList.add('hidden');
+        scientistUI.classList.add('hidden');
         waitingScreen.classList.remove('hidden');
         hasSeenRoleThisRound = false;
     } 
@@ -119,13 +128,21 @@ function updateUI(state) {
         if (myData.role === 'impostor') {
             crewmateUI.classList.add('hidden');
             impostorUI.classList.remove('hidden');
+            scientistUI.classList.add('hidden');
             renderFakeTasks(myData.tasks);
             updateKillSelector(state.players);
         } else {
             // Crewmate or Scientist
             impostorUI.classList.add('hidden');
             crewmateUI.classList.remove('hidden');
-            renderRealTasks(myData.tasks, myData.tasks_completed);
+            renderRealTasks(myData.tasks);
+            
+            if (myData.role === 'scientist') {
+                scientistUI.classList.remove('hidden');
+                updateScientistUI(state);
+            } else {
+                scientistUI.classList.add('hidden');
+            }
         }
         
         // If dead, disable actions
@@ -136,37 +153,41 @@ function updateUI(state) {
     }
 }
 
-async function completeTask() {
+async function completeTask(index) {
     if (myData.status !== 'alive') return;
-    if (myData.tasks_completed >= 8) return;
 
-    const newCompleted = myData.tasks_completed + 1;
-    const updatePath = `players.${myPlayerName}.tasks_completed`;
+    let currentCompleted = myData.completed_tasks || [];
+    if (currentCompleted.includes(index)) return;
+
+    const newCompleted = [...currentCompleted, index];
+    const updatePath = `players.${myPlayerName}.completed_tasks`;
     
     await updateDoc(gameRef, {
         [updatePath]: newCompleted
     });
 }
 
-function renderRealTasks(tasks, completedCount) {
+function renderRealTasks(tasks) {
     taskList.innerHTML = '';
+    const completedArr = myData.completed_tasks || [];
+    
     tasks.forEach((taskName, index) => {
-        const isDone = index < completedCount;
+        const isDone = completedArr.includes(index);
         const li = document.createElement('li');
         li.className = `task-item ${isDone ? 'completed' : ''}`;
         
         li.innerHTML = `
             <span>${taskName}</span>
-            <button class="task-btn" ${isDone || myData.status !== 'alive' ? 'disabled' : ''}>
+            <button class="task-btn" ${isDone || myData.status !== 'alive' ? 'disabled' : ''} id="task-btn-${index}">
                 ${isDone ? 'Fatto' : 'Spunta'}
             </button>
         `;
         
         if (!isDone && myData.status === 'alive') {
-            const btn = li.querySelector('button');
+            const btn = li.querySelector(`#task-btn-${index}`);
             btn.onclick = async (e) => {
                 e.target.disabled = true;
-                await completeTask();
+                await completeTask(index);
             };
         }
         taskList.appendChild(li);
@@ -201,7 +222,7 @@ function updateKillSelector(players) {
     killTargetSelect.innerHTML = '<option value="">-- Seleziona Vittima --</option>';
     
     for (const name in players) {
-        // Can only kill alive players, not self, and probably not other impostors (optional rule, let's assume standard: can't kill self)
+        // Un Impostore può uccidere solo i giocatori VIVI e che NON sono a loro volta impostori.
         if (players[name].status === 'alive' && name !== myPlayerName && players[name].role !== 'impostor') {
             const opt = document.createElement('option');
             opt.value = name;
@@ -256,5 +277,81 @@ btnKill.addEventListener('click', async () => {
         });
         
         killTargetSelect.value = "";
+    }
+});
+
+// --- SCIENTIST LOGIC ---
+function updateScientistUI(state) {
+    gameStatusText.textContent = `Round: ${state.round || 1}`;
+
+    if (state.round !== currentRoundTracker) {
+        currentRoundTracker = state.round;
+        hasUsedMeetingThisRound = false;
+    }
+
+    if (state.game_status === 'playing' && !hasUsedMeetingThisRound && myData.status === 'alive') {
+        btnEmergency.disabled = false;
+        btnEmergency.classList.add('available');
+        btnEmergency.textContent = "EMERGENZA (1)";
+    } else {
+        btnEmergency.disabled = true;
+        btnEmergency.classList.remove('available');
+        if (myData.status !== 'alive') {
+            btnEmergency.textContent = "SEI MORTO";
+        } else {
+            btnEmergency.textContent = hasUsedMeetingThisRound ? "USATA" : "NON DISPONIBILE";
+        }
+    }
+
+    renderVitals(state.players);
+}
+
+function renderVitals(players) {
+    vitalsContainer.innerHTML = '';
+    if(!players) return;
+
+    PLAYERS_LIST.forEach(name => {
+        const pData = players[name];
+        if(!pData) return;
+
+        const card = document.createElement('div');
+        card.className = 'vital-card';
+        
+        let statusClass = 'vital-revealed';
+        let statusText = 'SCONOSC.';
+
+        if (pData.status === 'alive') {
+            statusClass = 'vital-alive';
+            statusText = 'ALIVE';
+        } else if (pData.status === 'killed_hidden') {
+            statusClass = 'vital-killed';
+            statusText = 'KILLED';
+        } else if (pData.status === 'killed_revealed') {
+            statusClass = 'vital-revealed';
+            statusText = 'DEAD';
+        }
+
+        card.classList.add(statusClass);
+        
+        card.innerHTML = `
+            <div style="font-size: 0.9rem; font-family: var(--font-pixel); margin-bottom: 0.5rem; word-break: break-all;">${name}</div>
+            <div style="font-size: 0.7rem;">${statusText}</div>
+        `;
+        
+        vitalsContainer.appendChild(card);
+    });
+}
+
+btnEmergency.addEventListener('click', async () => {
+    if(hasUsedMeetingThisRound || myData.status !== 'alive') return;
+    
+    if(confirm("Vuoi chiamare una riunione di emergenza? Puoi farlo solo 1 volta per round.")) {
+        hasUsedMeetingThisRound = true;
+        btnEmergency.disabled = true;
+        btnEmergency.classList.remove('available');
+        
+        await updateDoc(gameRef, {
+            game_status: 'meeting_called'
+        });
     }
 });
