@@ -73,13 +73,28 @@ function startTimer(timerValue) {
 
 // Intro Video Logic on first load
 // Note: Autoplay might be blocked by browsers if not muted. 
-// We are playing it muted initially.
+// We handle this gracefully, and spacebar can be used to resume it.
 if(video) {
+    video.volume = 1.0;
     video.classList.remove('hidden');
-    video.play().catch(e => console.log("Autoplay blocked", e));
+    video.play().catch(e => console.log("Autoplay blocked. Use spacebar to play.", e));
     video.onended = () => {
         video.classList.add('hidden');
     };
+
+    // Toggle play/pause with Spacebar
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') {
+            e.preventDefault();
+            if (!video.classList.contains('hidden')) {
+                if (video.paused) {
+                    video.play();
+                } else {
+                    video.pause();
+                }
+            }
+        }
+    });
 }
 
 // Initial render
