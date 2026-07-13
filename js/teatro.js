@@ -224,9 +224,9 @@ onValue(roomRef, (snapshot) => {
             renderMapConfig(data.config);
         }
 
-        if(data.state && data.players) {
+        if(data.state) {
             const status = data.state.game_status;
-            const players = data.players;
+            const players = data.players || {};
             const votes = data.votes || {};
             const maxPlayers = data.config ? data.config.maxPlayers : null;
 
