@@ -29,6 +29,13 @@ const btnTimerAdd = document.getElementById('btn-timer-add');
 const btnTimerSub = document.getElementById('btn-timer-sub');
 const monitorContainer = document.getElementById('monitor-container');
 const logContainer = document.getElementById('log-container');
+const btnProjector = document.getElementById('btn-projector');
+
+if (btnProjector) {
+    btnProjector.addEventListener('click', () => {
+        window.open(`teatro.html?room=${roomCode}`, '_blank');
+    });
+}
 
 // Update UI text
 btnStart.classList.add('hidden'); // Hide fixed roles button since we don't have hardcoded players

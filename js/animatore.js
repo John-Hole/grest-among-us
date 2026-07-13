@@ -396,6 +396,11 @@ function startCooldownTimer() {
 }
 
 btnKill.addEventListener('click', async () => {
+    if (!currentState || currentState.game_status !== 'playing') {
+        alert("Azione non consentita in questa fase del gioco.");
+        return;
+    }
+
     const target = killTargetSelect.value;
     if (!target) {
         alert("Seleziona un bersaglio!");
@@ -453,6 +458,11 @@ function renderVitals(players) {
 }
 
 btnReport.addEventListener('click', async () => {
+    if (!currentState || currentState.game_status !== 'playing') {
+        alert("Attendi l'avvio ufficiale della partita prima di chiamare una riunione!");
+        return;
+    }
+
     const maxMeetings = roomConfig.maxMeetings || 1;
     const meetingsCalled = myData.meetings_called || 0;
     

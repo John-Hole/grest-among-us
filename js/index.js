@@ -70,7 +70,7 @@ const baseTemplate = {
     meetingDuration: 120,
     scientistEnabled: true,
     videoIntro: true,
-    maxPlayers: 15,
+    maxPlayers: 'unlimited',
     mapMode: 'photo',
     mapImage: null
 };
