@@ -9,16 +9,29 @@ if (!roomCode) {
     document.getElementById('join-overlay').classList.remove('hidden');
     document.getElementById('btn-join-room').addEventListener('click', () => {
         const code = document.getElementById('join-room-input').value.trim().toUpperCase();
-        if(code) {
-            window.location.href = `teatro.html?room=${code}`;
+        if(!code) {
+            alert("Inserisci il codice della stanza!");
+            return;
         }
+        console.log('Tentativo di connessione alla stanza:', code);
+        roomCode = code;
+        
+        // Update URL without reloading
+        const url = new URL(window.location);
+        url.searchParams.set('room', code);
+        window.history.replaceState({}, '', url);
+        
+        startConnection();
     });
 } else {
-    document.getElementById('join-overlay').classList.add('hidden');
-    // Proceed with Firebase connection
+    startConnection();
 }
 
-if (roomCode) {
+function startConnection() {
+    document.getElementById('join-overlay').classList.add('hidden');
+    const headerEl = document.getElementById('header-room-code');
+    if(headerEl) headerEl.textContent = roomCode;
+    
     // Elements
 const video = document.getElementById('intro-video');
 const overlayMeeting = document.getElementById('overlay-meeting');
