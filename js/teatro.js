@@ -56,7 +56,7 @@ let currentMapMode = null;
 // Initialize players list on the right (and in the lobby)
 function renderPlayers(playersData, votesData, maxPlayers) {
     playersListContainer.innerHTML = '';
-    const lobbyRoster = document.getElementById('lobby-roster');
+    const lobbyRoster = document.getElementById('waiting-players-list');
     if (lobbyRoster) lobbyRoster.innerHTML = '';
     
     let playerCount = 0;
@@ -100,7 +100,7 @@ function renderPlayers(playersData, votesData, maxPlayers) {
         }
     }
     
-    const countDisplay = document.getElementById('lobby-players-count');
+    const countDisplay = document.getElementById('waiting-players-count');
     if (countDisplay) {
         countDisplay.textContent = `Giocatori: ${playerCount} / ${maxPlayers === 'unlimited' ? '∞' : (maxPlayers || '?')}`;
     }
@@ -196,7 +196,8 @@ function updateTimerUI(endTime, isPaused, remaining) {
 
 // Init QR Code
 let qrInitialized = false;
-document.getElementById('lobby-room-code').textContent = roomCode;
+const lobbyCodeDisplay = document.getElementById('waiting-room-code');
+if (lobbyCodeDisplay) lobbyCodeDisplay.textContent = roomCode;
 
 // Initial render
 renderPlayers(null, null, null);
