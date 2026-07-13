@@ -20,11 +20,6 @@
             </div>
         </div>
         <div id="side-nav" class="side-nav">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <h2 style="font-size: 1.2rem; color: var(--accent-cyan); margin: 0;">Menu</h2>
-                <button id="nav-close" class="nav-close">✖</button>
-            </div>
-            <hr style="border-color: #333; margin-bottom: 1rem;">
             <a href="#" id="nav-home">Homepage</a>
             <a href="#" id="nav-teatro">Dashboard</a>
             <a href="#" id="nav-account">Account (Template)</a>
@@ -37,7 +32,6 @@
 
     const hamburgerBtn = document.getElementById('hamburger-btn');
     const sideNav = document.getElementById('side-nav');
-    const navClose = document.getElementById('nav-close');
     const navHome = document.getElementById('nav-home');
     const navTeatro = document.getElementById('nav-teatro');
     const navAccount = document.getElementById('nav-account');
@@ -46,8 +40,16 @@
         sideNav.classList.toggle('open');
     }
 
-    hamburgerBtn.addEventListener('click', toggleNav);
-    navClose.addEventListener('click', toggleNav);
+    hamburgerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleNav();
+    });
+
+    document.addEventListener('click', (e) => {
+        if (sideNav.classList.contains('open') && !sideNav.contains(e.target)) {
+            toggleNav();
+        }
+    });
 
     const inGame = isMaster || isAnimatore || (isTeatro && new URLSearchParams(window.location.search).get('room'));
 

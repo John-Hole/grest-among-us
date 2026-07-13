@@ -207,6 +207,7 @@ h1, h2, h3 {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: clamp(0.8rem, 3.5vw, 1.2rem) !important;
 }
 
 .navbar-right {
