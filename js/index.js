@@ -148,6 +148,9 @@ btnPromptGuest.addEventListener('click', () => {
 
 // --- AUTH LOGIC ---
 onAuthStateChanged(auth, (user) => {
+    // Render base templates synchronously before any network request
+    renderBaseTemplates();
+
     if (user) {
         currentUser = user;
         authStatus.textContent = `Loggato come: ${user.email}`;
@@ -160,7 +163,6 @@ onAuthStateChanged(auth, (user) => {
         btnLogout.classList.add('hidden');
         btnShowAuth.classList.remove('hidden');
         userTemplates = {};
-        renderTemplatesGrid();
     }
 });
 
@@ -189,22 +191,7 @@ btnLogout.addEventListener('click', async () => {
 
 
 // --- TEMPLATES LOGIC ---
-async function loadUserTemplates(uid) {
-    const dbRef = ref(db);
-    try {
-        const snapshot = await get(child(dbRef, `users/${uid}/templates`));
-        if (snapshot.exists()) {
-            userTemplates = snapshot.val();
-        } else {
-            userTemplates = {};
-        }
-        renderTemplatesGrid();
-    } catch (error) {
-        console.error("Error loading templates:", error);
-    }
-}
-
-function renderTemplatesGrid() {
+function renderBaseTemplates() {
     templatesGrid.innerHTML = '';
 
     // Add Create New Button
@@ -214,13 +201,23 @@ function renderTemplatesGrid() {
     createBtn.onclick = () => openCreateSettings(null, null);
     templatesGrid.appendChild(createBtn);
 
-    // Add Base Templates
+    // Add Base Template
     createTemplateCard('base', baseTemplate, false);
-    createTemplateCard('empty', emptyTemplate, false);
+}
 
-    // Add User Templates
-    for (const key in userTemplates) {
-        createTemplateCard(key, userTemplates[key], true);
+async function loadUserTemplates(uid) {
+    const dbRef = ref(db);
+    try {
+        const snapshot = await get(child(dbRef, `users/${uid}/templates`));
+        if (snapshot.exists()) {
+            userTemplates = snapshot.val();
+            // Append user templates
+            for (const key in userTemplates) {
+                createTemplateCard(key, userTemplates[key], true);
+            }
+        }
+    } catch (error) {
+        console.error("Error loading templates:", error);
     }
 }
 
