@@ -202,6 +202,11 @@ btnLogout.addEventListener('click', async () => {
 });
 
 
+// Close dropdowns when clicking outside
+document.addEventListener('click', () => {
+    document.querySelectorAll('.template-menu-dropdown').forEach(d => d.classList.add('hidden'));
+});
+
 // --- TEMPLATES LOGIC ---
 function renderBaseTemplates() {
     templatesGrid.innerHTML = '';
@@ -258,42 +263,54 @@ function createTemplateCard(id, data, isCustom) {
     if (isCustom) {
         const menuBtn = document.createElement('button');
         menuBtn.innerHTML = '&#8942;'; // 3 vertical dots
-        menuBtn.style = `position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; z-index: 10;`;
+        menuBtn.className = 'template-menu-btn';
         
         const menuDrop = document.createElement('div');
-        menuDrop.className = 'hidden';
-        menuDrop.style = `position: absolute; top: 3rem; right: 1rem; background: #222; border: 1px solid #444; border-radius: 8px; z-index: 20; display: flex; flex-direction: column; overflow: hidden;`;
+        menuDrop.className = 'template-menu-dropdown hidden';
+        
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Modifica';
+        editBtn.className = 'template-menu-item';
+        editBtn.onclick = (e) => { 
+            e.stopPropagation(); 
+            menuDrop.classList.add('hidden');
+            openCreateSettings(id, data, false); 
+        };
         
         const dupeBtn = document.createElement('button');
-        dupeBtn.textContent = 'Duplica e Modifica';
-        dupeBtn.style = `background: none; border: none; color: white; padding: 0.8rem 1rem; text-align: left; cursor: pointer;`;
-        dupeBtn.onmouseover = () => dupeBtn.style.background = '#333';
-        dupeBtn.onmouseout = () => dupeBtn.style.background = 'none';
-        dupeBtn.onclick = (e) => { e.stopPropagation(); openCreateSettings(id, data, true); };
+        dupeBtn.textContent = 'Duplica';
+        dupeBtn.className = 'template-menu-item';
+        dupeBtn.onclick = (e) => { 
+            e.stopPropagation(); 
+            menuDrop.classList.add('hidden');
+            openCreateSettings(id, data, true); 
+        };
         
         const delBtn = document.createElement('button');
         delBtn.textContent = 'Elimina';
-        delBtn.style = `background: none; border: none; color: red; padding: 0.8rem 1rem; text-align: left; cursor: pointer;`;
-        delBtn.onmouseover = () => delBtn.style.background = '#333';
-        delBtn.onmouseout = () => delBtn.style.background = 'none';
+        delBtn.className = 'template-menu-item template-menu-item-danger';
         delBtn.onclick = async (e) => { 
             e.stopPropagation(); 
+            menuDrop.classList.add('hidden');
             if(confirm("Sicuro di voler eliminare questo template?")) {
                 await remove(ref(db, `users/${currentUser.uid}/templates/${id}`));
                 loadUserTemplates(currentUser.uid);
             }
         };
 
+        menuDrop.appendChild(editBtn);
         menuDrop.appendChild(dupeBtn);
         menuDrop.appendChild(delBtn);
 
         menuBtn.onclick = (e) => {
             e.stopPropagation();
-            menuDrop.classList.toggle('hidden');
+            const wasHidden = menuDrop.classList.contains('hidden');
+            // Hide all other dropdowns
+            document.querySelectorAll('.template-menu-dropdown').forEach(d => d.classList.add('hidden'));
+            if (wasHidden) {
+                menuDrop.classList.remove('hidden');
+            }
         };
-
-        // Close dropdown on click outside
-        document.addEventListener('click', () => menuDrop.classList.add('hidden'));
 
         card.appendChild(menuBtn);
         card.appendChild(menuDrop);
