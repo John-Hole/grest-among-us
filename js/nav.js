@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <h2 style="font-size: 1.2rem; color: var(--accent-cyan); margin-bottom: 0;">Menu</h2>
             <hr style="border-color: #333; margin-bottom: 1rem;">
             <a href="#" id="nav-home">Homepage</a>
-            <a href="#" id="nav-teatro">Maxischermo</a>
+            <a href="#" id="nav-teatro">Dashboard</a>
             <a href="#" id="nav-account">Account (Template)</a>
         </div>
     `;
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     navTeatro.addEventListener('click', (e) => {
         e.preventDefault();
-        const code = prompt("Inserisci il codice stanza per il Maxischermo:");
+        const code = prompt("Inserisci il codice stanza per la Dashboard:");
         if (code) {
             handleNavigate(`teatro.html?room=${code.trim().toUpperCase()}`);
         }
