@@ -12,7 +12,7 @@
     }
 
     const navHTML = `
-        <div class="top-navbar">
+        <div class="top-navbar ${isTeatro ? 'autohide' : ''}">
             <div id="hamburger-btn" class="hamburger-btn">☰</div>
             <div class="navbar-title glitch-text" style="font-size: 1.2rem; margin: 0; text-shadow: 1px 1px var(--accent-red), -1px -1px var(--accent-blue);">GREST AMONG US</div>
             <div class="navbar-right">
@@ -29,6 +29,10 @@
         </div>
     `;
     document.body.insertAdjacentHTML('afterbegin', navHTML);
+
+    if (isTeatro) {
+        document.body.style.paddingTop = '0px';
+    }
 
     const hamburgerBtn = document.getElementById('hamburger-btn');
     const sideNav = document.getElementById('side-nav');

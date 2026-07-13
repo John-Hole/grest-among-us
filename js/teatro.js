@@ -29,6 +29,14 @@ if (!roomCode) {
 
 function startConnection() {
     document.getElementById('join-overlay').classList.add('hidden');
+    
+    // Attempt to go fullscreen automatically
+    if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+        });
+    }
+
     const headerEl = document.getElementById('header-room-code');
     if(headerEl) headerEl.textContent = roomCode;
     
@@ -242,7 +250,7 @@ onValue(roomRef, (snapshot) => {
                 if(qrContainer) qrContainer.classList.remove('hidden');
                 
                 clearInterval(timerInterval);
-                globalTimer.textContent = "SALA D'ATTESA";
+                globalTimer.textContent = "--:--";
                 globalTimer.style.color = "white";
                 
                 renderPlayers(players, votes, maxPlayers);
