@@ -109,7 +109,7 @@
             </div>
         </div>
 
-        <div style="margin-top: 2rem; text-align: center;">
+        <div id="report-section" style="margin-top: 2rem; text-align: center;">
             <p id="meetings-left-text" style="color: #aaa; margin-bottom: 0.5rem; font-size: clamp(0.8rem, 3vw, 0.9rem);">Riunioni rimanenti: -</p>
             <button id="btn-report" class="btn btn-call-meeting">SEGNALA / RIUNIONE</button>
         </div>
@@ -119,23 +119,10 @@
                 <h2 style="color: var(--accent-cyan); margin-bottom: 0.5rem;">SALA D'ATTESA</h2>
                 <p id="waiting-connection-status" style="color: var(--accent-green); font-weight: bold;">✔ Connesso come <span id="waiting-player-name"></span></p>
                 <p id="waiting-room-code" style="margin-top: 0.5rem; font-family: var(--font-pixel); font-size: 1.2rem;"></p>
-            </div>
-
-            <div style="background: rgba(0,0,0,0.5); padding: 1rem; border-radius: 12px;">
-                <h3 style="margin-bottom: 1rem; color: #aaa;">Anteprima Missione</h3>
-                <div id="waiting-map-preview" style="text-align: center; color: var(--accent-cyan);">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-
-            <div style="background: var(--card-bg); padding: 1rem; border-radius: 12px; flex-grow: 1;">
-                <h3 style="margin-bottom: 1rem; color: #aaa;">Compagni Connessi (<span id="waiting-players-count">0</span>)</h3>
-                <div id="waiting-players-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                    <!-- Populated by JS -->
-                </div>
+                <button id="btn-change-name" class="btn" style="margin-top: 1rem; padding: 0.5rem 1rem; font-size: 0.9rem;">Cambia Nome</button>
             </div>
             
-            <p style="text-align: center; color: #777; margin-top: 1rem; font-size: 0.9rem;">Il Master avvierà la partita a breve...</p>
+            <p style="text-align: center; color: #777; margin-top: 1rem; font-size: 0.9rem;">In attesa dell'avvio della partita...</p>
         </div>
     </div>
 

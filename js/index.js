@@ -121,7 +121,11 @@ function showSection(sectionName) {
 }
 
 btnShowAuth.addEventListener('click', () => showSection('auth'));
-btnGoJoin.addEventListener('click', () => showSection('join'));
+btnGoJoin.addEventListener('click', () => {
+    const savedName = localStorage.getItem('lastNickname');
+    if (savedName) joinName.value = savedName;
+    showSection('join');
+});
 btnAuthBack.addEventListener('click', () => showSection('home'));
 btnTplBack.addEventListener('click', () => showSection('home'));
 btnJoinBack.addEventListener('click', () => showSection('home'));
@@ -526,6 +530,8 @@ btnJoinRoom.addEventListener('click', async () => {
     if (!code || !name) {
         return alert("Inserisci sia il codice stanza che il nome giocatore.");
     }
+
+    localStorage.setItem('lastNickname', name);
 
     const dbRef = ref(db);
     try {

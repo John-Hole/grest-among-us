@@ -1,9 +1,9 @@
 import { db } from './firebase-config.js';
-import { ref, update, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+import { ref, update, onValue, onDisconnect, get, set, remove } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
 
 const urlParams = new URLSearchParams(window.location.search);
 const roomCode = urlParams.get('room');
-const myPlayerName = urlParams.get('player');
+let myPlayerName = urlParams.get('player');
 
 if (!roomCode || !myPlayerName) {
     alert("Manca il codice stanza o il nome giocatore.");
@@ -143,53 +143,24 @@ function updateUI(state, playersMap) {
         crewmateUI.classList.add('hidden');
         scientistUI.classList.add('hidden');
         killSection.classList.add('hidden');
+        document.getElementById('report-section').classList.add('hidden');
         waitingScreen.classList.remove('hidden');
         hasSeenRoleThisRound = false;
 
         // Populate Waiting Screen UI
         document.getElementById('waiting-player-name').textContent = myPlayerName;
         document.getElementById('waiting-room-code').textContent = `Stanza: ${roomCode}`;
-        
-        const previewEl = document.getElementById('waiting-map-preview');
-        if (roomConfig) {
-            if (roomConfig.mapMode === 'text') {
-                const taskCount = roomConfig.tasks ? roomConfig.tasks.length : 0;
-                previewEl.innerHTML = `Mappa: <strong>Testuale</strong><br>Task Totali: <strong>${taskCount}</strong>`;
-            } else {
-                previewEl.innerHTML = `Mappa: <strong>Visiva (Immagine)</strong>`;
-            }
-        }
-
-        const listEl = document.getElementById('waiting-players-list');
-        const countEl = document.getElementById('waiting-players-count');
-        listEl.innerHTML = '';
-        let count = 0;
-        if (playersMap) {
-            for (const name in playersMap) {
-                count++;
-                const badge = document.createElement('span');
-                badge.style.background = name === myPlayerName ? 'var(--accent-cyan)' : '#444';
-                badge.style.color = name === myPlayerName ? '#000' : '#fff';
-                badge.style.padding = '0.3rem 0.6rem';
-                badge.style.borderRadius = '4px';
-                badge.style.fontSize = '0.8rem';
-                badge.textContent = name;
-                listEl.appendChild(badge);
-            }
-        }
-        
-        let maxLimit = roomConfig && roomConfig.maxPlayers ? roomConfig.maxPlayers : '?';
-        if(maxLimit === 'unlimited') maxLimit = '∞';
-        countEl.textContent = `${count} / ${maxLimit}`;
     }
     else if (state.game_status === 'video_playing') {
         waitingScreen.classList.add('hidden');
         crewmateUI.classList.add('hidden');
         scientistUI.classList.add('hidden');
         killSection.classList.add('hidden');
+        document.getElementById('report-section').classList.add('hidden');
     }
     else if (state.game_status === 'playing') {
         waitingScreen.classList.add('hidden');
+        document.getElementById('report-section').classList.remove('hidden');
 
         if (state.round !== currentRoundTracker) {
             currentRoundTracker = state.round;
@@ -493,4 +464,43 @@ btnReport.addEventListener('click', async () => {
         updates[`rooms/${roomCode}/players/${myPlayerName}/meetings_called`] = meetingsCalled + 1;
         await update(ref(db), updates);
     }
+});
+
+document.getElementById('btn-change-name').addEventListener('click', async () => {
+    if(currentState && currentState.game_status !== 'waiting') {
+        alert("Non puoi cambiare nome a partita in corso.");
+        return;
+    }
+    const newName = prompt("Inserisci il tuo nuovo nome:");
+    if(!newName || newName.trim() === "" || newName.trim() === myPlayerName) return;
+    
+    const cleanName = newName.trim();
+    
+    // Check if name is taken
+    const snapshot = await get(ref(db, `rooms/${roomCode}/players/${cleanName}`));
+    if(snapshot.exists()) {
+        alert("Questo nome è già in uso!");
+        return;
+    }
+    
+    // Update Firebase
+    const oldNameRef = ref(db, `rooms/${roomCode}/players/${myPlayerName}`);
+    const newNameRef = ref(db, `rooms/${roomCode}/players/${cleanName}`);
+    
+    const playerData = await get(oldNameRef);
+    if(playerData.exists()) {
+        await set(newNameRef, playerData.val());
+        await remove(oldNameRef);
+    } else {
+        await set(newNameRef, { status: 'alive', role: 'crewmate', meetings_called: 0 });
+    }
+    
+    // Update local variables
+    myPlayerName = cleanName;
+    localStorage.setItem('lastNickname', cleanName);
+    
+    // Update URL without reloading
+    const url = new URL(window.location);
+    url.searchParams.set('player', cleanName);
+    window.history.replaceState({}, '', url);
 });
