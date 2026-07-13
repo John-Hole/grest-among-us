@@ -75,10 +75,11 @@
             <h2>Azioni Rapide</h2>
             <button id="btn-projector" class="btn" style="width: 100%; margin-bottom: 1rem; background: var(--accent-cyan); color: black;">VAI ALLA DASHBOARD (PROIETTORE)</button>
             <div class="controls-grid">
-                <button id="btn-start" class="btn hidden">Avvia Gioco (Ruoli Fissi)</button>
+                <button id="btn-start" class="btn hidden">Avvia Gioco</button>
                 <button id="btn-start-random" class="btn" style="background-color: #3f51b5;">Nuova Partita Casuale</button>
-                <button id="btn-call-meeting" class="btn" style="background-color: #ff9800;">Chiama Riunione</button>
-                <button id="btn-start-meeting" class="btn" style="background-color: #9c27b0;">Inizia Discussione</button>
+                <button id="btn-call-meeting" class="btn" style="background-color: #ff9800;">Chiama Emergenza</button>
+                <button id="btn-start-discussion" class="btn hidden" style="background-color: #ffeb3b; color: black;">Inizia Discussione</button>
+                <button id="btn-start-voting" class="btn hidden" style="background-color: #9c27b0;">Inizio Votazioni (60s)</button>
             </div>
             
             <div id="voting-section" class="hidden" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #444;">
@@ -91,9 +92,8 @@
         <div id="timer-controls" class="dashboard-card hidden">
             <h2>Gestione Timer</h2>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button id="btn-timer-pause" class="btn" style="flex:1; min-width: 120px;">Pausa / Riprendi</button>
-                <button id="btn-timer-add" class="btn" style="flex:1; background: #4caf50; min-width: 80px;">+ 30s</button>
-                <button id="btn-timer-sub" class="btn" style="flex:1; background: #f44336; min-width: 80px;">- 30s</button>
+                <button id="btn-timer-pause" class="btn" style="flex:2; min-width: 120px;">Pausa / Riprendi</button>
+                <button id="btn-timer-add" class="btn" style="flex:1; background: #4caf50; min-width: 80px;">+ 1 Min</button>
             </div>
         </div>
 

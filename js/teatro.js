@@ -54,7 +54,7 @@ function renderPlayers(playersData, votesData, maxPlayers) {
             let statusHtml = '';
             if (isRevealedDead) {
                 statusHtml = '<span style="margin-left:auto; color: red;">❌</span>';
-            } else if (previousStatus === 'meeting_in_progress') {
+            } else if (previousStatus === 'voting') {
                 statusHtml = hasVoted ? '<span style="margin-left:auto; color: var(--accent-green); font-size: 0.8rem;">VOTATO</span>' : '<span style="margin-left:auto; color: var(--dead-gray); font-size: 0.8rem;">IN ATTESA</span>';
             }
 
@@ -242,7 +242,7 @@ onValue(roomRef, (snapshot) => {
                 overlayMeeting.classList.add('hidden');
                 if(video) video.classList.add('hidden');
                 
-                if (previousStatus === 'meeting_in_progress' || previousStatus === 'meeting_called') {
+                if (previousStatus === 'voting' || previousStatus === 'discussion' || previousStatus === 'emergency') {
                     overlayEjected.classList.remove('hidden');
                     ejectedText.textContent = data.state.last_ejected && data.state.last_ejected !== 'SKIP' 
                         ? `${data.state.last_ejected} è stato espulso` 
@@ -257,23 +257,36 @@ onValue(roomRef, (snapshot) => {
                 
                 updateTimerUI(data.state.timer, data.state.timer_paused, data.state.timer_remaining);
             }
-            else if (status === 'meeting_called') {
+            else if (status === 'emergency') {
                 overlayMeeting.classList.remove('hidden');
-                overlayText.textContent = "RIUNIONE CHIAMATA";
+                overlayText.textContent = "RIUNIONE D'EMERGENZA";
                 overlayText.style.color = "var(--accent-red)";
                 if(video) video.classList.add('hidden');
                 clearInterval(timerInterval);
+                globalTimer.textContent = "EMERGENZA";
                 
-                if (previousStatus !== 'meeting_called' && sirenAudio) {
+                if (previousStatus !== 'emergency' && sirenAudio) {
                     sirenAudio.volume = 1.0;
                     sirenAudio.play().catch(e => console.log("Siren autoplay blocked", e));
                 }
             }
-            else if (status === 'meeting_in_progress') {
+            else if (status === 'discussion') {
                 overlayMeeting.classList.add('hidden'); 
-                globalTimer.textContent = "VOTAZIONE";
+                globalTimer.textContent = "DISCUSSIONE";
+                globalTimer.style.color = "#ffeb3b";
+                clearInterval(timerInterval);
+                renderPlayers(players, votes);
+            }
+            else if (status === 'voting') {
+                overlayMeeting.classList.add('hidden');
                 globalTimer.style.color = "var(--accent-red)";
                 clearInterval(timerInterval);
+                timerInterval = setInterval(() => {
+                    const remaining = Math.max(0, data.state.voting_endtime - Date.now());
+                    const sec = Math.ceil(remaining / 1000);
+                    globalTimer.textContent = `VOTAZIONE: ${sec}s`;
+                    if(remaining <= 0) clearInterval(timerInterval);
+                }, 100);
                 renderPlayers(players, votes);
             }
             else if (status === 'impostors_win') {

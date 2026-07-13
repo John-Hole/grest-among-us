@@ -99,17 +99,31 @@ function updateUI(state, playersMap) {
         overlayDead.classList.add('hidden');
     }
 
-    if (state.game_status === 'meeting_called') {
+    const overlayMeetingH1 = overlayMeeting.querySelector('h1');
+    const overlayMeetingP = overlayMeeting.querySelector('p');
+
+    if (state.game_status === 'emergency') {
         overlayMeeting.classList.remove('hidden');
         gameScreen.classList.add('hidden');
         votingUI.classList.add('hidden');
+        overlayMeetingH1.textContent = "EMERGENZA!";
+        overlayMeetingH1.style.color = "var(--accent-red)";
+        overlayMeetingP.textContent = "Il gioco è in pausa. Raggiungi il punto di raduno!";
         
-        if (previousStatus !== 'meeting_called' && sirenAudio) {
+        if (previousStatus !== 'emergency' && sirenAudio) {
             sirenAudio.volume = 1.0;
             sirenAudio.play().catch(e => console.log("Audio blocked", e));
         }
         return;
-    } else if (state.game_status === 'meeting_in_progress') {
+    } else if (state.game_status === 'discussion') {
+        overlayMeeting.classList.remove('hidden');
+        gameScreen.classList.add('hidden');
+        votingUI.classList.add('hidden');
+        overlayMeetingH1.textContent = "DISCUSSIONE";
+        overlayMeetingH1.style.color = "#ffeb3b";
+        overlayMeetingP.textContent = "Discuti! Guarda il maxischermo per i dettagli.";
+        return;
+    } else if (state.game_status === 'voting') {
         overlayMeeting.classList.add('hidden');
         gameScreen.classList.add('hidden');
         votingUI.classList.remove('hidden');
@@ -472,7 +486,10 @@ btnReport.addEventListener('click', async () => {
         btnReport.disabled = true;
         
         const updates = {};
-        updates[`rooms/${roomCode}/state/game_status`] = 'meeting_called';
+        const remaining = Math.max(0, currentState.timer - Date.now());
+        updates[`rooms/${roomCode}/state/game_status`] = 'emergency';
+        updates[`rooms/${roomCode}/state/timer_paused`] = true;
+        updates[`rooms/${roomCode}/state/timer_remaining`] = remaining;
         updates[`rooms/${roomCode}/players/${myPlayerName}/meetings_called`] = meetingsCalled + 1;
         await update(ref(db), updates);
     }

@@ -17,7 +17,9 @@ const currentRoundEl = document.getElementById('current-round');
 const btnStart = document.getElementById('btn-start');
 const btnStartRandom = document.getElementById('btn-start-random');
 const btnCallMeeting = document.getElementById('btn-call-meeting');
-const btnStartMeeting = document.getElementById('btn-start-meeting');
+const btnStartMeeting = null; // Removed
+const btnStartDiscussion = document.getElementById('btn-start-discussion');
+const btnStartVoting = document.getElementById('btn-start-voting');
 const btnEndMeeting = document.getElementById('btn-end-meeting');
 const btnReset = document.getElementById('btn-reset');
 const votingSection = document.getElementById('voting-section');
@@ -26,7 +28,6 @@ const votingSection = document.getElementById('voting-section');
 const timerControls = document.getElementById('timer-controls');
 const btnTimerPause = document.getElementById('btn-timer-pause');
 const btnTimerAdd = document.getElementById('btn-timer-add');
-const btnTimerSub = document.getElementById('btn-timer-sub');
 const monitorContainer = document.getElementById('monitor-container');
 const logContainer = document.getElementById('log-container');
 const btnProjector = document.getElementById('btn-projector');
@@ -167,7 +168,9 @@ function updateUI(state, players) {
     statusBadge.style.backgroundColor = "var(--dead-gray)";
     btnStartRandom.disabled = false;
     btnCallMeeting.disabled = true;
-    btnStartMeeting.disabled = true;
+    btnCallMeeting.classList.remove('hidden');
+    btnStartDiscussion.classList.add('hidden');
+    btnStartVoting.classList.add('hidden');
     votingSection.classList.add('hidden');
     timerControls.classList.add('hidden');
 
@@ -177,6 +180,7 @@ function updateUI(state, players) {
     else if (state.game_status === 'video_playing') {
         statusBadge.style.backgroundColor = "#ff9800";
         btnStartRandom.disabled = true;
+        btnCallMeeting.disabled = true;
     }
     else if (state.game_status === 'playing') {
         statusBadge.style.backgroundColor = "var(--accent-green)";
@@ -192,14 +196,22 @@ function updateUI(state, players) {
             btnTimerPause.style.background = "#ff9800";
         }
     } 
-    else if (state.game_status === 'meeting_called') {
+    else if (state.game_status === 'emergency') {
         statusBadge.style.backgroundColor = "var(--accent-red)";
         btnStartRandom.disabled = true;
-        btnStartMeeting.disabled = false;
+        btnCallMeeting.classList.add('hidden');
+        btnStartDiscussion.classList.remove('hidden');
     } 
-    else if (state.game_status === 'meeting_in_progress') {
+    else if (state.game_status === 'discussion') {
+        statusBadge.style.backgroundColor = "#ffeb3b";
+        btnStartRandom.disabled = true;
+        btnCallMeeting.classList.add('hidden');
+        btnStartVoting.classList.remove('hidden');
+    }
+    else if (state.game_status === 'voting') {
         statusBadge.style.backgroundColor = "#9c27b0";
         btnStartRandom.disabled = true;
+        btnCallMeeting.classList.add('hidden');
         votingSection.classList.remove('hidden');
     }
     else if (state.game_status === 'impostors_win' || state.game_status === 'crewmates_win') {
@@ -231,21 +243,21 @@ async function checkWinCondition(state, players) {
 }
 
 async function checkVotes(state, players, votes) {
-    if (state.game_status !== 'meeting_in_progress') return;
+    if (state.game_status !== 'voting') return;
 
     let aliveCount = 0;
     for (const p in players) {
         if (players[p].status === 'alive') aliveCount++;
     }
 
-    const voteKeys = Object.keys(votes);
+    const voteKeys = Object.keys(votes || {});
     if (voteKeys.length >= aliveCount && aliveCount > 0) {
-        await resolveMeeting(players, votes, state);
+        await resolveMeeting(players, votes || {}, state);
     }
 }
 
 async function resolveMeeting(players, votes, state) {
-    if (resolvingMeeting || state.game_status !== 'meeting_in_progress') return;
+    if (resolvingMeeting || state.game_status !== 'voting') return;
     resolvingMeeting = true;
 
     // Count votes
@@ -326,17 +338,9 @@ btnTimerPause.addEventListener('click', async () => {
 
 btnTimerAdd.addEventListener('click', async () => {
     if (currentState.timer_paused) {
-        await update(roomRef, { 'state/timer_remaining': currentState.timer_remaining + 30000 });
+        await update(roomRef, { 'state/timer_remaining': currentState.timer_remaining + 60000 });
     } else {
-        await update(roomRef, { 'state/timer': currentState.timer + 30000 });
-    }
-});
-
-btnTimerSub.addEventListener('click', async () => {
-    if (currentState.timer_paused) {
-        await update(roomRef, { 'state/timer_remaining': Math.max(0, currentState.timer_remaining - 30000) });
-    } else {
-        await update(roomRef, { 'state/timer': Math.max(Date.now(), currentState.timer - 30000) });
+        await update(roomRef, { 'state/timer': currentState.timer + 60000 });
     }
 });
 
@@ -433,18 +437,26 @@ btnStartRandom.addEventListener('click', async () => {
 });
 
 btnCallMeeting.addEventListener('click', async () => {
-    // We are going to meeting_called. Pause the timer.
+    // We are going to emergency. Pause the timer.
     const remaining = Math.max(0, currentState.timer - Date.now());
     await update(roomRef, {
-        'state/game_status': 'meeting_called',
+        'state/game_status': 'emergency',
         'state/timer_paused': true,
         'state/timer_remaining': remaining
     });
 });
 
-btnStartMeeting.addEventListener('click', async () => {
+btnStartDiscussion.addEventListener('click', async () => {
     await update(roomRef, {
-        'state/game_status': 'meeting_in_progress'
+        'state/game_status': 'discussion'
+    });
+});
+
+btnStartVoting.addEventListener('click', async () => {
+    const votingDuration = 60000;
+    await update(roomRef, {
+        'state/game_status': 'voting',
+        'state/voting_endtime': Date.now() + votingDuration
     });
 });
 
@@ -484,3 +496,11 @@ btnReset.addEventListener('click', async () => {
 
     await update(roomRef, updates);
 });
+
+setInterval(async () => {
+    if (currentState && currentState.game_status === 'voting' && currentState.voting_endtime && !resolvingMeeting) {
+        if (Date.now() >= currentState.voting_endtime) {
+            await resolveMeeting(currentPlayers, currentVotes || {}, currentState);
+        }
+    }
+}, 1000);
