@@ -161,12 +161,20 @@ onAuthStateChanged(auth, (user) => {
         btnLogout.classList.remove('hidden');
         btnShowAuth.classList.add('hidden');
         loadUserTemplates(user.uid);
+        
+        if (urlParams.get('go') === 'account') {
+            showSection('templates');
+        }
     } else {
         currentUser = null;
         authStatus.textContent = "Non loggato";
         btnLogout.classList.add('hidden');
         btnShowAuth.classList.remove('hidden');
         userTemplates = {};
+        
+        if (urlParams.get('go') === 'account') {
+            authModal.classList.remove('hidden');
+        }
     }
 });
 

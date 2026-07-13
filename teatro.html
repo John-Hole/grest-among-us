@@ -14,11 +14,13 @@
     <audio id="siren-audio" src="audio/siren.mp3" loop preload="auto"></audio>
     <audio id="meeting-audio" src="audio/meeting.mp3" preload="auto"></audio>
 
-    <div id="join-overlay" class="overlay-screen">
-        <h1 style="margin-bottom: 2rem;">GREST Among Us</h1>
-        <p style="font-size: 1.5rem; margin-bottom: 2rem;">Per visualizzare la dashboard inserisci il codice stanza:</p>
-        <input type="text" id="join-room-input" class="input-field" placeholder="CODICE" style="margin-bottom: 1rem;">
-        <button id="btn-join-room" class="btn">Connetti Dashboard</button>
+    <div id="join-overlay" class="overlay-screen" style="background: var(--bg-dark); padding: 2rem;">
+        <div class="section-container" style="background: var(--card-bg); border-radius: 20px; padding: 2rem; border: 2px solid var(--accent-cyan); max-width: 400px; width: 100%; text-align: center;">
+            <h1 style="margin-bottom: 1rem; color: var(--accent-cyan); font-family: var(--font-ui); font-size: 2rem;">Dashboard</h1>
+            <p style="font-size: 1rem; margin-bottom: 2rem; color: #ccc; font-family: var(--font-ui);">Inserisci il codice stanza per avviare il maxischermo:</p>
+            <input type="text" id="join-room-input" style="width: 100%; padding: 1rem; border-radius: 10px; background: #2a3644; color: white; border: none; box-sizing: border-box; font-family: var(--font-ui); text-transform: uppercase; margin-bottom: 1.5rem; text-align: center; font-size: 1.5rem;" placeholder="CODICE" maxlength="5">
+            <button id="btn-join-room" class="btn" style="width: 100%; font-family: var(--font-ui);">Connetti Dashboard</button>
+        </div>
     </div>
 
     <!-- Intro Video -->

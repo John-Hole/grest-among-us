@@ -3,14 +3,23 @@ import { ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.3/fi
 import { formatTime } from './game-logic.js';
 
 const urlParams = new URLSearchParams(window.location.search);
-const roomCode = urlParams.get('room');
+let roomCode = urlParams.get('room');
 
 if (!roomCode) {
-    alert("Nessun codice stanza fornito.");
-    window.location.href = "index.html";
+    document.getElementById('join-overlay').classList.remove('hidden');
+    document.getElementById('btn-join-room').addEventListener('click', () => {
+        const code = document.getElementById('join-room-input').value.trim().toUpperCase();
+        if(code) {
+            window.location.href = `teatro.html?room=${code}`;
+        }
+    });
+} else {
+    document.getElementById('join-overlay').classList.add('hidden');
+    // Proceed with Firebase connection
 }
 
-// Elements
+if (roomCode) {
+    // Elements
 const video = document.getElementById('intro-video');
 const overlayMeeting = document.getElementById('overlay-meeting');
 const overlayText = document.getElementById('overlay-text');
@@ -307,4 +316,6 @@ onValue(roomRef, (snapshot) => {
             previousStatus = status;
         }
     }
+    }
 });
+}

@@ -70,10 +70,7 @@
     
     navTeatro.addEventListener('click', (e) => {
         e.preventDefault();
-        const code = prompt("Inserisci il codice stanza per la Dashboard:");
-        if (code) {
-            handleNavigate(`teatro.html?room=${code.trim().toUpperCase()}`);
-        }
+        handleNavigate('teatro.html');
     });
 
     navAccount.addEventListener('click', (e) => {
