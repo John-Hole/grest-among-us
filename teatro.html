@@ -28,6 +28,14 @@
         <h1 class="role-animation-text" style="color: var(--accent-red); font-size: clamp(2rem, 6vw, 5rem); letter-spacing: 5px; text-align: center; text-transform: uppercase;">ASSEGNAZIONE RUOLI...</h1>
     </div>
 
+    <!-- Generic Overlays (Emergency, Ejected, Victory) -->
+    <div id="overlay-meeting" class="overlay-screen hidden" style="z-index: 1500; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center;">
+        <h1 id="overlay-text" class="alert-text" style="font-size: clamp(3rem, 8vw, 6rem); text-align: center;">RIUNIONE CHIAMATA</h1>
+    </div>
+    <div id="overlay-ejected" class="overlay-screen hidden" style="z-index: 1500; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center;">
+        <h1 id="ejected-text" style="color: white; font-size: clamp(2rem, 5vw, 4rem); text-align: center;">Nessuno è stato espulso</h1>
+    </div>
+
     <!-- Waiting Screen -->
     <div id="waiting-screen" class="overlay-screen hidden">
         <h1 class="glitch-text" style="font-size: clamp(3rem, 8vw, 6rem);">SALA D'ATTESA</h1>

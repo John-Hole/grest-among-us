@@ -231,8 +231,8 @@ onValue(roomRef, (snapshot) => {
             const maxPlayers = data.config ? data.config.maxPlayers : null;
 
             if (status === 'waiting') {
-                overlayMeeting.classList.add('hidden');
-                overlayEjected.classList.add('hidden');
+                if(overlayMeeting) overlayMeeting.classList.add('hidden');
+                if(overlayEjected) overlayEjected.classList.add('hidden');
                 
                 const mainDashboard = document.getElementById('main-dashboard-layout');
                 if (mainDashboard) mainDashboard.classList.add('hidden');
@@ -245,7 +245,7 @@ onValue(roomRef, (snapshot) => {
                 updateTaskBar(players);
             } 
             else if (status === 'playing') {
-                overlayMeeting.classList.add('hidden');
+                if(overlayMeeting) overlayMeeting.classList.add('hidden');
                 const waitingScreen = document.getElementById('waiting-screen');
                 if (waitingScreen) waitingScreen.classList.add('hidden');
                 
@@ -263,13 +263,15 @@ onValue(roomRef, (snapshot) => {
                 }
                 
                 if (previousStatus === 'voting' || previousStatus === 'discussion' || previousStatus === 'emergency') {
-                    overlayEjected.classList.remove('hidden');
-                    ejectedText.textContent = data.state.last_ejected && data.state.last_ejected !== 'SKIP' 
-                        ? `${data.state.last_ejected} è stato espulso` 
-                        : "Nessuno è stato espulso";
-                    setTimeout(() => {
-                        overlayEjected.classList.add('hidden');
-                    }, 5000);
+                    if(overlayEjected) {
+                        overlayEjected.classList.remove('hidden');
+                        if(ejectedText) ejectedText.textContent = data.state.last_ejected && data.state.last_ejected !== 'SKIP' 
+                            ? `${data.state.last_ejected} è stato espulso` 
+                            : "Nessuno è stato espulso";
+                        setTimeout(() => {
+                            overlayEjected.classList.add('hidden');
+                        }, 5000);
+                    }
                 }
 
                 renderPlayers(players, votes);
@@ -278,9 +280,11 @@ onValue(roomRef, (snapshot) => {
                 updateTimerUI(data.state.timer, data.state.timer_paused, data.state.timer_remaining);
             }
             else if (status === 'emergency') {
-                overlayMeeting.classList.remove('hidden');
-                overlayText.textContent = "RIUNIONE D'EMERGENZA";
-                overlayText.style.color = "var(--accent-red)";
+                if(overlayMeeting) overlayMeeting.classList.remove('hidden');
+                if(overlayText) {
+                    overlayText.textContent = "RIUNIONE D'EMERGENZA";
+                    overlayText.style.color = "var(--accent-red)";
+                }
                 clearInterval(timerInterval);
                 globalTimer.textContent = "EMERGENZA";
                 
@@ -290,14 +294,14 @@ onValue(roomRef, (snapshot) => {
                 }
             }
             else if (status === 'discussion') {
-                overlayMeeting.classList.add('hidden'); 
+                if(overlayMeeting) overlayMeeting.classList.add('hidden'); 
                 globalTimer.textContent = "DISCUSSIONE";
                 globalTimer.style.color = "#ffeb3b";
                 clearInterval(timerInterval);
                 renderPlayers(players, votes);
             }
             else if (status === 'voting') {
-                overlayMeeting.classList.add('hidden');
+                if(overlayMeeting) overlayMeeting.classList.add('hidden');
                 globalTimer.style.color = "var(--accent-red)";
                 clearInterval(timerInterval);
                 timerInterval = setInterval(() => {
@@ -309,16 +313,20 @@ onValue(roomRef, (snapshot) => {
                 renderPlayers(players, votes);
             }
             else if (status === 'impostors_win') {
-                overlayMeeting.classList.remove('hidden');
-                overlayText.textContent = "VITTORIA IMPOSTORI";
-                overlayText.style.color = "var(--accent-red)";
+                if(overlayMeeting) overlayMeeting.classList.remove('hidden');
+                if(overlayText) {
+                    overlayText.textContent = "VITTORIA IMPOSTORI";
+                    overlayText.style.color = "var(--accent-red)";
+                }
                 clearInterval(timerInterval);
                 globalTimer.textContent = "GAME OVER";
             }
             else if (status === 'crewmates_win') {
-                overlayMeeting.classList.remove('hidden');
-                overlayText.textContent = "VITTORIA CREWMATE";
-                overlayText.style.color = "var(--accent-cyan)";
+                if(overlayMeeting) overlayMeeting.classList.remove('hidden');
+                if(overlayText) {
+                    overlayText.textContent = "VITTORIA CREWMATE";
+                    overlayText.style.color = "var(--accent-cyan)";
+                }
                 clearInterval(timerInterval);
                 globalTimer.textContent = "GAME OVER";
             }
