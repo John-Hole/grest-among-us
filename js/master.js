@@ -1,6 +1,6 @@
 import { db } from './firebase-config.js';
 import { ref, get, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
-import { getRandomTasks, ROUND_TIMES } from './game-logic.js';
+import { getRandomTasks, ROUND_TIMES, formatTime } from './game-logic.js';
 
 // Get room code
 const urlParams = new URLSearchParams(window.location.search);
@@ -14,6 +14,7 @@ if (!roomCode) {
 // Elements
 const statusBadge = document.getElementById('current-status');
 const currentRoundEl = document.getElementById('current-round');
+const currentTimerEl = document.getElementById('current-timer');
 const btnStart = document.getElementById('btn-start');
 const btnStartRandom = document.getElementById('btn-start-random');
 const btnCallMeeting = document.getElementById('btn-call-meeting');
@@ -24,10 +25,30 @@ const btnEndMeeting = document.getElementById('btn-end-meeting');
 const btnReset = document.getElementById('btn-reset');
 const votingSection = document.getElementById('voting-section');
 
-// Timer Controls
+// Timer Controls Elements
 const timerControls = document.getElementById('timer-controls');
+const masterLiveClockEl = document.getElementById('master-live-clock');
+const liveTimerActions = document.getElementById('live-timer-actions');
+const votingTimerActions = document.getElementById('voting-timer-actions');
+
 const btnTimerPause = document.getElementById('btn-timer-pause');
 const btnTimerAdd = document.getElementById('btn-timer-add');
+const btnTimerSub = document.getElementById('btn-timer-sub');
+const btnTimerAdd5 = document.getElementById('btn-timer-add5');
+const btnTimerSub5 = document.getElementById('btn-timer-sub5');
+const inputCustomMin = document.getElementById('input-custom-min');
+const inputCustomSec = document.getElementById('input-custom-sec');
+const btnSetCustomTime = document.getElementById('btn-set-custom-time');
+
+const btnVotingAdd30 = document.getElementById('btn-voting-add30');
+const btnVotingSub30 = document.getElementById('btn-voting-sub30');
+
+const cfgRound1 = document.getElementById('cfg-round1');
+const cfgRound2 = document.getElementById('cfg-round2');
+const cfgRound3 = document.getElementById('cfg-round3');
+const cfgVoting = document.getElementById('cfg-voting');
+const btnSaveTimeCfg = document.getElementById('btn-save-time-cfg');
+
 const monitorContainer = document.getElementById('monitor-container');
 const logContainer = document.getElementById('log-container');
 const btnProjector = document.getElementById('btn-projector');
@@ -53,6 +74,28 @@ let resolvingMeeting = false;
 let previousPlayers = null;
 
 const roomRef = ref(db, `rooms/${roomCode}`);
+
+function getRoundDuration(roundNum) {
+    if (roomConfig && roomConfig.roundTimes && Array.isArray(roomConfig.roundTimes) && roomConfig.roundTimes.length > 0) {
+        const idx = Math.min(roundNum - 1, roomConfig.roundTimes.length - 1);
+        return roomConfig.roundTimes[idx];
+    }
+    return ROUND_TIMES[Math.min(roundNum - 1, ROUND_TIMES.length - 1)];
+}
+
+function syncTimeConfigUI() {
+    if (!roomConfig) return;
+    const activeId = document.activeElement ? document.activeElement.id : null;
+    
+    if (roomConfig.roundTimes && Array.isArray(roomConfig.roundTimes)) {
+        if (cfgRound1 && activeId !== 'cfg-round1') cfgRound1.value = Math.round(roomConfig.roundTimes[0] / 60000) || 10;
+        if (cfgRound2 && activeId !== 'cfg-round2') cfgRound2.value = Math.round(roomConfig.roundTimes[1] / 60000) || 7;
+        if (cfgRound3 && activeId !== 'cfg-round3') cfgRound3.value = Math.round(roomConfig.roundTimes[2] / 60000) || 5;
+    }
+    if (cfgVoting && activeId !== 'cfg-voting') {
+        cfgVoting.value = roomConfig.meetingDuration || 60;
+    }
+}
 
 // Toggle Espulsi section listener
 const btnToggleKicked = document.getElementById('btn-toggle-kicked');
@@ -241,6 +284,7 @@ onValue(roomRef, (snapshot) => {
         currentVotes = data.votes || {};
         currentKicked = data.kickedPlayers || {};
         
+        syncTimeConfigUI();
         updateUI(currentState, currentPlayers);
         updateMonitor(currentPlayers);
         updateKickedSection(currentKicked);
@@ -272,7 +316,22 @@ function updateUI(state, players) {
     btnStartDiscussion.classList.add('hidden');
     btnStartVoting.classList.add('hidden');
     votingSection.classList.add('hidden');
-    timerControls.classList.add('hidden');
+
+    if (btnStartVoting) {
+        btnStartVoting.textContent = `Inizio Votazioni (${roomConfig.meetingDuration || 60}s)`;
+    }
+
+    if (timerControls) timerControls.classList.remove('hidden');
+
+    if (liveTimerActions) {
+        if (state.game_status === 'playing') liveTimerActions.classList.remove('hidden');
+        else liveTimerActions.classList.add('hidden');
+    }
+
+    if (votingTimerActions) {
+        if (state.game_status === 'voting') votingTimerActions.classList.remove('hidden');
+        else votingTimerActions.classList.add('hidden');
+    }
 
     if (state.game_status === 'waiting') {
         // waiting
@@ -286,14 +345,15 @@ function updateUI(state, players) {
         statusBadge.style.backgroundColor = "var(--accent-green)";
         btnStartRandom.disabled = true;
         btnCallMeeting.disabled = false;
-        timerControls.classList.remove('hidden');
         
-        if (state.timer_paused) {
-            btnTimerPause.textContent = "Riprendi Timer";
-            btnTimerPause.style.background = "var(--accent-green)";
-        } else {
-            btnTimerPause.textContent = "Metti in Pausa";
-            btnTimerPause.style.background = "#ff9800";
+        if (btnTimerPause) {
+            if (state.timer_paused) {
+                btnTimerPause.textContent = "Riprendi";
+                btnTimerPause.style.background = "var(--accent-green)";
+            } else {
+                btnTimerPause.textContent = "Pausa";
+                btnTimerPause.style.background = "#ea580c";
+            }
         }
     } 
     else if (state.game_status === 'emergency') {
@@ -319,6 +379,61 @@ function updateUI(state, players) {
         btnStartRandom.disabled = true;
     }
 }
+
+function renderMasterTimer() {
+    if (!currentState || !currentState.game_status) {
+        if (currentTimerEl) currentTimerEl.textContent = "--:--";
+        if (masterLiveClockEl) masterLiveClockEl.textContent = "--:--";
+        return;
+    }
+
+    const status = currentState.game_status;
+    let timerText = "00:00";
+    let timerColor = "#38bdf8";
+
+    if (status === 'waiting') {
+        timerText = "IN ATTESA";
+        timerColor = "#94a3b8";
+    } else if (status === 'video_playing') {
+        timerText = "VIDEO INTRO";
+        timerColor = "#ff9800";
+    } else if (status === 'playing') {
+        if (currentState.timer_paused) {
+            const remSec = formatTime(currentState.timer_remaining || 0);
+            timerText = `PAUSA (${remSec})`;
+            timerColor = "#ff9800";
+        } else {
+            const left = Math.max(0, (currentState.timer || 0) - Date.now());
+            timerText = formatTime(left);
+            timerColor = left <= 30000 ? "#ef4444" : "#38bdf8";
+        }
+    } else if (status === 'emergency') {
+        timerText = "EMERGENZA";
+        timerColor = "#ef4444";
+    } else if (status === 'discussion') {
+        timerText = "DISCUSSIONE";
+        timerColor = "#ffeb3b";
+    } else if (status === 'voting') {
+        const remaining = Math.max(0, (currentState.voting_endtime || 0) - Date.now());
+        const sec = Math.ceil(remaining / 1000);
+        timerText = `VOTAZIONE: ${sec}s`;
+        timerColor = "#9c27b0";
+    } else if (status === 'impostors_win' || status === 'crewmates_win') {
+        timerText = "FINE PARTITA";
+        timerColor = "#64748b";
+    }
+
+    if (currentTimerEl) {
+        currentTimerEl.textContent = timerText;
+        currentTimerEl.style.color = timerColor;
+    }
+    if (masterLiveClockEl) {
+        masterLiveClockEl.textContent = timerText;
+        masterLiveClockEl.style.color = timerColor;
+    }
+}
+
+setInterval(renderMasterTimer, 200);
 
 async function checkWinCondition(state, players) {
     if (state.game_status !== 'playing') return;
@@ -399,7 +514,7 @@ async function resolveMeeting(players, votes, state) {
         }
     }
 
-    const roundDuration = ROUND_TIMES[Math.min(nextRound - 1, ROUND_TIMES.length - 1)];
+    const roundDuration = getRoundDuration(nextRound);
     const endTime = Date.now() + roundDuration;
 
     const updates = {};
@@ -419,31 +534,129 @@ async function resolveMeeting(players, votes, state) {
     resolvingMeeting = false;
 }
 
+// Config save button
+if (btnSaveTimeCfg) {
+    btnSaveTimeCfg.addEventListener('click', async () => {
+        const r1 = Math.max(1, parseInt(cfgRound1.value) || 10);
+        const r2 = Math.max(1, parseInt(cfgRound2.value) || 7);
+        const r3 = Math.max(1, parseInt(cfgRound3.value) || 5);
+        const votingSec = Math.max(10, parseInt(cfgVoting.value) || 60);
+
+        const roundTimes = [r1 * 60000, r2 * 60000, r3 * 60000];
+
+        await update(roomRef, {
+            'config/roundTimes': roundTimes,
+            'config/meetingDuration': votingSec
+        });
+
+        addLog(`⏱️ Tempi aggiornati dal Master: R1=${r1}m, R2=${r2}m, R3+=${r3}m, Votazione=${votingSec}s.`);
+        alert("Impostazioni tempi salvate!");
+    });
+}
+
 // Timer Controls
-btnTimerPause.addEventListener('click', async () => {
-    if (currentState.timer_paused) {
-        const newTimer = Date.now() + currentState.timer_remaining;
-        await update(roomRef, {
-            'state/timer_paused': false,
-            'state/timer': newTimer
-        });
-    } else {
-        const remaining = Math.max(0, currentState.timer - Date.now());
-        await update(roomRef, {
-            'state/timer_paused': true,
-            'state/timer_remaining': remaining
-        });
-    }
-});
+if (btnTimerPause) {
+    btnTimerPause.addEventListener('click', async () => {
+        if (currentState.timer_paused) {
+            const newTimer = Date.now() + currentState.timer_remaining;
+            await update(roomRef, {
+                'state/timer_paused': false,
+                'state/timer': newTimer
+            });
+        } else {
+            const remaining = Math.max(0, currentState.timer - Date.now());
+            await update(roomRef, {
+                'state/timer_paused': true,
+                'state/timer_remaining': remaining
+            });
+        }
+    });
+}
 
-btnTimerAdd.addEventListener('click', async () => {
-    if (currentState.timer_paused) {
-        await update(roomRef, { 'state/timer_remaining': currentState.timer_remaining + 60000 });
-    } else {
-        await update(roomRef, { 'state/timer': currentState.timer + 60000 });
-    }
-});
+if (btnTimerAdd) {
+    btnTimerAdd.addEventListener('click', async () => {
+        if (currentState.timer_paused) {
+            await update(roomRef, { 'state/timer_remaining': (currentState.timer_remaining || 0) + 60000 });
+        } else {
+            await update(roomRef, { 'state/timer': (currentState.timer || Date.now()) + 60000 });
+        }
+        addLog(`⏱️ +1 Minuto aggiunto al tempo di gioco.`);
+    });
+}
 
+if (btnTimerSub) {
+    btnTimerSub.addEventListener('click', async () => {
+        if (currentState.timer_paused) {
+            const newRem = Math.max(0, (currentState.timer_remaining || 0) - 60000);
+            await update(roomRef, { 'state/timer_remaining': newRem });
+        } else {
+            const newTimer = Math.max(Date.now(), (currentState.timer || Date.now()) - 60000);
+            await update(roomRef, { 'state/timer': newTimer });
+        }
+        addLog(`⏱️ -1 Minuto sottratto al tempo di gioco.`);
+    });
+}
+
+if (btnTimerAdd5) {
+    btnTimerAdd5.addEventListener('click', async () => {
+        if (currentState.timer_paused) {
+            await update(roomRef, { 'state/timer_remaining': (currentState.timer_remaining || 0) + 300000 });
+        } else {
+            await update(roomRef, { 'state/timer': (currentState.timer || Date.now()) + 300000 });
+        }
+        addLog(`⏱️ +5 Minuti aggiunti al tempo di gioco.`);
+    });
+}
+
+if (btnTimerSub5) {
+    btnTimerSub5.addEventListener('click', async () => {
+        if (currentState.timer_paused) {
+            const newRem = Math.max(0, (currentState.timer_remaining || 0) - 300000);
+            await update(roomRef, { 'state/timer_remaining': newRem });
+        } else {
+            const newTimer = Math.max(Date.now(), (currentState.timer || Date.now()) - 300000);
+            await update(roomRef, { 'state/timer': newTimer });
+        }
+        addLog(`⏱️ -5 Minuti sottratti al tempo di gioco.`);
+    });
+}
+
+if (btnSetCustomTime) {
+    btnSetCustomTime.addEventListener('click', async () => {
+        const mins = parseInt(inputCustomMin.value) || 0;
+        const secs = parseInt(inputCustomSec.value) || 0;
+        const targetMs = (mins * 60 + secs) * 1000;
+        if (targetMs <= 0 && mins === 0 && secs === 0) return alert("Inserisci un tempo valido.");
+
+        if (currentState.timer_paused) {
+            await update(roomRef, { 'state/timer_remaining': targetMs });
+        } else {
+            await update(roomRef, { 'state/timer': Date.now() + targetMs });
+        }
+        inputCustomMin.value = '';
+        inputCustomSec.value = '';
+        addLog(`⏱️ Tempo di gioco impostato a ${mins}m ${secs}s dal Master.`);
+    });
+}
+
+if (btnVotingAdd30) {
+    btnVotingAdd30.addEventListener('click', async () => {
+        if (currentState.game_status === 'voting' && currentState.voting_endtime) {
+            await update(roomRef, { 'state/voting_endtime': currentState.voting_endtime + 30000 });
+            addLog(`⏱️ +30 Secondi aggiunti alla votazione.`);
+        }
+    });
+}
+
+if (btnVotingSub30) {
+    btnVotingSub30.addEventListener('click', async () => {
+        if (currentState.game_status === 'voting' && currentState.voting_endtime) {
+            const newEndTime = Math.max(Date.now(), currentState.voting_endtime - 30000);
+            await update(roomRef, { 'state/voting_endtime': newEndTime });
+            addLog(`⏱️ -30 Secondi sottratti alla votazione.`);
+        }
+    });
+}
 
 // Actions
 btnStartRandom.addEventListener('click', async () => {
@@ -498,7 +711,7 @@ btnStartRandom.addEventListener('click', async () => {
         };
     });
 
-    const roundDuration = ROUND_TIMES[0];
+    const roundDuration = getRoundDuration(1);
 
     const updates = {};
     updates['state/round'] = 1;
@@ -534,7 +747,7 @@ btnStartDiscussion.addEventListener('click', async () => {
 });
 
 btnStartVoting.addEventListener('click', async () => {
-    const votingDuration = 60000;
+    const votingDuration = (roomConfig.meetingDuration || 60) * 1000;
     await update(roomRef, {
         'state/game_status': 'voting',
         'state/voting_endtime': Date.now() + votingDuration

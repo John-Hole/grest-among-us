@@ -1477,3 +1477,62 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:foc
     border-color: #38bdf8 !important;
     box-shadow: 0 0 12px rgba(56, 189, 248, 0.25) !important;
 }
+
+/* ==========================================================================
+   MOBILE SMARTPHONE OPTIMIZATIONS (CELLULARE <= 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* Prevent auto-zoom on mobile inputs on iOS Safari and Android Chrome */
+    input[type="text"], input[type="number"], input[type="password"], input[type="email"], select, textarea {
+        font-size: 16px !important;
+    }
+
+    body {
+        padding-top: 60px !important;
+        -webkit-text-size-adjust: 100%;
+    }
+
+    .master-layout-container {
+        padding: 0.75rem;
+        gap: 0.9rem;
+    }
+
+    .master-header-banner {
+        padding: 1rem;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.8rem;
+    }
+
+    .master-header-metrics {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .scienziato-container, .player-app-container {
+        padding: 0.75rem;
+        gap: 0.9rem;
+    }
+
+    .vitals-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)) !important;
+        gap: 0.6rem !important;
+    }
+
+    .task-item {
+        padding: 0.85rem !important;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.6rem;
+    }
+
+    .task-btn {
+        width: 100%;
+        min-height: 48px;
+        font-size: 0.9rem;
+    }
+
+    .btn-call-meeting, .kill-btn {
+        min-height: 52px;
+    }
+}

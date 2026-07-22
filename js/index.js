@@ -477,6 +477,7 @@ function getRoomConfigFromUI() {
         killCooldown: parseInt(createKillCooldown.value) || 120,
         maxMeetings: parseInt(createMaxMeetings.value) || 1,
         meetingDuration: parseInt(createMeetingDuration.value) || 120,
+        roundTimes: [10 * 60000, 7 * 60000, 5 * 60000],
         videoIntro: createVideoIntro.checked,
         scientistEnabled: createScientist.checked,
         mapMode: mode,

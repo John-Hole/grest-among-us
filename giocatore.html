@@ -2,52 +2,60 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Realmong Us - App Giocatore</title>
     <link rel="stylesheet" href="css/global.css">
     <style>
-        .login-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+        body {
+            touch-action: manipulation;
+            padding-bottom: 2rem;
         }
-        
+
         .role-screen {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: black;
+            background-color: #07090e;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            padding: 1.5rem;
+            box-sizing: border-box;
         }
 
         .role-text {
-            font-size: clamp(2rem, 10vw, 5rem);
+            font-size: clamp(2.2rem, 10vw, 4.5rem);
             margin-bottom: 2rem;
             text-align: center;
             word-wrap: break-word;
             max-width: 90%;
-            padding: 0 1rem;
+            letter-spacing: 2px;
+            font-weight: 800;
         }
 
-        .role-impostor { color: var(--accent-red); }
-        .role-crewmate { color: var(--accent-cyan); }
+        .role-impostor { color: var(--accent-red); text-shadow: 0 0 20px rgba(255, 75, 75, 0.5); }
+        .role-crewmate { color: var(--accent-cyan); text-shadow: 0 0 20px rgba(0, 229, 255, 0.5); }
         
         select {
-            padding: 1rem;
-            font-size: 1.2rem;
+            padding: 0.9rem 1rem !important;
+            font-size: 16px !important;
             width: 100%;
-            max-width: 300px;
-            margin-bottom: 2rem;
-            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-radius: 12px !important;
         }
-        
-        /* Mobile adjustments */
-        body { padding-bottom: 2rem; }
+
+        /* Mobile specific card container tweaks */
+        .player-app-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
@@ -55,101 +63,130 @@
     <!-- Meeting Overlay -->
     <div id="overlay-meeting" class="overlay-screen hidden">
         <h1 class="alert-text">RIUNIONE CHIAMATA</h1>
-        <p style="margin-top: 2rem; font-size: 1.5rem;">Segui la schermata generale e attendi disposizioni.</p>
+        <p style="margin-top: 1.5rem; font-size: 1.2rem; text-align: center; color: #e2e8f0; padding: 0 1rem;">Segui la schermata generale e attendi disposizioni.</p>
     </div>
-
-    <!-- Login screen removed. Handled by index.html -->
 
     <!-- Role Reveal Screen -->
     <div id="role-screen" class="role-screen hidden">
-        <h2 style="color: white; margin-bottom: 1rem;">Tu sei...</h2>
+        <h2 style="color: #94a3b8; margin-bottom: 1rem; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;">Ruolo Assegnato</h2>
         <h1 id="role-text" class="role-text">CREWMATE</h1>
-        <button id="btn-hide-role" class="btn">HO CAPITO (Nascondi)</button>
+        <button id="btn-hide-role" class="btn" style="padding: 1rem 2rem; font-size: 1rem; border-radius: 50px;">HO CAPITO (Nascondi)</button>
     </div>
 
     <!-- Siren Audio for Emergencies -->
     <audio id="siren-audio" src="public/assets/sirena.mp3" preload="auto"></audio>
 
     <!-- Death Overlay -->
-    <div id="overlay-dead" class="overlay-screen hidden" style="background: rgba(255,0,0,0.8);">
-        <h1 class="alert-text" style="font-size: 4rem;">SEI MORTO</h1>
-        <p style="margin-top: 1rem; font-size: 1.5rem; text-align: center;">Attendi la fine della partita in silenzio.</p>
+    <div id="overlay-dead" class="overlay-screen hidden" style="background: rgba(20, 5, 5, 0.95); backdrop-filter: blur(10px);">
+        <h1 class="alert-text" style="font-size: clamp(2.5rem, 8vw, 4rem);">SEI MORTO</h1>
+        <p style="margin-top: 1rem; font-size: 1.2rem; text-align: center; color: #cbd5e1; max-width: 320px;">Attendi la fine della partita in silenzio.</p>
     </div>
 
     <!-- Main Game App -->
-    <div id="game-screen" class="mobile-app hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-            <h2 id="player-name-display" style="color: var(--accent-cyan); font-size: clamp(1rem, 4vw, 1.2rem); cursor: pointer; padding: 0.5rem; border-radius: 4px; background: rgba(255,255,255,0.1); word-break: break-all; max-width: 70%;">Nome</h2>
-            <div id="status-badge" style="background: var(--accent-green); padding: 0.5rem clamp(0.5rem, 2vw, 1rem); border-radius: 4px; font-weight: bold; font-size: clamp(0.8rem, 3vw, 1rem);">ALIVE</div>
+    <div id="game-screen" class="player-app-container hidden">
+        
+        <!-- Header Bar -->
+        <div class="glass-card" style="display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1.1rem !important;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; max-width: 65%;">
+                <span style="font-size: 1.2rem;">👤</span>
+                <h2 id="player-name-display" style="color: var(--accent-cyan); font-size: 1rem; cursor: pointer; word-break: break-all; margin: 0; text-transform: none;">Nome</h2>
+            </div>
+            <div id="status-badge" style="background: rgba(0, 230, 118, 0.15); border: 1px solid rgba(0, 230, 118, 0.3); color: var(--accent-green); padding: 0.35rem 0.8rem; border-radius: 50px; font-weight: bold; font-size: 0.8rem; letter-spacing: 0.5px;">ALIVE</div>
         </div>
 
-        <div id="crewmate-ui" class="hidden">
-            <h3 style="margin-bottom: 1rem;">Le tue Task</h3>
+        <!-- Crewmate Tasks UI -->
+        <div id="crewmate-ui" class="glass-card hidden">
+            <div class="glass-card-header">
+                <div class="glass-card-header-left">
+                    <span class="header-icon">📋</span>
+                    <h2>LE TUE TASK</h2>
+                </div>
+            </div>
             <ul id="task-list" class="task-list">
                 <!-- Tasks populated by JS -->
             </ul>
         </div>
 
         <!-- Hidden Kill Section for Impostors -->
-        <div id="kill-section" class="hidden" style="margin-top: 2rem; margin-bottom: 2rem; background: rgba(255,0,0,0.2); padding: clamp(1rem, 4vw, 1.5rem); border-radius: 8px; border: 1px solid var(--accent-red);">
-            <h3 style="color: var(--accent-red); margin-bottom: 1rem;">Menu Segreto (Impostore)</h3>
-            <select id="kill-target-select" style="width: 100%; max-width: 100%; margin-bottom: 1rem; background: #222; border: 1px solid var(--accent-red); color: white; padding: clamp(0.8rem, 3vw, 1rem); font-size: clamp(1rem, 4vw, 1.2rem);">
+        <div id="kill-section" class="glass-card hidden" style="border-color: rgba(239, 68, 68, 0.3) !important; background: linear-gradient(180deg, rgba(18, 24, 37, 0.95) 0%, rgba(35, 12, 15, 0.9) 100%) !important;">
+            <div class="glass-card-header">
+                <div class="glass-card-header-left">
+                    <span class="header-icon">🗡️</span>
+                    <h2 style="color: #ef4444;">MENU SEGRETO (IMPOSTORE)</h2>
+                </div>
+            </div>
+            <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.4rem; font-weight: 600;">Seleziona bersaglio:</label>
+            <select id="kill-target-select">
                 <!-- Populated by JS -->
             </select>
-            <button id="btn-kill" class="btn btn-danger kill-btn">KILL</button>
+            <button id="btn-kill" class="btn btn-danger kill-btn" style="min-height: 52px; font-size: 1.1rem; font-weight: 800; border-radius: 12px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);">KILL BERSAGLIO</button>
         </div>
 
-        <div id="scientist-ui" class="hidden" style="margin-top: 2rem; border-top: 2px solid var(--accent-cyan); padding-top: 1rem;">
-            <h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">Monitor Parametri Vitali</h3>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <p id="game-status-text" style="font-size: clamp(0.8rem, 3vw, 0.9rem); font-weight: bold;"></p>
+        <!-- Scientist Vitals UI -->
+        <div id="scientist-ui" class="glass-card hidden">
+            <div class="glass-card-header">
+                <div class="glass-card-header-left">
+                    <span class="header-icon">🩺</span>
+                    <h2>MONITOR VITALI</h2>
+                </div>
             </div>
+            <p id="game-status-text" style="font-size: 0.85rem; font-weight: 600; color: #94a3b8; margin-bottom: 0.8rem;"></p>
             <div id="vitals-container" class="vitals-grid">
                 <!-- Populated by JS -->
             </div>
         </div>
 
-        <div id="report-section" class="hidden" style="margin-top: 2rem; text-align: center;">
-            <p id="meetings-left-text" style="color: #aaa; margin-bottom: 0.5rem; font-size: clamp(0.8rem, 3vw, 0.9rem);">Riunioni rimanenti: -</p>
-            <button id="btn-report" class="btn btn-call-meeting">SEGNALA / RIUNIONE</button>
+        <!-- Emergency / Report Section -->
+        <div id="report-section" class="glass-card hidden" style="text-align: center;">
+            <p id="meetings-left-text" style="color: #94a3b8; margin-bottom: 0.75rem; font-size: 0.85rem; font-weight: 600;">Riunioni rimanenti: -</p>
+            <button id="btn-report" class="btn btn-call-meeting" style="min-height: 52px; font-size: 1.1rem;">SEGNALA / RIUNIONE</button>
         </div>
         
-        <div id="waiting-screen" class="hidden" style="display: flex; flex-direction: column; gap: 1rem; padding-top: 1.5rem; width: 100%;">
-            <div style="background: var(--card-bg); border: 2px solid var(--accent-cyan); border-radius: 12px; padding: clamp(0.8rem, 3vw, 1.2rem); text-align: center; width: 100%; box-sizing: border-box;">
-                <h2 style="color: var(--accent-cyan); margin-bottom: 0.5rem; font-size: clamp(1.1rem, 4.5vw, 1.4rem);">SALA D'ATTESA</h2>
-                <p id="waiting-connection-status" style="color: var(--accent-green); font-weight: bold; font-size: clamp(0.85rem, 3.5vw, 0.95rem); word-break: break-word;">✔ Connesso come <span id="waiting-player-name"></span></p>
-                <p id="waiting-room-code" style="margin-top: 0.5rem; font-family: var(--font-pixel); font-size: clamp(0.85rem, 3.5vw, 1.1rem); word-break: break-all;"></p>
-                <button id="btn-change-name" class="btn" style="margin-top: 1rem; padding: 0.5rem 1rem; font-size: clamp(0.8rem, 3vw, 0.9rem);">Cambia Nome</button>
+        <!-- Waiting Lobby Screen -->
+        <div id="waiting-screen" class="glass-card hidden" style="text-align: center; padding: 1.5rem !important;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">⏳</div>
+            <h2 style="color: var(--accent-cyan); margin-bottom: 0.5rem; font-size: 1.3rem;">SALA D'ATTESA</h2>
+            <p id="waiting-connection-status" style="color: var(--accent-green); font-weight: bold; font-size: 0.9rem; margin-bottom: 0.5rem; word-break: break-word;">✔ Connesso come <span id="waiting-player-name"></span></p>
+            <div id="waiting-room-code" style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); color: #38bdf8; padding: 0.5rem 1rem; border-radius: 10px; font-weight: 800; font-size: 1.1rem; letter-spacing: 2px; margin: 0.8rem 0; display: inline-block;"></div>
+            <div>
+                <button id="btn-change-name" class="btn" style="margin-top: 0.8rem; padding: 0.6rem 1.2rem; font-size: 0.85rem; background: rgba(255,255,255,0.1); color: white;">Cambia Nome</button>
             </div>
-            
-            <p style="text-align: center; color: #777; margin-top: 1rem; font-size: 0.9rem;">In attesa dell'avvio della partita...</p>
+            <p style="color: #64748b; margin-top: 1.2rem; font-size: 0.85rem;">In attesa che il Master avvii la partita...</p>
         </div>
 
-        <div id="not-in-room-screen" class="hidden" style="display: flex; flex-direction: column; gap: 1rem; padding-top: 1.5rem; text-align: center; width: 100%;">
-            <div style="background: var(--card-bg); border: 2px solid var(--accent-red); border-radius: 12px; padding: clamp(1rem, 4vw, 1.5rem); width: 100%; box-sizing: border-box;">
-                <h2 style="color: var(--accent-red); margin-bottom: 0.8rem; font-size: clamp(1.1rem, 4.5vw, 1.4rem); word-break: break-word;">NON NELLA STANZA</h2>
-                <p id="not-in-room-msg" style="color: #ccc; margin-bottom: 1.5rem; font-size: clamp(0.85rem, 3.5vw, 0.95rem); line-height: 1.4;">Sei stato disconnesso o rimosso dalla stanza. Puoi rientrare solo se la partita non è ancora iniziata.</p>
-                <div style="display: flex; flex-direction: column; gap: 0.8rem; align-items: center; width: 100%;">
-                    <button id="btn-rejoin-room" class="btn" style="width: 100%; max-width: 280px; padding: clamp(0.6rem, 2vw, 0.8rem); font-size: clamp(0.85rem, 3.5vw, 1rem); background: var(--accent-green); color: black; font-weight: bold; white-space: normal; line-height: 1.2;">RIENTRA / ENTRA IN STANZA</button>
-                    <button id="btn-not-in-room-change-name" class="btn" style="width: 100%; max-width: 280px; padding: 0.6rem; font-size: clamp(0.85rem, 3vw, 0.95rem);">Cambia Nome</button>
-                </div>
+        <!-- Disconnected Screen -->
+        <div id="not-in-room-screen" class="glass-card hidden" style="text-align: center; border-color: rgba(239, 68, 68, 0.3) !important;">
+            <h2 style="color: #ef4444; margin-bottom: 0.8rem; font-size: 1.2rem;">NON NELLA STANZA</h2>
+            <p id="not-in-room-msg" style="color: #94a3b8; margin-bottom: 1.5rem; font-size: 0.9rem; line-height: 1.5;">Sei stato disconnesso o rimosso dalla stanza.</p>
+            <div style="display: flex; flex-direction: column; gap: 0.8rem; align-items: center; width: 100%;">
+                <button id="btn-rejoin-room" class="btn" style="width: 100%; min-height: 48px; font-size: 0.95rem; background: var(--accent-green); color: black; font-weight: bold;">RIENTRA IN STANZA</button>
+                <button id="btn-not-in-room-change-name" class="btn" style="width: 100%; min-height: 44px; font-size: 0.85rem; background: rgba(255,255,255,0.1); color: white;">Cambia Nome</button>
             </div>
         </div>
+
     </div>
 
     <!-- Voting UI (Replaces main game UI during meetings) -->
-    <div id="voting-ui" class="mobile-app hidden" style="padding-top: 2rem;">
-        <h2 style="color: var(--accent-red); text-align: center; margin-bottom: 1rem;">VOTAZIONE</h2>
-        <p style="text-align: center; margin-bottom: 2rem;">Confrontati con gli altri e decidi chi espellere.</p>
-        
-        <div id="voting-options" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
-            <!-- Populated by JS -->
-        </div>
+    <div id="voting-ui" class="player-app-container hidden">
+        <div class="glass-card" style="border-color: rgba(147, 51, 234, 0.3) !important;">
+            <div class="glass-card-header">
+                <div class="glass-card-header-left">
+                    <span class="header-icon">🗳️</span>
+                    <h2 style="color: #a855f7;">VOTAZIONE IN CORSO</h2>
+                </div>
+            </div>
+            <p style="text-align: center; color: #94a3b8; margin-bottom: 1.2rem; font-size: 0.9rem;">Confrontati con gli altri e decidi chi espellere.</p>
+            
+            <div id="voting-options" style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;">
+                <!-- Populated by JS -->
+            </div>
 
-        <div style="text-align: center;" id="voting-status"></div>
+            <div style="text-align: center; font-weight: 700; color: #38bdf8; font-size: 0.9rem;" id="voting-status"></div>
+        </div>
     </div>
 
     <!-- Script as module -->
     <script type="module" src="js/giocatore.js"></script>
-<script src="js/nav.js"></script></body>
+    <script src="js/nav.js"></script>
+</body>
 </html>
