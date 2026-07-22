@@ -5,6 +5,24 @@ import { formatTime, TASKS_LIST } from './game-logic.js';
 const urlParams = new URLSearchParams(window.location.search);
 let roomCode = urlParams.get('room');
 
+function enableFullscreen() {
+    if (!document.fullscreenElement) {
+        const el = document.documentElement;
+        if (el.requestFullscreen) {
+            el.requestFullscreen().catch(err => console.log("Fullscreen request:", err.message));
+        } else if (el.webkitRequestFullscreen) {
+            el.webkitRequestFullscreen();
+        } else if (el.msRequestFullscreen) {
+            el.msRequestFullscreen();
+        }
+    }
+}
+
+// Enable fullscreen on user gesture anywhere on screen
+document.addEventListener('click', () => {
+    enableFullscreen();
+}, { once: false });
+
 if (!roomCode) {
     document.getElementById('join-overlay').classList.remove('hidden');
     document.getElementById('btn-join-room').addEventListener('click', () => {
@@ -16,6 +34,8 @@ if (!roomCode) {
         console.log('Tentativo di connessione alla stanza:', code);
         roomCode = code;
         
+        enableFullscreen();
+
         // Update URL without reloading
         const url = new URL(window.location);
         url.searchParams.set('room', code);
@@ -30,12 +50,8 @@ if (!roomCode) {
 function startConnection() {
     document.getElementById('join-overlay').classList.add('hidden');
     
-    // Attempt to go fullscreen automatically
-    if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen().catch(err => {
-            console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-        });
-    }
+    // Attempt fullscreen
+    enableFullscreen();
 
     const headerEl = document.getElementById('header-room-code');
     if (headerEl) headerEl.textContent = roomCode;

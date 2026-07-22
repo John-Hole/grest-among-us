@@ -7,8 +7,8 @@
     let rightSideHTML = '';
     if (isIndex) {
         rightSideHTML = `<button id="btn-show-auth" class="btn btn-sm" style="background: #3f51b5; padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: 50px;">ACCEDI / REGISTRATI</button>`;
-    } else if (isMaster || isAnimatore) {
-        rightSideHTML = `<button onclick="if(confirm('Vuoi abbandonare la partita?')) window.location.href='index.html'" class="btn btn-danger btn-sm" style="padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: 50px;">ESCI</button>`;
+    } else if (isMaster || isAnimatore || isTeatro) {
+        rightSideHTML = `<button onclick="if(confirm('Vuoi uscire dalla schermata generale?')) window.location.href='index.html'" class="btn btn-danger btn-sm" style="padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: 50px;">ESCI</button>`;
     }
 
     const navHTML = `
