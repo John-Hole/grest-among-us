@@ -22,7 +22,6 @@
         <div id="side-nav" class="side-nav">
             <a href="#" id="nav-home">Homepage</a>
             <a href="#" id="nav-schermo">Schermata generale</a>
-            <a href="#" id="nav-mappa">Mappa Oratorio (SVG)</a>
             <a href="#" id="nav-account">Account (Template)</a>
             <div style="flex-grow: 1;"></div>
             <div id="nav-auth-status" style="font-size: 0.8rem; color: #ccc; margin-bottom: 10px;">Non loggato</div>
@@ -31,8 +30,7 @@
     `;
     document.body.insertAdjacentHTML('afterbegin', navHTML);
 
-    const isMappa = window.location.pathname.includes('mappa_oratorio.html');
-    if (isSchermo || isMappa) {
+    if (isSchermo) {
         document.body.style.paddingTop = '0px';
     }
 
@@ -40,7 +38,6 @@
     const sideNav = document.getElementById('side-nav');
     const navHome = document.getElementById('nav-home');
     const navSchermo = document.getElementById('nav-schermo');
-    const navMappa = document.getElementById('nav-mappa');
     const navAccount = document.getElementById('nav-account');
 
     function toggleNav() {
@@ -79,13 +76,6 @@
         navSchermo.addEventListener('click', (e) => {
             e.preventDefault();
             handleNavigate('schermo.html');
-        });
-    }
-
-    if (navMappa) {
-        navMappa.addEventListener('click', (e) => {
-            e.preventDefault();
-            handleNavigate('mappa_oratorio.html');
         });
     }
 
