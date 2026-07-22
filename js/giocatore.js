@@ -89,7 +89,17 @@ onValue(roomRef, (snapshot) => {
             updateUI(currentState, data.players);
         } else {
             myData = null;
-            statusBadge.textContent = "NON NELLA STANZA";
+
+            // Check if player was kicked
+            const isKicked = data.kickedPlayers && Object.keys(data.kickedPlayers).some(
+                p => p.toLowerCase() === myPlayerName.toLowerCase()
+            );
+
+            if (isKicked) {
+                statusBadge.textContent = "SEI STATO ESPULSO";
+            } else {
+                statusBadge.textContent = "NON NELLA STANZA";
+            }
             statusBadge.style.background = "var(--accent-red)";
 
             // Hide all game UIs
@@ -107,7 +117,12 @@ onValue(roomRef, (snapshot) => {
             if (notInRoomScreen) {
                 notInRoomScreen.classList.remove('hidden');
                 if (btnRejoinRoom) {
-                    if (currentState && currentState.game_status !== 'waiting') {
+                    if (isKicked) {
+                        btnRejoinRoom.disabled = true;
+                        btnRejoinRoom.textContent = "SEI STATO ESPULSO";
+                        btnRejoinRoom.style.background = "#555";
+                        btnRejoinRoom.style.color = "#aaa";
+                    } else if (currentState && currentState.game_status !== 'waiting') {
                         btnRejoinRoom.disabled = true;
                         btnRejoinRoom.textContent = "PARTITA GIÀ AVVIATA";
                         btnRejoinRoom.style.background = "#555";
@@ -506,6 +521,16 @@ async function rejoinRoom() {
         }
 
         const roomData = snapshot.val();
+        if (roomData.kickedPlayers) {
+            const isKicked = Object.keys(roomData.kickedPlayers).some(
+                p => p.toLowerCase() === myPlayerName.toLowerCase()
+            );
+            if (isKicked) {
+                alert("Sei stato espulso da questa stanza dal Master. Non puoi rientrare finché non verrai riammesso.");
+                return;
+            }
+        }
+
         if (roomData.state && roomData.state.game_status !== 'waiting') {
             alert("Impossibile rientrare: la partita è già in corso. Puoi rientrare solo se la partita non è ancora iniziata.");
             return;
@@ -556,15 +581,27 @@ async function promptChangeName() {
     if (cleanName.toLowerCase() === (myPlayerName || "").toLowerCase() && myData) return;
 
     try {
-        const playerSnap = await get(ref(db, `rooms/${roomCode}/players`));
-        if (playerSnap.exists()) {
-            const existingPlayers = playerSnap.val();
-            const isTaken = Object.keys(existingPlayers).some(
-                p => p.toLowerCase() === cleanName.toLowerCase() && p.toLowerCase() !== (myPlayerName || "").toLowerCase()
-            );
-            if (isTaken) {
-                alert(`Il nome "${cleanName}" è già in uso in questa stanza! Per favore scegli un nome diverso.`);
-                return;
+        const roomSnap = await get(ref(db, `rooms/${roomCode}`));
+        if (roomSnap.exists()) {
+            const roomData = roomSnap.val();
+            if (roomData.kickedPlayers) {
+                const isKicked = Object.keys(roomData.kickedPlayers).some(
+                    p => p.toLowerCase() === cleanName.toLowerCase()
+                );
+                if (isKicked) {
+                    alert(`Il nome "${cleanName}" risulta espulso da questa stanza!`);
+                    return;
+                }
+            }
+            if (roomData.players) {
+                const existingPlayers = roomData.players;
+                const isTaken = Object.keys(existingPlayers).some(
+                    p => p.toLowerCase() === cleanName.toLowerCase() && p.toLowerCase() !== (myPlayerName || "").toLowerCase()
+                );
+                if (isTaken) {
+                    alert(`Il nome "${cleanName}" è già in uso in questa stanza! Per favore scegli un nome diverso.`);
+                    return;
+                }
             }
         }
 

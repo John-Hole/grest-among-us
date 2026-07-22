@@ -21,13 +21,23 @@
     padding: 0;
 }
 
+html, body {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+img, video, canvas, svg, iframe {
+    max-width: 100%;
+    height: auto;
+}
+
 body {
     background-color: var(--bg-color);
     color: var(--text-main);
     font-family: var(--font-ui);
     background-image: radial-gradient(circle at center, #1a1a24 0%, #000000 100%);
     min-height: 100vh;
-    overflow-x: hidden;
     padding-top: 70px;
 }
 

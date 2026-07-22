@@ -101,7 +101,21 @@
         <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
             <!-- Monitor -->
             <div class="dashboard-card" style="flex: 1; min-width: 300px;">
-                <h2 style="color: #ffeb3b;">Monitor Giocatori</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(0, 229, 255, 0.2); margin-bottom: 1rem; padding-bottom: 0.5rem;">
+                    <h2 style="color: #ffeb3b; margin: 0; border: none; padding: 0;">Monitor Giocatori</h2>
+                    <button id="btn-toggle-kicked" class="btn hidden" style="background: #e53935; color: white; padding: 0.3rem 0.8rem; font-size: 0.85rem; border-radius: 12px; font-weight: bold; cursor: pointer;">
+                        Espulsi: <span id="kicked-count">0</span>
+                    </button>
+                </div>
+
+                <!-- Kicked list panel -->
+                <div id="kicked-section" class="hidden" style="background: #1a1a1a; padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #e53935;">
+                    <h3 style="color: #ff5252; font-size: 0.95rem; margin-top: 0; margin-bottom: 0.5rem;">Giocatori Espulsi</h3>
+                    <div id="kicked-list-container" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
                 <div id="monitor-container" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 400px; overflow-y: auto;">
                     <!-- Populated by JS -->
                 </div>

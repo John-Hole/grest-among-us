@@ -48,10 +48,20 @@ let currentState = {};
 let roomConfig = {};
 let currentPlayers = {};
 let currentVotes = {};
+let currentKicked = {};
 let resolvingMeeting = false;
 let previousPlayers = null;
 
 const roomRef = ref(db, `rooms/${roomCode}`);
+
+// Toggle Espulsi section listener
+const btnToggleKicked = document.getElementById('btn-toggle-kicked');
+const kickedSection = document.getElementById('kicked-section');
+if (btnToggleKicked && kickedSection) {
+    btnToggleKicked.addEventListener('click', () => {
+        kickedSection.classList.toggle('hidden');
+    });
+}
 
 // Logging Helper
 function addLog(msg) {
@@ -64,8 +74,8 @@ function addLog(msg) {
 function processPlayerLogs(oldPlayers, newPlayers) {
     if (!oldPlayers) return;
     for (const name in oldPlayers) {
-        if (!newPlayers[name]) {
-            addLog(`🥾 <span style="color:var(--accent-red);">${name}</span> è stato espulso.`);
+        if (!newPlayers[name] && (!currentKicked || !currentKicked[name])) {
+            addLog(`🥾 <span style="color:var(--accent-red);">${name}</span> ha lasciato la stanza.`);
         }
     }
     for (const name in newPlayers) {
@@ -132,7 +142,11 @@ function updateMonitor(players) {
             btnKick.style.fontSize = "0.8rem";
             btnKick.onclick = async () => {
                 if(confirm(`Espellere ${name} dalla stanza?`)) {
-                    await remove(ref(db, `rooms/${roomCode}/players/${name}`));
+                    await update(roomRef, {
+                        [`players/${name}`]: null,
+                        [`kickedPlayers/${name}`]: true
+                    });
+                    addLog(`🥾 <span style="color:var(--accent-red);">${name}</span> è stato espulso dal Master.`);
                 }
             };
             div.appendChild(btnKick);
@@ -160,7 +174,11 @@ function updateMonitor(players) {
                 btnKick.style.fontSize = "0.8rem";
                 btnKick.onclick = async () => {
                     if(confirm(`Espellere ${name} dalla partita?`)) {
-                        await remove(ref(db, `rooms/${roomCode}/players/${name}`));
+                        await update(roomRef, {
+                            [`players/${name}`]: null,
+                            [`kickedPlayers/${name}`]: true
+                        });
+                        addLog(`🥾 <span style="color:var(--accent-red);">${name}</span> è stato espulso dal Master.`);
                     }
                 };
                 div.appendChild(btnKick);
@@ -171,6 +189,58 @@ function updateMonitor(players) {
     }
 }
 
+function updateKickedSection(kickedMap) {
+    const kickedNames = Object.keys(kickedMap || {});
+    const btnToggleKicked = document.getElementById('btn-toggle-kicked');
+    const kickedCountEl = document.getElementById('kicked-count');
+    const kickedListContainer = document.getElementById('kicked-list-container');
+
+    if (!btnToggleKicked || !kickedCountEl || !kickedListContainer) return;
+
+    if (kickedNames.length === 0) {
+        btnToggleKicked.classList.add('hidden');
+        if (kickedSection) kickedSection.classList.add('hidden');
+        kickedListContainer.innerHTML = '';
+        return;
+    }
+
+    btnToggleKicked.classList.remove('hidden');
+    kickedCountEl.textContent = kickedNames.length;
+
+    kickedListContainer.innerHTML = '';
+    kickedNames.forEach(name => {
+        const div = document.createElement('div');
+        div.style.display = 'flex';
+        div.style.justifyContent = 'space-between';
+        div.style.alignItems = 'center';
+        div.style.background = '#252525';
+        div.style.padding = '0.4rem 0.6rem';
+        div.style.borderRadius = '6px';
+
+        div.innerHTML = `
+            <strong style="color: #ff8a80; font-size: 0.9rem;">${name}</strong>
+        `;
+
+        const btnReadmit = document.createElement('button');
+        btnReadmit.textContent = "RIAMMETTI";
+        btnReadmit.className = "btn";
+        btnReadmit.style.background = "#4caf50";
+        btnReadmit.style.color = "white";
+        btnReadmit.style.padding = "0.2rem 0.6rem";
+        btnReadmit.style.fontSize = "0.8rem";
+        btnReadmit.style.cursor = "pointer";
+        btnReadmit.onclick = async () => {
+            if (confirm(`Riammettere ${name} nella stanza?`)) {
+                await remove(ref(db, `rooms/${roomCode}/kickedPlayers/${name}`));
+                addLog(`🔄 <span style="color:#4caf50;">${name}</span> è stato riammesso dal Master.`);
+            }
+        };
+
+        div.appendChild(btnReadmit);
+        kickedListContainer.appendChild(div);
+    });
+}
+
 // Listen to changes
 onValue(roomRef, (snapshot) => {
     if (snapshot.exists()) {
@@ -179,9 +249,11 @@ onValue(roomRef, (snapshot) => {
         roomConfig = data.config || {};
         currentPlayers = data.players || {};
         currentVotes = data.votes || {};
+        currentKicked = data.kickedPlayers || {};
         
         updateUI(currentState, currentPlayers);
         updateMonitor(currentPlayers);
+        updateKickedSection(currentKicked);
         
         processPlayerLogs(previousPlayers, currentPlayers);
         previousPlayers = JSON.parse(JSON.stringify(currentPlayers));
@@ -508,6 +580,7 @@ btnReset.addEventListener('click', async () => {
     updates['state/timer_remaining'] = 0;
     updates['state/last_ejected'] = null;
     updates['votes'] = null;
+    updates['kickedPlayers'] = null;
 
     for (const name in playersMap) {
         updates[`players/${name}`] = playersMap[name];

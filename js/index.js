@@ -570,6 +570,15 @@ btnJoinRoom.addEventListener('click', async () => {
         }
 
         const roomData = snapshot.val();
+        if (roomData.kickedPlayers) {
+            const isKicked = Object.keys(roomData.kickedPlayers).some(
+                p => p.toLowerCase() === name.toLowerCase()
+            );
+            if (isKicked) {
+                return alert(`Sei stato espulso da questa stanza! Non puoi accedere finché il Master non ti riammette.`);
+            }
+        }
+
         if (roomData.state && roomData.state.game_status !== 'waiting') {
             return alert("Impossibile accedere: partita già in corso!");
         }
