@@ -1,4 +1,4 @@
-// JS module for Mappa Oratorio preview & interactive SVG inspector
+// JS module for Mappa Oratorio preview
 
 document.addEventListener('DOMContentLoaded', () => {
     initDemoQRCode();
@@ -85,9 +85,8 @@ function initDemoPlayers() {
     `).join('');
 }
 
-// 4. Load SVG Map & Enable Inspector Features
+// 4. Load SVG Map & Enable Hover Border Highlight
 let currentScale = 1;
-let selectedRoomElement = null;
 
 async function loadAndInitSVGMap() {
     const mapContainer = document.getElementById('svg-map-container');
@@ -107,7 +106,7 @@ async function loadAndInitSVGMap() {
             svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
             
             attachSVGInteractivity(svgEl);
-            setupMapToolbar(svgEl);
+            setupZoomControls(svgEl);
         }
     } catch (err) {
         console.error("Errore nel caricamento del file SVG:", err);
@@ -117,28 +116,16 @@ async function loadAndInitSVGMap() {
 
 function attachSVGInteractivity(svgEl) {
     const tooltip = document.getElementById('room-tooltip');
-    const inspectName = document.getElementById('inspect-name');
-    const inspectDetails = document.getElementById('inspect-details');
-    const inspectColor = document.getElementById('inspect-color');
-    const btnCopyRoom = document.getElementById('btn-copy-room');
-
-    // Find all paths in room layer or with IDs
     const roomPaths = svgEl.querySelectorAll('path[id]');
 
     roomPaths.forEach(path => {
-        const roomId = path.getAttribute('id') || 'Senza Nome';
-        const rawFill = path.getAttribute('fill') || path.style.fill || '#555';
+        const roomId = path.getAttribute('id') || '';
+        if (!roomId) return;
 
-        // Mousemove tooltip
         path.addEventListener('mouseenter', (e) => {
             if (tooltip) {
                 tooltip.textContent = `📍 ${roomId}`;
                 tooltip.style.display = 'block';
-            }
-            if (inspectName && !selectedRoomElement) {
-                inspectName.textContent = roomId;
-                inspectColor.style.background = rawFill;
-                inspectDetails.textContent = `Colore: ${rawFill}`;
             }
         });
 
@@ -151,62 +138,16 @@ function attachSVGInteractivity(svgEl) {
 
         path.addEventListener('mouseleave', () => {
             if (tooltip) tooltip.style.display = 'none';
-            if (!selectedRoomElement && inspectName) {
-                inspectName.textContent = "Passa sopra una stanza";
-                inspectDetails.textContent = "(Clicca per selezionare)";
-                inspectColor.style.background = "#df3300";
-            }
-        });
-
-        // Click to select
-        path.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (selectedRoomElement) {
-                selectedRoomElement.classList.remove('selected-room');
-            }
-
-            selectedRoomElement = path;
-            path.classList.add('selected-room');
-
-            if (inspectName) inspectName.textContent = `🎯 Stanza Selezionata: ${roomId}`;
-            if (inspectColor) inspectColor.style.background = rawFill;
-            if (inspectDetails) {
-                const bbox = path.getBBox ? path.getBBox() : { width: 0, height: 0 };
-                inspectDetails.textContent = `ID: "${roomId}" | Colore: ${rawFill} | Dim: ${Math.round(bbox.width)}x${Math.round(bbox.height)}mm`;
-            }
         });
     });
-
-    // Click outside to deselect
-    document.addEventListener('click', (e) => {
-        if (selectedRoomElement && !svgEl.contains(e.target)) {
-            selectedRoomElement.classList.remove('selected-room');
-            selectedRoomElement = null;
-            if (inspectName) inspectName.textContent = "Passa sopra una stanza";
-            if (inspectDetails) inspectDetails.textContent = "(Clicca per selezionare)";
-        }
-    });
-
-    if (btnCopyRoom) {
-        btnCopyRoom.addEventListener('click', () => {
-            const nameToCopy = selectedRoomElement ? selectedRoomElement.getAttribute('id') : inspectName.textContent.replace("🎯 Stanza Selezionata: ", "");
-            if (nameToCopy && nameToCopy !== "Passa sopra una stanza") {
-                navigator.clipboard.writeText(nameToCopy);
-                alert(`Copiato negli appunti: "${nameToCopy}"`);
-            } else {
-                alert("Seleziona prima una stanza da copiare!");
-            }
-        });
-    }
 }
 
-// 5. Map Toolbar controls
-function setupMapToolbar(svgEl) {
+// 5. Zoom & Label Controls
+function setupZoomControls(svgEl) {
     const btnZoomIn = document.getElementById('btn-zoom-in');
     const btnZoomOut = document.getElementById('btn-zoom-out');
     const btnZoomReset = document.getElementById('btn-zoom-reset');
     const btnToggleLabels = document.getElementById('btn-toggle-labels');
-    const btnToggleTasks = document.getElementById('btn-toggle-tasks');
 
     function applyZoom() {
         svgEl.style.transform = `scale(${currentScale})`;
@@ -242,51 +183,6 @@ function setupMapToolbar(svgEl) {
             const labelsLayer = svgEl.querySelector('g[inkscape\\:label="Etichette"]') || svgEl.querySelector('#layer1');
             if (labelsLayer) {
                 labelsLayer.style.display = labelsVisible ? 'inline' : 'none';
-            }
-        });
-    }
-
-    // Toggle simulated task pings on map
-    let tasksPingVisible = false;
-    if (btnToggleTasks) {
-        btnToggleTasks.addEventListener('click', () => {
-            tasksPingVisible = !tasksPingVisible;
-            btnToggleTasks.classList.toggle('active', tasksPingVisible);
-            
-            let markersGroup = svgEl.querySelector('#simulated-task-markers');
-            if (tasksPingVisible) {
-                if (!markersGroup) {
-                    markersGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                    markersGroup.setAttribute('id', 'simulated-task-markers');
-
-                    // Sample coordinates for task markers in SVG units
-                    const pingCoords = [
-                        { x: 30, y: 70, label: "Salone" },
-                        { x: 75, y: 55, label: "Musica" },
-                        { x: 195, y: 60, label: "Cucina" },
-                        { x: 160, y: 115, label: "Palco" },
-                        { x: 165, y: 155, label: "Teatro" },
-                        { x: 155, y: 235, label: "Sala Gialla" }
-                    ];
-
-                    pingCoords.forEach(pt => {
-                        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                        circle.setAttribute('cx', pt.x);
-                        circle.setAttribute('cy', pt.y);
-                        circle.setAttribute('r', '3');
-                        circle.setAttribute('fill', '#ffe600');
-                        circle.setAttribute('stroke', '#000');
-                        circle.setAttribute('stroke-width', '0.5');
-                        circle.setAttribute('class', 'task-marker-ping');
-                        circle.innerHTML = `<title>Task: ${pt.label}</title>`;
-                        markersGroup.appendChild(circle);
-                    });
-
-                    svgEl.appendChild(markersGroup);
-                }
-                markersGroup.style.display = 'inline';
-            } else if (markersGroup) {
-                markersGroup.style.display = 'none';
             }
         });
     }
