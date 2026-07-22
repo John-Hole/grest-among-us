@@ -45,6 +45,9 @@ const masterModalClockEl = document.getElementById('master-modal-clock');
 const modalLiveTimerSection = document.getElementById('modal-live-timer-section');
 const modalVotingTimerSection = document.getElementById('modal-voting-timer-section');
 
+const btnTimerPauseCard = document.getElementById('btn-timer-pause-card');
+const btnTimerAddCard = document.getElementById('btn-timer-add-card');
+
 const btnTimerPause = document.getElementById('btn-timer-pause');
 const btnTimerAdd = document.getElementById('btn-timer-add');
 const btnTimerSub = document.getElementById('btn-timer-sub');
@@ -119,6 +122,7 @@ function closeTimerModal() {
 
 if (btnOpenTimerModal) btnOpenTimerModal.addEventListener('click', openTimerModal);
 if (btnOpenTimerModalCard) btnOpenTimerModalCard.addEventListener('click', openTimerModal);
+if (masterLiveClockEl) masterLiveClockEl.addEventListener('click', openTimerModal);
 if (currentTimerPill) currentTimerPill.addEventListener('click', openTimerModal);
 if (btnCloseTimerModal) btnCloseTimerModal.addEventListener('click', closeTimerModal);
 
@@ -538,10 +542,19 @@ function updateUI(state, players) {
     }
 
     if (timerControls) {
-        if (state.game_status === 'waiting') {
+        if (state.game_status === 'waiting' || state.game_status === 'video_playing') {
             timerControls.classList.add('hidden');
         } else {
             timerControls.classList.remove('hidden');
+        }
+    }
+
+    // Show/hide "Gestisci Tempo" button in Azioni Rapide
+    if (btnOpenTimerModal) {
+        if (state.game_status !== 'waiting' && state.game_status !== 'video_playing') {
+            btnOpenTimerModal.classList.remove('hidden');
+        } else {
+            btnOpenTimerModal.classList.add('hidden');
         }
     }
 
@@ -587,6 +600,15 @@ function updateUI(state, players) {
                 btnTimerPause.style.background = "#ea580c";
             }
         }
+        if (btnTimerPauseCard) {
+            if (state.timer_paused) {
+                btnTimerPauseCard.textContent = "▶️ RIPRENDI";
+                btnTimerPauseCard.style.background = "#00c853";
+            } else {
+                btnTimerPauseCard.textContent = "⏸️ PAUSA";
+                btnTimerPauseCard.style.background = "#ea580c";
+            }
+        }
     } 
     else if (state.game_status === 'emergency') {
         btnStartRandom.disabled = true;
@@ -610,65 +632,73 @@ function updateUI(state, players) {
 
 function renderMasterTimer() {
     if (!currentState || !currentState.game_status) {
-        const defaultTxt = "⏳ --:--";
-        if (currentTimerEl) currentTimerEl.textContent = defaultTxt;
-        if (masterLiveClockEl) masterLiveClockEl.textContent = defaultTxt;
-        if (masterModalClockEl) masterModalClockEl.textContent = defaultTxt;
+        if (currentTimerPill) currentTimerPill.classList.add('hidden');
         return;
     }
 
     const status = currentState.game_status;
-    let timerText = "00:00";
+    let headerTimerText = "00:00";
+    let liveClockText = "00:00";
     let modalTimerText = "00:00";
     let timerColor = "#38bdf8";
 
     if (status === 'waiting') {
-        timerText = "⏳ IN ATTESA";
+        if (currentTimerPill) currentTimerPill.classList.add('hidden');
+        liveClockText = "⏳ IN ATTESA";
         modalTimerText = "⏳ IN ATTESA";
         timerColor = "#94a3b8";
     } else if (status === 'video_playing') {
-        timerText = "🎬 VIDEO INTRO";
+        if (currentTimerPill) currentTimerPill.classList.add('hidden');
+        liveClockText = "🎬 VIDEO INTRO";
         modalTimerText = "🎬 VIDEO INTRO";
         timerColor = "#ff9800";
     } else if (status === 'playing') {
+        if (currentTimerPill) currentTimerPill.classList.remove('hidden');
         if (currentState.timer_paused) {
             const remSec = formatTime(currentState.timer_remaining || 0);
-            timerText = `⏸️ PAUSA (${remSec})`;
+            headerTimerText = remSec;
+            liveClockText = `⏸️ PAUSA (${remSec})`;
             modalTimerText = `PAUSA (${remSec})`;
             timerColor = "#f59e0b";
         } else {
             const left = Math.max(0, (currentState.timer || 0) - Date.now());
             const remSec = formatTime(left);
-            timerText = `▶️ ${remSec}`;
+            headerTimerText = remSec;
+            liveClockText = `▶️ ${remSec}`;
             modalTimerText = `▶️ ${remSec}`;
             timerColor = left <= 30000 ? "#ef4444" : "#38bdf8";
         }
     } else if (status === 'emergency') {
-        timerText = "🚨 EMERGENZA";
+        if (currentTimerPill) currentTimerPill.classList.add('hidden');
+        liveClockText = "🚨 EMERGENZA";
         modalTimerText = "🚨 EMERGENZA";
         timerColor = "#ef4444";
     } else if (status === 'discussion') {
-        timerText = "💬 DISCUSSIONE";
+        if (currentTimerPill) currentTimerPill.classList.add('hidden');
+        liveClockText = "💬 DISCUSSIONE";
         modalTimerText = "💬 DISCUSSIONE";
         timerColor = "#ffeb3b";
     } else if (status === 'voting') {
+        if (currentTimerPill) currentTimerPill.classList.remove('hidden');
         const remaining = Math.max(0, (currentState.voting_endtime || 0) - Date.now());
         const sec = Math.ceil(remaining / 1000);
-        timerText = `🗳️ VOTAZIONE: ${sec}s`;
+        headerTimerText = `${sec}s`;
+        liveClockText = `🗳️ VOTAZIONE: ${sec}s`;
         modalTimerText = `🗳️ VOTAZIONE: ${sec}s`;
         timerColor = "#9c27b0";
     } else if (status === 'impostors_win' || status === 'crewmates_win') {
-        timerText = "🏆 FINE PARTITA";
+        if (currentTimerPill) currentTimerPill.classList.add('hidden');
+        liveClockText = "🏆 FINE PARTITA";
         modalTimerText = "🏆 FINE PARTITA";
         timerColor = "#64748b";
     }
 
     if (currentTimerEl) {
-        currentTimerEl.textContent = timerText;
+        currentTimerEl.textContent = headerTimerText;
         currentTimerEl.style.color = timerColor;
     }
     if (masterLiveClockEl) {
-        masterLiveClockEl.textContent = timerText;
+        masterLiveClockEl.textContent = liveClockText;
         masterLiveClockEl.style.color = timerColor;
     }
     if (masterModalClockEl) {
@@ -800,34 +830,36 @@ if (btnSaveTimeCfg) {
 }
 
 // Timer Controls
-if (btnTimerPause) {
-    btnTimerPause.addEventListener('click', async () => {
-        if (currentState.timer_paused) {
-            const newTimer = Date.now() + currentState.timer_remaining;
-            await update(roomRef, {
-                'state/timer_paused': false,
-                'state/timer': newTimer
-            });
-        } else {
-            const remaining = Math.max(0, currentState.timer - Date.now());
-            await update(roomRef, {
-                'state/timer_paused': true,
-                'state/timer_remaining': remaining
-            });
-        }
-    });
-}
+const toggleTimerPauseState = async () => {
+    if (currentState.timer_paused) {
+        const newTimer = Date.now() + currentState.timer_remaining;
+        await update(roomRef, {
+            'state/timer_paused': false,
+            'state/timer': newTimer
+        });
+    } else {
+        const remaining = Math.max(0, currentState.timer - Date.now());
+        await update(roomRef, {
+            'state/timer_paused': true,
+            'state/timer_remaining': remaining
+        });
+    }
+};
 
-if (btnTimerAdd) {
-    btnTimerAdd.addEventListener('click', async () => {
-        if (currentState.timer_paused) {
-            await update(roomRef, { 'state/timer_remaining': (currentState.timer_remaining || 0) + 60000 });
-        } else {
-            await update(roomRef, { 'state/timer': (currentState.timer || Date.now()) + 60000 });
-        }
-        addLog(`⏱️ +1 Minuto aggiunto al tempo di gioco.`);
-    });
-}
+const addOneMinuteToTimer = async () => {
+    if (currentState.timer_paused) {
+        await update(roomRef, { 'state/timer_remaining': (currentState.timer_remaining || 0) + 60000 });
+    } else {
+        await update(roomRef, { 'state/timer': (currentState.timer || Date.now()) + 60000 });
+    }
+    addLog(`⏱️ +1 Minuto aggiunto al tempo di gioco.`);
+};
+
+if (btnTimerPause) btnTimerPause.addEventListener('click', toggleTimerPauseState);
+if (btnTimerPauseCard) btnTimerPauseCard.addEventListener('click', toggleTimerPauseState);
+
+if (btnTimerAdd) btnTimerAdd.addEventListener('click', addOneMinuteToTimer);
+if (btnTimerAddCard) btnTimerAddCard.addEventListener('click', addOneMinuteToTimer);
 
 if (btnTimerSub) {
     btnTimerSub.addEventListener('click', async () => {
