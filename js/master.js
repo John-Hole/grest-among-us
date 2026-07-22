@@ -1,5 +1,5 @@
 import { db } from './firebase-config.js';
-import { ref, get, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+import { ref, get, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
 import { getRandomTasks, ROUND_TIMES } from './game-logic.js';
 
 // Get room code
@@ -63,6 +63,11 @@ function addLog(msg) {
 
 function processPlayerLogs(oldPlayers, newPlayers) {
     if (!oldPlayers) return;
+    for (const name in oldPlayers) {
+        if (!newPlayers[name]) {
+            addLog(`🥾 <span style="color:var(--accent-red);">${name}</span> è stato espulso.`);
+        }
+    }
     for (const name in newPlayers) {
         const oldP = oldPlayers[name];
         const newP = newPlayers[name];
@@ -72,7 +77,7 @@ function processPlayerLogs(oldPlayers, newPlayers) {
             addLog(`💀 <span style="color:var(--accent-red);">${name}</span> è STATO UCCISO.`);
         }
         if (oldP.status === 'alive' && newP.status === 'killed_revealed') {
-            addLog(`🥾 <span style="color:var(--accent-cyan);">${name}</span> è STATO ESPULSO.`);
+            addLog(`🥾 <span style="color:var(--accent-cyan);">${name}</span> è STATO ESPULSO DA VOTAZIONE.`);
         }
 
         // Check tasks
@@ -88,6 +93,8 @@ function processPlayerLogs(oldPlayers, newPlayers) {
 
 function updateMonitor(players) {
     monitorContainer.innerHTML = '';
+    const isGameWaiting = !currentState || !currentState.game_status || currentState.game_status === 'waiting';
+
     for (const name in players) {
         const p = players[name];
         const div = document.createElement('div');
@@ -105,28 +112,59 @@ function updateMonitor(players) {
         };
 
         const statusLabel = p.status === 'alive' ? 'VIVO' : 'MORTO';
-        const color = p.status === 'alive' ? roleColors[p.role] : 'var(--dead-gray)';
+        const color = p.status === 'alive' ? roleColors[p.role || 'crewmate'] : 'var(--dead-gray)';
+        const roleLabel = (p.role || 'crewmate').toUpperCase();
 
         div.innerHTML = `
             <div>
                 <strong style="color: ${color};">${name}</strong> 
-                <span style="font-size: 0.8rem; margin-left: 0.5rem; color:#aaa;">[${p.role.toUpperCase()}]</span>
+                <span style="font-size: 0.8rem; margin-left: 0.5rem; color:#aaa;">[${roleLabel}]</span>
                 <span style="font-size: 0.8rem; margin-left: 0.5rem; color: ${p.status==='alive'?'#fff':'#aaa'};">${statusLabel}</span>
             </div>
         `;
 
-        if (p.status === 'alive') {
-            const btnKill = document.createElement('button');
-            btnKill.textContent = "KILL";
-            btnKill.className = "btn btn-danger";
-            btnKill.style.padding = "0.2rem 0.5rem";
-            btnKill.style.fontSize = "0.8rem";
-            btnKill.onclick = async () => {
-                if(confirm(`Forzare l'uccisione di ${name}?`)) {
-                    await update(roomRef, { [`players/${name}/status`]: 'killed_hidden' });
+        if (isGameWaiting) {
+            // Prima che il gioco parti: mostra tasto ESPELLI
+            const btnKick = document.createElement('button');
+            btnKick.textContent = "ESPELLI";
+            btnKick.className = "btn btn-danger";
+            btnKick.style.padding = "0.2rem 0.5rem";
+            btnKick.style.fontSize = "0.8rem";
+            btnKick.onclick = async () => {
+                if(confirm(`Espellere ${name} dalla stanza?`)) {
+                    await remove(ref(db, `rooms/${roomCode}/players/${name}`));
                 }
             };
-            div.appendChild(btnKill);
+            div.appendChild(btnKick);
+        } else {
+            // Durante la partita:
+            if (p.status === 'alive') {
+                // Giocatore vivo: tasto KILL
+                const btnKill = document.createElement('button');
+                btnKill.textContent = "KILL";
+                btnKill.className = "btn btn-danger";
+                btnKill.style.padding = "0.2rem 0.5rem";
+                btnKill.style.fontSize = "0.8rem";
+                btnKill.onclick = async () => {
+                    if(confirm(`Forzare l'uccisione di ${name}?`)) {
+                        await update(roomRef, { [`players/${name}/status`]: 'killed_hidden' });
+                    }
+                };
+                div.appendChild(btnKill);
+            } else {
+                // Giocatore morto: sostituisci KILL con tasto ESPELLI
+                const btnKick = document.createElement('button');
+                btnKick.textContent = "ESPELLI";
+                btnKick.className = "btn btn-danger";
+                btnKick.style.padding = "0.2rem 0.5rem";
+                btnKick.style.fontSize = "0.8rem";
+                btnKick.onclick = async () => {
+                    if(confirm(`Espellere ${name} dalla partita?`)) {
+                        await remove(ref(db, `rooms/${roomCode}/players/${name}`));
+                    }
+                };
+                div.appendChild(btnKick);
+            }
         }
 
         monitorContainer.appendChild(div);
