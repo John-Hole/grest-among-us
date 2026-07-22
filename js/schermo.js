@@ -241,12 +241,18 @@ function startConnection() {
 
         for (const name in playersData) {
             const pData = playersData[name];
-            if (pData.role !== 'impostor' && pData.role !== 'scientist' && pData.tasks) { 
-                const tasksKeys = Object.keys(pData.tasks);
-                totalTasks += tasksKeys.length;
-                tasksKeys.forEach(key => {
-                    if (pData.tasks[key].completed) completedTasks++;
-                });
+            // Count tasks for all non-impostors (crewmates, scientists, etc.)
+            if (pData.role !== 'impostor' && pData.tasks) { 
+                const tasksObj = pData.tasks;
+                for (const key in tasksObj) {
+                    const task = tasksObj[key];
+                    if (task) {
+                        totalTasks++;
+                        if (task.completed === true || task.completed === "true") {
+                            completedTasks++;
+                        }
+                    }
+                }
             }
         }
 
@@ -354,6 +360,11 @@ function startConnection() {
                 const votes = data.votes || {};
                 const maxPlayers = data.config ? data.config.maxPlayers : null;
 
+                // Real-time taskbar update on any room change
+                updateTaskBar(players);
+
+                const qrCodeBox = document.getElementById('qr-code-container');
+
                 if (status === 'waiting') {
                     if(overlayMeeting) overlayMeeting.classList.add('hidden');
                     if(overlayEjected) overlayEjected.classList.add('hidden');
@@ -361,6 +372,8 @@ function startConnection() {
                     const mainDashboard = document.getElementById('main-dashboard-layout');
                     if (mainDashboard) mainDashboard.classList.remove('hidden');
                     
+                    if (qrCodeBox) qrCodeBox.classList.remove('hidden');
+
                     const taskbar = document.getElementById('taskbar-container');
                     if (taskbar) taskbar.classList.add('hidden');
 
@@ -377,6 +390,8 @@ function startConnection() {
                     const mainDashboard = document.getElementById('main-dashboard-layout');
                     if (mainDashboard) mainDashboard.classList.remove('hidden');
                     
+                    if (qrCodeBox) qrCodeBox.classList.add('hidden');
+
                     const taskbar = document.getElementById('taskbar-container');
                     if (taskbar) taskbar.classList.remove('hidden');
 
@@ -406,8 +421,6 @@ function startConnection() {
                     }
 
                     renderPlayers(players, votes, maxPlayers);
-                    updateTaskBar(players);
-                    
                     updateTimerUI(data.state.timer, data.state.timer_paused, data.state.timer_remaining);
                 }
                 else if (status === 'emergency') {
