@@ -39,9 +39,8 @@
        y="523.25903"
        width="121.04862"
        height="64.828838"
-       id="rect242-9-2" /><pattern id="exterior-stripes" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
-      <rect width="4" height="4" fill="currentColor" opacity="0"/>
-      <line x1="0" y1="0" x2="0" y2="4" stroke="#000000" stroke-width="0.8" stroke-opacity="0.25"/>
+       id="rect242-9-2" /><pattern id="exterior-stripes" patternUnits="userSpaceOnUse" width="5" height="5" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="5" stroke="#000000" stroke-width="1.5" stroke-opacity="0.35"/>
     </pattern>
 </defs><sodipodi:namedview
      id="namedview6"
@@ -262,6 +261,12 @@
        d="m 10.477,142.56 33.208,71.374 22.918,-10.945 -20.767,-47.427 5.7997,-5.1449 2.4566,-0.0936 -0.0034,-17.779 -23.688,0.006 z"
        fill="#f97316"
        style="fill:#f97316;fill-opacity:0.9;stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1" /></g>
+<g id="layer-exterior-overlay" inkscape:label="Esterno Overlay" style="display:inline" transform="translate(50.778168,-9.59724)">
+    <path d="M 30.402,132.55 10.477,142.559 -50.233,9.949 h 25.631 c 0,0 55.004,122.6 55.004,122.6 z" fill="url(#exterior-stripes)" style="fill:url(#exterior-stripes);stroke:none;pointer-events:none;" />
+    <path d="m -10.66,41.141 199.04,-0.06476 0.0274,-31.129 h -213.01 z" fill="url(#exterior-stripes)" style="fill:url(#exterior-stripes);stroke:none;pointer-events:none;" />
+    <path d="m 188.41,9.9477 -0.03,31.12854 12.7876,-0.10395 -0.0935,27.502 7.0267,0.18709 13.273,23.079 16.416,-9.7021 -5e-5,-72.029 z" fill="url(#exterior-stripes)" style="fill:url(#exterior-stripes);stroke:none;pointer-events:none;" />
+    <path d="m 10.477,142.56 33.208,71.374 22.918,-10.945 -20.767,-47.427 5.7997,-5.1449 2.4566,-0.0936 -0.0034,-17.779 -23.688,0.006 z" fill="url(#exterior-stripes)" style="fill:url(#exterior-stripes);stroke:none;pointer-events:none;" />
+</g>
 <g
      inkscape:groupmode="layer"
      id="layer1"
