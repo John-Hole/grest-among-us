@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GREST Among Us - Maxischermo</title>
+    <title>Realmong Us - Maxischermo</title>
     <link rel="stylesheet" href="css/global.css">
     <!-- QR Code Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
-<body class="teatro-body">
+<body class="schermo-body">
     
     <!-- Audio Elements -->
     <audio id="siren-audio" src="audio/siren.mp3" loop preload="auto"></audio>
@@ -45,13 +45,13 @@
         </div>
     </div>
 
-    <!-- Main Dashboard Interface (Teatro Grid) -->
-    <div class="teatro-lobby-container hidden" id="main-dashboard-layout">
+    <!-- Main Dashboard Interface (Schermo Grid) -->
+    <div class="schermo-lobby-container hidden" id="main-dashboard-layout">
         
         <!-- LEFT COLUMN: QR Code & Task List -->
-        <div class="teatro-left-col">
+        <div class="schermo-left-col">
             <!-- QR Code Section -->
-            <div id="qr-code-container" class="teatro-card qr-card">
+            <div id="qr-code-container" class="schermo-card qr-card">
                 <div class="qr-info-header">UNISCITI ALLA STANZA</div>
                 <div id="qrcode" class="qrcode-wrapper"></div>
                 <div class="qr-room-badge">
@@ -62,13 +62,13 @@
             </div>
 
             <!-- Task List Box (Left) -->
-            <div id="left-tasks-container" class="teatro-card left-tasks-card">
-                <div class="teatro-card-header">
+            <div id="left-tasks-container" class="schermo-card left-tasks-card">
+                <div class="schermo-card-header">
                     <span class="header-icon">📋</span>
                     <h2>TASK IN GIOCO</h2>
                 </div>
                 <div id="left-tasks-scroll" class="auto-scroll-box">
-                    <ul id="left-tasks-list" class="teatro-tasks-ul">
+                    <ul id="left-tasks-list" class="schermo-tasks-ul">
                         <!-- Populated by JS -->
                     </ul>
                 </div>
@@ -76,9 +76,9 @@
         </div>
 
         <!-- CENTER COLUMN: Room Code & Map or Center Tasks -->
-        <div class="teatro-center-col">
+        <div class="schermo-center-col">
             <!-- Room Code / Timer Header -->
-            <div class="teatro-card center-header-card">
+            <div class="schermo-card center-header-card">
                 <div id="global-timer" class="game-timer hidden">10:00</div>
                 <div class="room-code-display">
                     <span class="code-title">CODICE STANZA</span>
@@ -87,7 +87,7 @@
             </div>
 
             <!-- Center Main Area: Map or Tasks Table -->
-            <div class="teatro-card center-main-card">
+            <div class="schermo-card center-main-card">
                 <!-- Map View -->
                 <div id="map-view-wrapper" class="map-view-wrapper">
                     <img id="map-image" src="public/assets/mappa.jpg" alt="Mappa della navicella" class="map-img">
@@ -95,7 +95,7 @@
 
                 <!-- Full Center Tasks View (Shown when map is missing / not loaded) -->
                 <div id="text-map-container" class="center-tasks-wrapper hidden">
-                    <div class="teatro-card-header">
+                    <div class="schermo-card-header">
                         <span class="header-icon">📝</span>
                         <h2>ELENCO TASK DISPONIBILI</h2>
                     </div>
@@ -116,7 +116,7 @@
             </div>
 
             <!-- Footer: Task Progress Bar (Shown during game) -->
-            <div id="taskbar-container" class="teatro-card taskbar-card hidden">
+            <div id="taskbar-container" class="schermo-card taskbar-card hidden">
                 <div class="taskbar-info">
                     <span class="taskbar-title">PROGRESSO TASK GLOBALI</span>
                     <span id="task-progress-text" class="taskbar-pct">0%</span>
@@ -128,9 +128,9 @@
         </div>
 
         <!-- RIGHT COLUMN: Players List -->
-        <div class="teatro-right-col">
-            <div class="teatro-card players-card">
-                <div class="teatro-card-header">
+        <div class="schermo-right-col">
+            <div class="schermo-card players-card">
+                <div class="schermo-card-header">
                     <span class="header-icon">👥</span>
                     <h2>GIOCATORI <span id="waiting-players-count" class="players-limit-badge"></span></h2>
                 </div>
@@ -145,7 +145,7 @@
     </div>
 
     <!-- Script as module to use import -->
-    <script type="module" src="js/teatro.js"></script>
+    <script type="module" src="js/schermo.js"></script>
     <script src="js/nav.js"></script>
 </body>
 </html>

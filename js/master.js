@@ -34,7 +34,7 @@ const btnProjector = document.getElementById('btn-projector');
 
 if (btnProjector) {
     btnProjector.addEventListener('click', () => {
-        window.open(`teatro.html?room=${roomCode}`, '_blank');
+        window.open(`schermo.html?room=${roomCode}`, '_blank');
     });
 }
 

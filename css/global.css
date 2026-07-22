@@ -655,7 +655,7 @@ h1, h2, h3 {
     animation: roleReveal 5s ease-in-out forwards;
 }
 
-body.teatro-body {
+body.schermo-body, body.teatro-body {
     padding-top: 0 !important;
     margin: 0 !important;
     overflow: hidden !important;
@@ -664,8 +664,8 @@ body.teatro-body {
     background: #090c12;
 }
 
-/* TEATRO GENERAL SCREEN LOBBY LAYOUT */
-.teatro-lobby-container {
+/* SCHERMO GENERAL SCREEN LOBBY LAYOUT */
+.schermo-lobby-container, .teatro-lobby-container {
     display: grid;
     grid-template-columns: 300px 1fr 280px;
     gap: 1.25rem;
@@ -681,15 +681,15 @@ body.teatro-body {
 }
 
 @media (max-width: 1200px) {
-    .teatro-lobby-container {
+    .schermo-lobby-container, .teatro-lobby-container {
         grid-template-columns: 260px 1fr 250px;
         gap: 1rem;
         padding: 1rem;
     }
 }
 
-/* TEATRO COLUMNS */
-.teatro-left-col, .teatro-right-col {
+/* SCHERMO COLUMNS */
+.schermo-left-col, .schermo-right-col, .teatro-left-col, .teatro-right-col {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
@@ -697,7 +697,7 @@ body.teatro-body {
     overflow: hidden;
 }
 
-.teatro-center-col {
+.schermo-center-col, .teatro-center-col {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
@@ -705,8 +705,8 @@ body.teatro-body {
     overflow: hidden;
 }
 
-/* TEATRO CARD BASE (Clean, modern dark glass aesthetic) */
-.teatro-card {
+/* SCHERMO CARD BASE (Clean, modern dark glass aesthetic) */
+.schermo-card, .teatro-card {
     background: rgba(18, 24, 37, 0.85);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -719,7 +719,7 @@ body.teatro-body {
     position: relative;
 }
 
-.teatro-card-header {
+.schermo-card-header, .teatro-card-header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -728,7 +728,7 @@ body.teatro-body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.teatro-card-header h2 {
+.schermo-card-header h2, .teatro-card-header h2 {
     font-size: 1rem;
     color: #e2e8f0;
     font-weight: 700;
@@ -810,7 +810,7 @@ body.teatro-body {
     flex: 1;
 }
 
-.teatro-tasks-ul {
+.schermo-tasks-ul, .teatro-tasks-ul {
     list-style: none;
     display: flex;
     flex-direction: column;
@@ -819,7 +819,7 @@ body.teatro-body {
 }
 
 /* CLEAN TASK ITEM - REMOVED HEAVY NEON CYAN BORDER */
-.teatro-task-item {
+.schermo-task-item, .teatro-task-item {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 10px;
@@ -830,7 +830,7 @@ body.teatro-body {
     transition: background 0.2s, border-color 0.2s;
 }
 
-.teatro-task-item:hover {
+.schermo-task-item:hover, .teatro-task-item:hover {
     background: rgba(255, 255, 255, 0.06);
     border-color: rgba(255, 255, 255, 0.12);
 }

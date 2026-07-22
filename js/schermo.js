@@ -202,7 +202,7 @@ function startConnection() {
         if (leftTaskList) {
             tasksArray.forEach(t => {
                 const li = document.createElement('li');
-                li.className = 'teatro-task-item';
+                li.className = 'schermo-task-item';
                 li.innerHTML = `
                     <span class="task-num">#${t.num}</span>
                     <div class="task-info">
@@ -332,7 +332,7 @@ function startConnection() {
                 const qrContainer = document.getElementById("qrcode");
                 if (qrContainer) {
                     qrContainer.innerHTML = '';
-                    const joinUrl = `${window.location.origin}${window.location.pathname.replace('teatro.html', 'index.html')}?room=${roomCode}`;
+                    const joinUrl = `${window.location.origin}${window.location.pathname.replace('schermo.html', 'index.html')}?room=${roomCode}`;
                     new QRCode(qrContainer, {
                         text: joinUrl,
                         width: 150,

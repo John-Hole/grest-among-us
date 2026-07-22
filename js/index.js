@@ -63,7 +63,7 @@ let userTemplates = {};
 
 // Default Templates
 const baseTemplate = {
-    name: "Standard Grest",
+    name: "Standard Realmong",
     impostorCount: 3,
     killCooldown: 120,
     maxMeetings: 1,
@@ -592,7 +592,7 @@ btnJoinRoom.addEventListener('click', async () => {
             meetings_called: 0
         });
 
-        window.location.href = `animatore.html?room=${code}&player=${encodeURIComponent(name)}`;
+        window.location.href = `giocatore.html?room=${code}&player=${encodeURIComponent(name)}`;
     } catch (error) {
         alert("Errore di connessione: " + error.message);
     }
