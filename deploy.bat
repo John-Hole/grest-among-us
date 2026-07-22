@@ -9,21 +9,17 @@ echo 1. Aggiunta file modificati...
 git add .
 
 echo.
-set /p msg="2. Inserisci una descrizione delle modifiche (oppure premi INVIO): "
-if "%msg%"=="" set msg=Aggiornamento automatico del %date% %time%
+echo 2. Creazione commit automatico con data e ora...
+git commit -m "Deploy %date% %time%"
 
 echo.
-echo 3. Creazione commit...
-git commit -m "%msg%"
-
-echo.
-echo 4. Invio modifiche su GitHub (push)...
+echo 3. Invio modifiche su GitHub (push)...
 git push origin main
 
 echo.
 echo =============================================
-echo    DEPLOY COMPLETATO! Vercel aggiornera la
-echo    pagina online tra pochi secondi.
+echo    DEPLOY COMPLETATO CON SUCCESSO!
+echo    Vercel aggiornera il sito tra pochi secondi.
 echo =============================================
 echo.
-pause
+timeout /t 3
