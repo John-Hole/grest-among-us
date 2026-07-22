@@ -711,25 +711,39 @@ h1, h2, h3 {
     animation: roleReveal 5s ease-in-out forwards;
 }
 
+/* TEATRO BODY SPECIFIC FIXES */
+body.teatro-body {
+    padding-top: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    height: 100vh;
+    width: 100vw;
+    background: #090c12;
+}
+
+body.teatro-body .top-navbar {
+    display: none !important;
+}
+
 /* TEATRO GENERAL SCREEN LOBBY LAYOUT */
 .teatro-lobby-container {
     display: grid;
-    grid-template-columns: 320px 1fr 320px;
+    grid-template-columns: 300px 1fr 280px;
     gap: 1.25rem;
     padding: 1.25rem;
     height: 100vh;
     width: 100vw;
     box-sizing: border-box;
-    background: #08090c;
-    background-image: radial-gradient(circle at 50% 30%, #171d27 0%, #06070a 100%);
-    color: white;
+    background: #090c12;
+    background-image: radial-gradient(circle at 50% 30%, #141923 0%, #07090e 100%);
+    color: #e2e8f0;
     font-family: var(--font-ui);
     overflow: hidden;
 }
 
 @media (max-width: 1200px) {
     .teatro-lobby-container {
-        grid-template-columns: 260px 1fr 260px;
+        grid-template-columns: 260px 1fr 250px;
         gap: 1rem;
         padding: 1rem;
     }
@@ -752,14 +766,14 @@ h1, h2, h3 {
     overflow: hidden;
 }
 
-/* TEATRO CARD BASE */
+/* TEATRO CARD BASE (Clean, modern dark glass aesthetic) */
 .teatro-card {
-    background: rgba(26, 34, 46, 0.85);
+    background: rgba(18, 24, 37, 0.85);
     backdrop-filter: blur(12px);
-    border: 2px solid rgba(0, 229, 255, 0.25);
-    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
     padding: 1rem;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.03);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -772,18 +786,19 @@ h1, h2, h3 {
     gap: 0.5rem;
     margin-bottom: 0.8rem;
     padding-bottom: 0.6rem;
-    border-bottom: 2px solid rgba(0, 229, 255, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .teatro-card-header h2 {
-    font-size: 1.1rem;
-    color: var(--accent-cyan);
-    letter-spacing: 1px;
+    font-size: 1rem;
+    color: #e2e8f0;
+    font-weight: 700;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
 }
 
 .header-icon {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
 }
 
 /* QR CODE CARD */
@@ -791,15 +806,14 @@ h1, h2, h3 {
     align-items: center;
     text-align: center;
     flex-shrink: 0;
-    background: rgba(20, 27, 38, 0.95);
-    border-color: var(--accent-cyan);
+    background: rgba(18, 24, 37, 0.95);
     padding: 1.2rem 1rem;
 }
 
 .qr-info-header {
-    font-size: 0.85rem;
-    font-weight: 800;
-    color: var(--accent-cyan);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #94a3b8;
     letter-spacing: 1px;
     margin-bottom: 0.8rem;
     text-transform: uppercase;
@@ -809,7 +823,7 @@ h1, h2, h3 {
     background: #ffffff;
     padding: 10px;
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -826,30 +840,30 @@ h1, h2, h3 {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: #0f1722;
+    background: rgba(255, 255, 255, 0.05);
     padding: 0.4rem 1rem;
     border-radius: 20px;
-    border: 1px solid rgba(0, 229, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     margin-bottom: 0.4rem;
 }
 
 .qr-label {
     font-size: 0.8rem;
-    color: #aaa;
+    color: #94a3b8;
     font-weight: 600;
 }
 
 .qr-code-text {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 800;
-    color: var(--accent-red);
+    color: #ff5252;
     letter-spacing: 2px;
     font-family: var(--font-ui);
 }
 
 .qr-subtext {
     font-size: 0.8rem;
-    color: #999;
+    color: #64748b;
 }
 
 /* LEFT TASKS CARD */
@@ -865,31 +879,33 @@ h1, h2, h3 {
     padding: 0.2rem;
 }
 
+/* CLEAN TASK ITEM - REMOVED HEAVY NEON CYAN BORDER */
 .teatro-task-item {
-    background: rgba(15, 23, 34, 0.7);
-    border: 1px solid rgba(0, 229, 255, 0.15);
-    border-left: 4px solid var(--accent-cyan);
-    border-radius: 8px;
-    padding: 0.6rem 0.8rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 0.65rem 0.85rem;
     display: flex;
     align-items: flex-start;
-    gap: 0.6rem;
-    transition: background 0.2s;
+    gap: 0.7rem;
+    transition: background 0.2s, border-color 0.2s;
 }
 
 .teatro-task-item:hover {
-    background: rgba(0, 229, 255, 0.08);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
 }
 
 .task-num {
-    background: var(--accent-cyan);
-    color: #000;
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
     font-weight: 800;
     font-size: 0.75rem;
-    padding: 2px 6px;
-    border-radius: 4px;
+    padding: 3px 7px;
+    border-radius: 6px;
     flex-shrink: 0;
-    margin-top: 2px;
+    margin-top: 1px;
+    border: 1px solid rgba(56, 189, 248, 0.25);
 }
 
 .task-info {
@@ -901,19 +917,20 @@ h1, h2, h3 {
 .task-title {
     font-weight: 700;
     font-size: 0.9rem;
-    color: #fff;
+    color: #f1f5f9;
 }
 
 .task-desc {
     font-size: 0.8rem;
-    color: #bbb;
-    line-height: 1.2;
+    color: #94a3b8;
+    line-height: 1.3;
 }
 
 .task-location {
     font-size: 0.75rem;
-    color: var(--accent-cyan);
-    margin-top: 2px;
+    color: #38bdf8;
+    margin-top: 3px;
+    font-weight: 600;
 }
 
 /* CENTER HEADER CARD */
@@ -922,8 +939,8 @@ h1, h2, h3 {
     text-align: center;
     align-items: center;
     justify-content: center;
-    padding: 0.8rem 1.5rem;
-    background: rgba(15, 23, 34, 0.9);
+    padding: 0.7rem 1.5rem;
+    background: rgba(18, 24, 37, 0.9);
 }
 
 .room-code-display {
@@ -934,22 +951,21 @@ h1, h2, h3 {
 }
 
 .code-title {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: #8899aa;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #94a3b8;
     letter-spacing: 2px;
 }
 
 .code-val {
-    font-size: 2.2rem;
+    font-size: 2rem;
     font-weight: 800;
-    color: var(--accent-cyan);
+    color: #38bdf8;
     letter-spacing: 4px;
-    text-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
-    background: rgba(0, 229, 255, 0.1);
+    background: rgba(56, 189, 248, 0.1);
     padding: 0.2rem 1.2rem;
-    border-radius: 12px;
-    border: 2px solid var(--accent-cyan);
+    border-radius: 10px;
+    border: 1px solid rgba(56, 189, 248, 0.3);
 }
 
 .game-timer {
@@ -985,8 +1001,8 @@ h1, h2, h3 {
     max-height: 100%;
     object-fit: contain;
     border-radius: 12px;
-    border: 2px solid rgba(0, 229, 255, 0.3);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
 }
 
 /* CENTER TASKS TABLE VIEW */
@@ -1005,11 +1021,11 @@ h1, h2, h3 {
 }
 
 .center-tasks-table th {
-    background: rgba(0, 229, 255, 0.15);
-    color: var(--accent-cyan);
+    background: rgba(56, 189, 248, 0.1);
+    color: #38bdf8;
     padding: 0.8rem 1rem;
-    font-weight: 800;
-    border-bottom: 2px solid var(--accent-cyan);
+    font-weight: 700;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.3);
     position: sticky;
     top: 0;
     z-index: 2;
@@ -1017,7 +1033,7 @@ h1, h2, h3 {
 
 .center-tasks-table td {
     padding: 0.8rem 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .center-tasks-table tr:nth-child(even) {
@@ -1026,7 +1042,7 @@ h1, h2, h3 {
 
 .task-td-num {
     font-weight: 800;
-    color: var(--accent-cyan);
+    color: #38bdf8;
     width: 50px;
 }
 
@@ -1037,18 +1053,18 @@ h1, h2, h3 {
 }
 
 .task-td-obj {
-    color: #ccc;
+    color: #cbd5e1;
 }
 
 .task-td-pos {
-    color: var(--accent-cyan);
+    color: #38bdf8;
     width: 25%;
 }
 
 /* TASK PROGRESS BAR (IN GAME) */
 .taskbar-card {
     flex-shrink: 0;
-    background: rgba(15, 23, 34, 0.9);
+    background: rgba(18, 24, 37, 0.9);
     padding: 0.8rem 1.2rem;
 }
 
@@ -1061,8 +1077,8 @@ h1, h2, h3 {
 
 .taskbar-title {
     font-size: 0.85rem;
-    font-weight: 800;
-    color: var(--accent-cyan);
+    font-weight: 700;
+    color: #94a3b8;
     letter-spacing: 1px;
 }
 
@@ -1078,9 +1094,10 @@ h1, h2, h3 {
 }
 
 .players-limit-badge {
-    font-size: 0.9rem;
-    color: #aaa;
+    font-size: 0.85rem;
+    color: #94a3b8;
     margin-left: 0.4rem;
+    font-weight: 600;
 }
 
 .players-grid-list {
@@ -1090,55 +1107,54 @@ h1, h2, h3 {
     padding: 0.2rem;
 }
 
+/* CLEAN PLAYER CARD - REMOVED THICK SIDE BORDER */
 .player-card {
-    background: rgba(15, 23, 34, 0.7);
-    border: 1px solid rgba(0, 229, 255, 0.15);
-    border-left: 4px solid var(--accent-blue);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 10px;
-    padding: 0.7rem 0.9rem;
+    padding: 0.65rem 0.85rem;
     display: flex;
     align-items: center;
     gap: 0.8rem;
-    font-weight: 700;
-    font-size: 1rem;
+    font-weight: 600;
+    font-size: 0.95rem;
 }
 
 .player-avatar {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
 }
 
 .player-name {
     flex: 1;
     word-break: break-word;
-    color: #fff;
+    color: #f1f5f9;
 }
 
 .player-card.dead {
-    border-left-color: var(--accent-red);
-    opacity: 0.6;
+    opacity: 0.5;
 }
 
 .player-card.dead .player-name {
     text-decoration: line-through;
-    color: #888;
+    color: #64748b;
 }
 
 .player-status {
     font-size: 0.75rem;
     padding: 2px 8px;
     border-radius: 10px;
-    font-weight: 800;
+    font-weight: 700;
 }
 
 .voted-badge {
-    background: rgba(0, 230, 118, 0.2);
+    background: rgba(0, 230, 118, 0.15);
     color: var(--accent-green);
-    border: 1px solid var(--accent-green);
+    border: 1px solid rgba(0, 230, 118, 0.3);
 }
 
 .waiting-badge {
-    background: rgba(255, 255, 255, 0.1);
-    color: #aaa;
+    background: rgba(255, 255, 255, 0.06);
+    color: #94a3b8;
 }
 
 .dead-icon {

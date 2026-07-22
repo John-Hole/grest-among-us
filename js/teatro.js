@@ -62,7 +62,7 @@ function startConnection() {
     let timerInterval = null;
     let currentTimerEndTime = 0;
 
-    // Helper: Auto-Scroll overflow containers smoothly
+    // Helper: Auto-Scroll overflow containers smoothly (Slow, readable pace)
     function setupAutoScroll(container) {
         if (!container) return;
         
@@ -73,8 +73,8 @@ function startConnection() {
         
         let scrollPos = container.scrollTop;
         let direction = 1;
-        let pauseFrames = 90; // Pause at top
-        const speed = 0.5;
+        let pauseFrames = 240; // 4 seconds initial pause at top
+        const speed = 0.15;   // Very slow, smooth crawl (easy to read on projector)
         
         function autoScrollLoop() {
             const maxScroll = container.scrollHeight - container.clientHeight;
@@ -87,11 +87,11 @@ function startConnection() {
                     if (scrollPos >= maxScroll) {
                         scrollPos = maxScroll;
                         direction = -1;
-                        pauseFrames = 120; // 2 sec pause at bottom
+                        pauseFrames = 240; // 4 seconds pause at bottom
                     } else if (scrollPos <= 0) {
                         scrollPos = 0;
                         direction = 1;
-                        pauseFrames = 120; // 2 sec pause at top
+                        pauseFrames = 240; // 4 seconds pause at top
                     }
                     container.scrollTop = scrollPos;
                 }
