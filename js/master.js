@@ -108,12 +108,7 @@ function updateMonitor(players) {
     for (const name in players) {
         const p = players[name];
         const div = document.createElement('div');
-        div.style.display = 'flex';
-        div.style.justifyContent = 'space-between';
-        div.style.alignItems = 'center';
-        div.style.background = '#333';
-        div.style.padding = '0.5rem';
-        div.style.borderRadius = '4px';
+        div.className = 'master-player-row';
 
         const roleColors = {
             'impostor': 'var(--accent-red)',
@@ -126,10 +121,10 @@ function updateMonitor(players) {
         const roleLabel = (p.role || 'crewmate').toUpperCase();
 
         div.innerHTML = `
-            <div>
-                <strong style="color: ${color};">${name}</strong> 
-                <span style="font-size: 0.8rem; margin-left: 0.5rem; color:#aaa;">[${roleLabel}]</span>
-                <span style="font-size: 0.8rem; margin-left: 0.5rem; color: ${p.status==='alive'?'#fff':'#aaa'};">${statusLabel}</span>
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <strong style="color: ${color}; font-size: 0.95rem;">${name}</strong> 
+                <span style="font-size: 0.75rem; padding: 2px 7px; border-radius: 6px; background: rgba(255,255,255,0.06); color:#94a3b8; font-weight: 600;">${roleLabel}</span>
+                <span style="font-size: 0.75rem; padding: 2px 7px; border-radius: 6px; background: ${p.status==='alive'?'rgba(0,230,118,0.15)':'rgba(255,255,255,0.05)'}; color: ${p.status==='alive'?'var(--accent-green)':'#64748b'}; font-weight: 700;">${statusLabel}</span>
             </div>
         `;
 
@@ -138,8 +133,8 @@ function updateMonitor(players) {
             const btnKick = document.createElement('button');
             btnKick.textContent = "ESPELLI";
             btnKick.className = "btn btn-danger";
-            btnKick.style.padding = "0.2rem 0.5rem";
-            btnKick.style.fontSize = "0.8rem";
+            btnKick.style.padding = "0.3rem 0.7rem";
+            btnKick.style.fontSize = "0.75rem";
             btnKick.onclick = async () => {
                 if(confirm(`Espellere ${name} dalla stanza?`)) {
                     await update(roomRef, {
@@ -157,8 +152,8 @@ function updateMonitor(players) {
                 const btnKill = document.createElement('button');
                 btnKill.textContent = "KILL";
                 btnKill.className = "btn btn-danger";
-                btnKill.style.padding = "0.2rem 0.5rem";
-                btnKill.style.fontSize = "0.8rem";
+                btnKill.style.padding = "0.3rem 0.7rem";
+                btnKill.style.fontSize = "0.75rem";
                 btnKill.onclick = async () => {
                     if(confirm(`Forzare l'uccisione di ${name}?`)) {
                         await update(roomRef, { [`players/${name}/status`]: 'killed_hidden' });
@@ -170,8 +165,8 @@ function updateMonitor(players) {
                 const btnKick = document.createElement('button');
                 btnKick.textContent = "ESPELLI";
                 btnKick.className = "btn btn-danger";
-                btnKick.style.padding = "0.2rem 0.5rem";
-                btnKick.style.fontSize = "0.8rem";
+                btnKick.style.padding = "0.3rem 0.7rem";
+                btnKick.style.fontSize = "0.75rem";
                 btnKick.onclick = async () => {
                     if(confirm(`Espellere ${name} dalla partita?`)) {
                         await update(roomRef, {
@@ -210,24 +205,19 @@ function updateKickedSection(kickedMap) {
     kickedListContainer.innerHTML = '';
     kickedNames.forEach(name => {
         const div = document.createElement('div');
-        div.style.display = 'flex';
-        div.style.justifyContent = 'space-between';
-        div.style.alignItems = 'center';
-        div.style.background = '#252525';
-        div.style.padding = '0.4rem 0.6rem';
-        div.style.borderRadius = '6px';
+        div.className = 'master-kicked-row';
 
         div.innerHTML = `
-            <strong style="color: #ff8a80; font-size: 0.9rem;">${name}</strong>
+            <strong style="color: #f87171; font-size: 0.9rem;">${name}</strong>
         `;
 
         const btnReadmit = document.createElement('button');
         btnReadmit.textContent = "RIAMMETTI";
         btnReadmit.className = "btn";
-        btnReadmit.style.background = "#4caf50";
+        btnReadmit.style.background = "#16a34a";
         btnReadmit.style.color = "white";
-        btnReadmit.style.padding = "0.2rem 0.6rem";
-        btnReadmit.style.fontSize = "0.8rem";
+        btnReadmit.style.padding = "0.3rem 0.7rem";
+        btnReadmit.style.fontSize = "0.75rem";
         btnReadmit.style.cursor = "pointer";
         btnReadmit.onclick = async () => {
             if (confirm(`Riammettere ${name} nella stanza?`)) {

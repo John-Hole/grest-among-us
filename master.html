@@ -5,135 +5,140 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Realmong Us - Pannello Master</title>
     <link rel="stylesheet" href="css/global.css">
-    <style>
-        body {
-            overflow-x: hidden;
-        }
-        .master-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 1rem;
-            width: 100%;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        .dashboard-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            box-sizing: border-box;
-            width: 100%;
-        }
-        .dashboard-card h2 {
-            font-size: 1.2rem;
-            color: var(--accent-cyan);
-            margin-bottom: 1rem;
-            border-bottom: 2px solid rgba(0, 229, 255, 0.2);
-            padding-bottom: 0.5rem;
-        }
-        .controls-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        @media (max-width: 600px) {
-            .controls-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        .status-badge {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            background: var(--dead-gray);
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-        .danger-zone {
-            border-top: 2px solid var(--accent-red);
-            padding-top: 1rem;
-            margin-top: 1rem;
-        }
-    </style>
 </head>
 <body>
-    <div class="master-container">
-        <h1 style="margin-bottom: 0.5rem; color: var(--accent-cyan); font-size: clamp(1.5rem, 5vw, 2.5rem); text-align: center;">PANNELLO MASTER</h1>
+    <div class="master-layout-container">
         
-        <!-- Info Card -->
-        <div class="dashboard-card">
-            <h2>Informazioni Partita</h2>
-            <div style="margin-bottom: 0.5rem;">Stato Attuale: <span id="current-status" class="status-badge">Caricamento...</span></div>
-            <div>Round: <strong id="current-round" style="color: var(--accent-green); font-size: 1.2rem;">1</strong></div>
-        </div>
-
-        <!-- Actions Card -->
-        <div class="dashboard-card">
-            <h2>Azioni Rapide</h2>
-            <button id="btn-projector" class="btn" style="width: 100%; margin-bottom: 1rem; background: var(--accent-cyan); color: black;">VAI ALLA SCHERMATA GENERALE (PROIETTORE)</button>
-            <div class="controls-grid">
-                <button id="btn-start" class="btn hidden">Avvia Gioco</button>
-                <button id="btn-start-random" class="btn" style="background-color: #3f51b5;">Nuova Partita Casuale</button>
-                <button id="btn-call-meeting" class="btn" style="background-color: #ff9800;">Chiama Emergenza</button>
-                <button id="btn-start-discussion" class="btn hidden" style="background-color: #ffeb3b; color: black;">Inizia Discussione</button>
-                <button id="btn-start-voting" class="btn hidden" style="background-color: #9c27b0;">Inizio Votazioni (60s)</button>
+        <!-- HEADER BANNER -->
+        <div class="master-header-banner">
+            <div class="master-header-title">
+                <span style="font-size: 1.8rem;">⚙️</span>
+                <h1 style="margin: 0;">PANNELLO MASTER</h1>
             </div>
             
-            <div id="voting-section" class="hidden" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #444;">
-                <p style="margin-bottom: 1rem; font-size: 0.9rem; color: #ccc;">Termina anticipatamente la riunione forzando il calcolo sui voti parziali.</p>
-                <button id="btn-end-meeting" class="btn btn-danger" style="width: 100%;">Termina Votazione</button>
+            <div class="master-header-metrics">
+                <div class="master-round-pill">ROUND <strong id="current-round">1</strong></div>
+                <div class="master-status-pill">STATO: <span id="current-status" style="margin-left: 0.3rem;">Caricamento...</span></div>
             </div>
         </div>
 
-        <!-- Timer Controls Card -->
-        <div id="timer-controls" class="dashboard-card hidden">
-            <h2>Gestione Timer</h2>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button id="btn-timer-pause" class="btn" style="flex:2; min-width: 120px;">Pausa / Riprendi</button>
-                <button id="btn-timer-add" class="btn" style="flex:1; background: #4caf50; min-width: 80px;">+ 1 Min</button>
-            </div>
-        </div>
-
-        <!-- Monitor & Logs Wrapper -->
-        <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
-            <!-- Monitor -->
-            <div class="dashboard-card" style="flex: 1; min-width: 300px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(0, 229, 255, 0.2); margin-bottom: 1rem; padding-bottom: 0.5rem;">
-                    <h2 style="color: #ffeb3b; margin: 0; border: none; padding: 0;">Monitor Giocatori</h2>
-                    <button id="btn-toggle-kicked" class="btn hidden" style="background: #e53935; color: white; padding: 0.3rem 0.8rem; font-size: 0.85rem; border-radius: 12px; font-weight: bold; cursor: pointer;">
-                        Espulsi: <span id="kicked-count">0</span>
+        <!-- MAIN DASHBOARD GRID -->
+        <div class="master-grid">
+            
+            <!-- LEFT COLUMN: Quick Actions & Timer Controls -->
+            <div class="master-left-col">
+                
+                <!-- Projector Shortcut Card -->
+                <div class="glass-card">
+                    <div class="glass-card-header">
+                        <div class="glass-card-header-left">
+                            <span class="header-icon">📺</span>
+                            <h2>PROIETTORE SCHERMO</h2>
+                        </div>
+                    </div>
+                    <button id="btn-projector" class="btn-projector-banner">
+                        <span>VAI ALLA SCHERMATA GENERALE</span>
                     </button>
                 </div>
 
-                <!-- Kicked list panel -->
-                <div id="kicked-section" class="hidden" style="background: #1a1a1a; padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #e53935;">
-                    <h3 style="color: #ff5252; font-size: 0.95rem; margin-top: 0; margin-bottom: 0.5rem;">Giocatori Espulsi</h3>
-                    <div id="kicked-list-container" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <!-- Quick Actions Card -->
+                <div class="glass-card">
+                    <div class="glass-card-header">
+                        <div class="glass-card-header-left">
+                            <span class="header-icon">⚡</span>
+                            <h2>AZIONI RAPIDE PARTITA</h2>
+                        </div>
+                    </div>
+                    
+                    <div class="master-controls-grid">
+                        <button id="btn-start" class="btn hidden">Avvia Gioco</button>
+                        <button id="btn-start-random" class="btn btn-master-action" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white;">Avvia Partita</button>
+                        <button id="btn-call-meeting" class="btn btn-master-action" style="background: linear-gradient(135deg, #ea580c, #c2410c); color: white;">Chiama Emergenza</button>
+                        <button id="btn-start-discussion" class="btn btn-master-action hidden" style="background: linear-gradient(135deg, #eab308, #ca8a04); color: black;">Inizia Discussione</button>
+                        <button id="btn-start-voting" class="btn btn-master-action hidden" style="background: linear-gradient(135deg, #9333ea, #7e22ce); color: white;">Inizio Votazioni (60s)</button>
+                    </div>
+
+                    <!-- Voting Override Section -->
+                    <div id="voting-section" class="hidden" style="margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                        <p style="margin-bottom: 0.8rem; font-size: 0.85rem; color: #94a3b8;">Termina anticipatamente la riunione forzando il calcolo sui voti parziali.</p>
+                        <button id="btn-end-meeting" class="btn btn-danger" style="width: 100%; font-weight: 700;">Termina Votazione</button>
+                    </div>
+                </div>
+
+                <!-- Timer Controls Card -->
+                <div id="timer-controls" class="glass-card hidden">
+                    <div class="glass-card-header">
+                        <div class="glass-card-header-left">
+                            <span class="header-icon">⏱️</span>
+                            <h2>GESTIONE TIMER</h2>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
+                        <button id="btn-timer-pause" class="btn" style="flex:2; min-width: 130px; background: #ea580c; color: white;">Pausa / Riprendi</button>
+                        <button id="btn-timer-add" class="btn" style="flex:1; background: #16a34a; color: white; min-width: 90px;">+ 1 Min</button>
+                    </div>
+                </div>
+
+                <!-- Danger Zone Card -->
+                <div class="glass-card danger-zone-card">
+                    <div class="glass-card-header">
+                        <div class="glass-card-header-left">
+                            <span class="header-icon">⚠️</span>
+                            <h2>ZONA PERICOLO</h2>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #f87171; margin-bottom: 1rem; line-height: 1.4;">
+                        Ripristina la stanza allo stato iniziale di attesa. Tutti i progressi di partita verranno azzerati.
+                    </p>
+                    <button id="btn-reset" class="btn btn-danger" style="width: 100%;">Azzera Tutto (Torna in attesa)</button>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Player Monitor & Event Logs -->
+            <div class="master-right-col">
+                
+                <!-- Player Monitor Card -->
+                <div class="glass-card" style="display: flex; flex-direction: column;">
+                    <div class="glass-card-header">
+                        <div class="glass-card-header-left">
+                            <span class="header-icon">👥</span>
+                            <h2>MONITOR GIOCATORI</h2>
+                        </div>
+                        <button id="btn-toggle-kicked" class="btn hidden" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; padding: 0.3rem 0.8rem; font-size: 0.8rem; border-radius: 50px; font-weight: bold; cursor: pointer;">
+                            Espulsi: <span id="kicked-count">0</span>
+                        </button>
+                    </div>
+
+                    <!-- Kicked List Panel -->
+                    <div id="kicked-section" class="hidden" style="background: rgba(239, 68, 68, 0.05); padding: 0.8rem; border-radius: 12px; margin-bottom: 1rem; border: 1px solid rgba(239, 68, 68, 0.3);">
+                        <h3 style="color: #ef4444; font-size: 0.9rem; margin-top: 0; margin-bottom: 0.6rem; font-weight: 700; text-transform: uppercase;">Giocatori Espulsi</h3>
+                        <div id="kicked-list-container" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Live Players Container -->
+                    <div id="monitor-container" class="auto-scroll-box" style="display: flex; flex-direction: column; gap: 0.6rem; max-height: 420px; overflow-y: auto; padding-right: 2px;">
                         <!-- Populated by JS -->
                     </div>
                 </div>
 
-                <div id="monitor-container" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 400px; overflow-y: auto;">
-                    <!-- Populated by JS -->
+                <!-- Event Logs Card -->
+                <div class="glass-card">
+                    <div class="glass-card-header">
+                        <div class="glass-card-header-left">
+                            <span class="header-icon">📜</span>
+                            <h2>LOG EVENTI DI GIOCO</h2>
+                        </div>
+                    </div>
+                    <div id="log-container" class="auto-scroll-box" style="max-height: 220px; overflow-y: auto;">
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
+
             </div>
 
-            <!-- Logs -->
-            <div class="dashboard-card" style="flex: 1; min-width: 300px;">
-                <h2 style="color: var(--accent-cyan);">Log Eventi</h2>
-                <div id="log-container" style="background: black; padding: 1rem; border-radius: 8px; max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; border: 1px solid #333; line-height: 1.4;">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-        </div>
-        
-        <!-- Danger Zone -->
-        <div class="dashboard-card danger-zone">
-            <h2 style="color: var(--accent-red); border-bottom-color: rgba(255, 75, 75, 0.2);">Zona Pericolo</h2>
-            <button id="btn-reset" class="btn btn-danger" style="width: 100%;">Azzera Tutto (Torna in attesa)</button>
         </div>
     </div>
 
