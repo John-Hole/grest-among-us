@@ -59,6 +59,9 @@ function startConnection() {
     const lobbyCodeDisplay = document.getElementById('waiting-room-code');
     if (lobbyCodeDisplay) lobbyCodeDisplay.textContent = roomCode;
     
+    // Load default SVG Map of Oratorio
+    loadSVGMap();
+    
     // Elements
     const overlayMeeting = document.getElementById('overlay-meeting');
     const overlayText = document.getElementById('overlay-text');
@@ -269,6 +272,30 @@ function startConnection() {
         }
     }
 
+    async function loadSVGMap() {
+        const svgContainer = document.getElementById('svg-map-container');
+        if (!svgContainer) return;
+
+        try {
+            const response = await fetch('public/assets/MappaOratotorio.svg');
+            if (!response.ok) throw new Error("HTTP error " + response.status);
+            const svgText = await response.text();
+            svgContainer.innerHTML = svgText;
+            const svgEl = svgContainer.querySelector('svg');
+            if (svgEl) {
+                svgEl.setAttribute('width', '100%');
+                svgEl.setAttribute('height', '100%');
+                svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+            }
+            if (mapViewWrapper) mapViewWrapper.classList.remove('hidden');
+            if (textMapContainer) textMapContainer.classList.add('hidden');
+        } catch (err) {
+            console.error("Errore caricamento MappaOratotorio.svg:", err);
+            if (mapViewWrapper) mapViewWrapper.classList.add('hidden');
+            if (textMapContainer) textMapContainer.classList.remove('hidden');
+        }
+    }
+
     async function renderMapConfig(config) {
         if (!config) return;
         
@@ -278,25 +305,21 @@ function startConnection() {
             if (mapViewWrapper) mapViewWrapper.classList.add('hidden');
             if (textMapContainer) textMapContainer.classList.remove('hidden');
         } else {
-            // Photo mode: try loading map image
+            // Check if user uploaded a custom map image in Firebase
             const imgSnapshot = await get(ref(db, `images/${roomCode}`));
-            let imgSrc = "public/assets/mappa.jpg";
+            const svgContainer = document.getElementById('svg-map-container');
+
             if (imgSnapshot.exists() && imgSnapshot.val()) {
-                imgSrc = imgSnapshot.val();
-            }
-            
-            mapImage.onload = () => {
+                const imgSrc = imgSnapshot.val();
+                if (svgContainer) {
+                    svgContainer.innerHTML = `<img id="map-image" src="${imgSrc}" alt="Mappa Stanza" class="map-img">`;
+                }
                 if (mapViewWrapper) mapViewWrapper.classList.remove('hidden');
                 if (textMapContainer) textMapContainer.classList.add('hidden');
-            };
-            
-            mapImage.onerror = () => {
-                console.log("Mappa non caricata o non presente: mostra task nello spazio centrale.");
-                if (mapViewWrapper) mapViewWrapper.classList.add('hidden');
-                if (textMapContainer) textMapContainer.classList.remove('hidden');
-            };
-
-            mapImage.src = imgSrc;
+            } else {
+                // Default: load SVG map of Oratorio
+                await loadSVGMap();
+            }
         }
     }
 

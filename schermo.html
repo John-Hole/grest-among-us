@@ -106,7 +106,9 @@
             <div class="schermo-card center-main-card">
                 <!-- Map View -->
                 <div id="map-view-wrapper" class="map-view-wrapper">
-                    <img id="map-image" src="public/assets/mappa.jpg" alt="Mappa della navicella" class="map-img">
+                    <div id="svg-map-container" class="svg-container">
+                        <!-- SVG map loaded dynamically -->
+                    </div>
                 </div>
 
                 <!-- Full Center Tasks View (Shown when map is missing / not loaded) -->
@@ -150,7 +152,7 @@
     </div>
 
     <!-- Script as module to use import -->
-    <script type="module" src="js/schermo.js"></script>
+    <script type="module" src="js/schermo.js?v=2"></script>
     <script src="js/nav.js"></script>
 </body>
 </html>
