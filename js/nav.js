@@ -2,12 +2,13 @@
     const isMaster = window.location.pathname.includes('master.html');
     const isGiocatore = window.location.pathname.includes('giocatore.html');
     const isSchermo = window.location.pathname.includes('schermo.html');
-    const isIndex = !isMaster && !isGiocatore && !isSchermo;
+    const isScienziato = window.location.pathname.includes('scienziato.html');
+    const isIndex = !isMaster && !isGiocatore && !isSchermo && !isScienziato;
     
     let rightSideHTML = '';
     if (isIndex) {
         rightSideHTML = `<button id="btn-show-auth" class="btn btn-sm btn-nav-auth"><span class="auth-text-desktop">ACCEDI / REGISTRATI</span><span class="auth-text-mobile">ACCEDI<br>REGISTRATI</span></button>`;
-    } else if (isMaster || isGiocatore || isSchermo) {
+    } else if (isMaster || isGiocatore || isSchermo || isScienziato) {
         rightSideHTML = `<button onclick="if(confirm('Vuoi uscire dalla schermata generale?')) window.location.href='index.html'" class="btn btn-danger btn-sm" style="padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: 50px;">ESCI</button>`;
     }
 
@@ -55,7 +56,7 @@
         }
     });
 
-    const inGame = isMaster || isGiocatore || (isSchermo && new URLSearchParams(window.location.search).get('room'));
+    const inGame = isMaster || isGiocatore || isScienziato || (isSchermo && new URLSearchParams(window.location.search).get('room'));
 
     function handleNavigate(targetUrl) {
         if (inGame) {
