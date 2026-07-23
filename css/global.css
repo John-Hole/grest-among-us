@@ -1200,6 +1200,20 @@ body.schermo-body, body.teatro-body {
     filter: drop-shadow(0 0 10px #00f2fe) brightness(1.1);
 }
 
+/* Black/Closed rooms: do NOT highlight on hover */
+.svg-container svg path.closed-room,
+.svg-container svg path.closed-room:hover,
+.svg-container svg path[id="Sala Chiusa"]:hover,
+.svg-container svg path[id="Caldaia"]:hover,
+.svg-container svg path[id="Locale Tecnico"]:hover,
+.svg-container svg path[id="Collegamento Suore"]:hover,
+.svg-container svg path[id="Ripostiglio Palco"]:hover {
+    pointer-events: none !important;
+    stroke: #000000 !important;
+    stroke-width: 0.7px !important;
+    filter: none !important;
+}
+
 .map-img {
     max-width: 100%;
     max-height: 100%;

@@ -179,10 +179,10 @@
      d="m 95.052,89.181 -6.3583,11.013 -34.61,0.0889 0.0097,50.043 20.910657,-0.0804 c 0.06898,-0.0336 21.474854,-36.26337 32.120243,-54.44939 z"
      fill="#10b981"
      style="fill:#10b981;fill-opacity:0.9;stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1"
-     sodipodi:nodetypes="ccccccc" /><path
+     sodipodi:nodetypes="ccccccc" /><path class="closed-room"
      id="Locale Tecnico"
      d="m 107.12,95.771 -6.1628,10.529 12.484,7.3704 6.2735,-10.725 z"
-     style="stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1"
+     style="stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1;pointer-events:none;"
      sodipodi:nodetypes="ccccc" /><path
      id="Palco"
      d="m 153.81,106.21 -14.122,24.721 67.402,0.5325 -14.038,-25.091 0.0151,-7.2465 -4.89949,-0.02177 0.0328,-8.7158 -29.155,-0.004 -0.0378,8.7325 -5.1974,-0.01211 z"
@@ -219,11 +219,11 @@
      d="m 178.4,233.49 -18.389,-31.75 -14.87831,8.49745 -11.87672,-20.57872 9.00777,-5.71372 3.75396,6.79199 h 18.35049 l 0.008,5.2481 1.6135,1.621 13.262,0.0331 2.3482,-2.4474 0.001,-4.4548 17.94951,0.0144 22.147,-39.27 4.4117,2.6481 -13.211,23.185 12.192,6.706 1.3891,2.3978 c 0,0 -41.93701,23.98795 -41.928,23.986 l -0.005,12.33042 3.14626,5.57287 z"
      fill="#f87171"
      sodipodi:nodetypes="cccccccccccccccccccccc"
-     style="fill:#f87171;fill-opacity:0.9;stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1" /><path
+     style="fill:#f87171;fill-opacity:0.9;stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1" /><path class="closed-room"
      id="Sala Chiusa"
      d="m 128.9035,159.77249 -24.3215,14.21651 35.827,64.358 30.495,-17.773 -10.893,-18.834 -14.87831,8.49745 -11.87672,-20.57872 9.00777,-5.71372 z"
      sodipodi:nodetypes="ccccccccc"
-     style="stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1" /><path
+     style="stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1;pointer-events:none;" /><path
      id="Sala Viola"
      d="M 203.92925,199.31733 226.47921,186.4183 239.193,209.12669 217.37643,222.444 Z"
      fill="#a855f7"
@@ -247,16 +247,16 @@
      id="WC Teatro 3"
      d="m 234.11,168.44 -12.208,-7.0158 4.2095,-7.3199 12.091,7.0626 z"
      fill="#f472b6"
-     style="fill:#f472b6;fill-opacity:0.9;stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1" /><path
+     style="fill:#f472b6;fill-opacity:0.9;stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1" /><path class="closed-room"
      id="Caldaia"
      d="m 119.72,102.94 -18.025,30.816 19.155,11.43 17.997,-31.378 z"
-     style="stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1" /><path
+     style="stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1;pointer-events:none;" /><path class="closed-room"
      id="Collegamento Suore"
      d="m 202.34,102.99 23.196,41.723 8.6295,-5.2385 -2.4322,-4.5135 10.5,-6.1272 -14.032,-24.859 22.193,-13.143 -12.605,-8.7932 z"
-     style="stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1" /><path
+     style="stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1;pointer-events:none;" /><path class="closed-room"
      id="Ripostiglio Palco"
      d="m 151.07,90.388 v 8.7215 l 7.9368,0.0121 0.0379,-8.7325 z"
-     style="stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1" /><path
+     style="stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1;pointer-events:none;" /><path
      id="Strada Laterale"
      d="M 30.402,132.55 10.477,142.559 -50.233,9.949 h 25.631 c 0,0 55.004,122.6 55.004,122.6 z"
      fill="#4ade80"
