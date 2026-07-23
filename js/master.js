@@ -60,11 +60,11 @@ const btnSetCustomTime = document.getElementById('btn-set-custom-time');
 const btnVotingAdd30 = document.getElementById('btn-voting-add30');
 const btnVotingSub30 = document.getElementById('btn-voting-sub30');
 
-const cfgRound1 = document.getElementById('cfg-round1');
-const cfgRound2 = document.getElementById('cfg-round2');
-const cfgRound3 = document.getElementById('cfg-round3');
+const cfgDiscussion = document.getElementById('cfg-discussion');
 const cfgVoting = document.getElementById('cfg-voting');
 const btnSaveTimeCfg = document.getElementById('btn-save-time-cfg');
+const masterRoundTimesContainer = document.getElementById('master-round-times-container');
+const btnMasterAddRound = document.getElementById('btn-master-add-round');
 
 // Preset Picker Pop-up Elements
 const modalPresetPicker = document.getElementById('modal-preset-picker');
@@ -276,17 +276,73 @@ function getRoundDuration(roundNum) {
     return ROUND_TIMES[Math.min(roundNum - 1, ROUND_TIMES.length - 1)];
 }
 
+let masterRoundTimes = [10, 7, 5];
+
+function renderMasterRoundTimesUI(timesArr = [10, 7, 5]) {
+    if (!masterRoundTimesContainer) return;
+    masterRoundTimesContainer.innerHTML = '';
+    masterRoundTimes = timesArr;
+
+    timesArr.forEach((mins, idx) => {
+        const isLast = idx === timesArr.length - 1;
+        const div = document.createElement('div');
+        div.style = `display: flex; align-items: center; gap: 0.5rem; background: rgba(0,0,0,0.25); padding: 0.35rem 0.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);`;
+        
+        const labelText = isLast && idx > 0 ? `Round ${idx + 1}+ (ripete ∞)` : `Round ${idx + 1}`;
+        
+        div.innerHTML = `
+            <span style="font-size: 0.75rem; font-weight: bold; width: 120px; color: ${isLast ? 'var(--accent-cyan, #00e5ff)' : 'white'};">${labelText}:</span>
+            <input type="number" class="master-round-time-input" value="${mins}" min="1" max="120" style="flex: 1; padding: 0.35rem; border-radius: 6px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.15); font-weight: 600;">
+            <span style="font-size: 0.75rem; color: #aaa;">min</span>
+            ${timesArr.length > 1 ? `<button type="button" class="btn-master-remove-round" style="background: none; border: none; color: #ff4b4b; cursor: pointer; font-weight: bold; padding: 0 0.3rem;">✕</button>` : ''}
+        `;
+
+        if (timesArr.length > 1) {
+            const removeBtn = div.querySelector('.btn-master-remove-round');
+            if (removeBtn) {
+                removeBtn.onclick = () => {
+                    masterRoundTimes.splice(idx, 1);
+                    renderMasterRoundTimesUI(masterRoundTimes);
+                };
+            }
+        }
+
+        const inputEl = div.querySelector('.master-round-time-input');
+        if (inputEl) {
+            inputEl.onchange = (e) => {
+                const val = parseInt(e.target.value) || 1;
+                masterRoundTimes[idx] = val;
+            };
+        }
+
+        masterRoundTimesContainer.appendChild(div);
+    });
+}
+
+if (btnMasterAddRound) {
+    btnMasterAddRound.addEventListener('click', () => {
+        const lastVal = masterRoundTimes.length > 0 ? masterRoundTimes[masterRoundTimes.length - 1] : 5;
+        masterRoundTimes.push(lastVal);
+        renderMasterRoundTimesUI(masterRoundTimes);
+    });
+}
+
 function syncTimeConfigUI() {
     if (!roomConfig) return;
     const activeId = document.activeElement ? document.activeElement.id : null;
     
-    if (roomConfig.roundTimes && Array.isArray(roomConfig.roundTimes)) {
-        if (cfgRound1 && activeId !== 'cfg-round1') cfgRound1.value = Math.round(roomConfig.roundTimes[0] / 60000) || 10;
-        if (cfgRound2 && activeId !== 'cfg-round2') cfgRound2.value = Math.round(roomConfig.roundTimes[1] / 60000) || 7;
-        if (cfgRound3 && activeId !== 'cfg-round3') cfgRound3.value = Math.round(roomConfig.roundTimes[2] / 60000) || 5;
+    if (cfgDiscussion && activeId !== 'cfg-discussion') {
+        cfgDiscussion.value = roomConfig.discussionDuration !== undefined ? roomConfig.discussionDuration : 0;
     }
     if (cfgVoting && activeId !== 'cfg-voting') {
-        cfgVoting.value = roomConfig.meetingDuration || 60;
+        cfgVoting.value = roomConfig.votingDuration || roomConfig.meetingDuration || 60;
+    }
+
+    if (roomConfig.roundTimes && Array.isArray(roomConfig.roundTimes) && roomConfig.roundTimes.length > 0) {
+        const minsArr = roomConfig.roundTimes.map(ms => Math.max(1, Math.round(ms / 60000)));
+        renderMasterRoundTimesUI(minsArr);
+    } else {
+        renderMasterRoundTimesUI([10, 7, 5]);
     }
 }
 
@@ -517,10 +573,6 @@ function updateUI(state, players) {
             statusText = "⏳ IN ATTESA";
             statusBg = "rgba(148, 163, 184, 0.2)";
             statusColor = "#94a3b8";
-        } else if (state.game_status === 'video_playing') {
-            statusText = "🎬 VIDEO INTRO";
-            statusBg = "rgba(255, 152, 0, 0.2)";
-            statusColor = "#ff9800";
         } else if (state.game_status === 'playing') {
             statusText = "🟢 IN CORSO";
             statusBg = "rgba(0, 230, 118, 0.2)";
@@ -573,7 +625,7 @@ function updateUI(state, players) {
     }
 
     if (timerControls) {
-        if (state.game_status === 'waiting' || state.game_status === 'video_playing') {
+        if (state.game_status === 'waiting') {
             timerControls.classList.add('hidden');
         } else {
             timerControls.classList.remove('hidden');
@@ -604,10 +656,6 @@ function updateUI(state, players) {
 
     if (state.game_status === 'waiting') {
         // waiting
-    }
-    else if (state.game_status === 'video_playing') {
-        btnStartRandom.disabled = true;
-        btnCallMeeting.disabled = true;
     }
     else if (state.game_status === 'playing') {
         btnStartRandom.disabled = true;
@@ -669,11 +717,6 @@ function renderMasterTimer() {
         liveClockText = "⏳ IN ATTESA";
         modalTimerText = "⏳ IN ATTESA";
         timerColor = "#94a3b8";
-    } else if (status === 'video_playing') {
-        if (currentTimerPill) currentTimerPill.classList.add('hidden');
-        liveClockText = "🎬 VIDEO INTRO";
-        modalTimerText = "🎬 VIDEO INTRO";
-        timerColor = "#ff9800";
     } else if (status === 'playing') {
         if (currentTimerPill) currentTimerPill.classList.remove('hidden');
         if (currentState.timer_paused) {
@@ -833,19 +876,26 @@ async function resolveMeeting(players, votes, state) {
 // Config save button
 if (btnSaveTimeCfg) {
     btnSaveTimeCfg.addEventListener('click', async () => {
-        const r1 = Math.max(1, parseInt(cfgRound1.value) || 10);
-        const r2 = Math.max(1, parseInt(cfgRound2.value) || 7);
-        const r3 = Math.max(1, parseInt(cfgRound3.value) || 5);
-        const votingSec = Math.max(10, parseInt(cfgVoting.value) || 60);
+        const discSec = Math.max(0, parseInt(cfgDiscussion ? cfgDiscussion.value : 0) || 0);
+        const votingSec = Math.max(5, parseInt(cfgVoting ? cfgVoting.value : 60) || 60);
 
-        const roundTimes = [r1 * 60000, r2 * 60000, r3 * 60000];
+        const roundInputs = document.querySelectorAll('.master-round-time-input');
+        const roundTimesMins = [];
+        roundInputs.forEach(input => {
+            const val = parseInt(input.value) || 1;
+            roundTimesMins.push(val);
+        });
+        if (roundTimesMins.length === 0) roundTimesMins.push(5);
+        const roundTimesMs = roundTimesMins.map(m => m * 60000);
 
         await update(roomRef, {
-            'config/roundTimes': roundTimes,
+            'config/roundTimes': roundTimesMs,
+            'config/discussionDuration': discSec,
+            'config/votingDuration': votingSec,
             'config/meetingDuration': votingSec
         });
 
-        addLog(`⏱️ Tempi aggiornati dal Master: R1=${r1}m, R2=${r2}m, R3+=${r3}m, Votazione=${votingSec}s.`);
+        addLog(`⏱️ Tempi aggiornati dal Master: Discussione=${discSec}s, Votazione=${votingSec}s, Round=${roundTimesMins.join('/')}m.`);
         alert("✅ Impostazioni tempi salvate con successo!");
         closeConfigTempiModal();
     });
@@ -977,14 +1027,16 @@ btnStartRandom.addEventListener('click', async () => {
     }
     
     const hasScientist = roomConfig.scientistEnabled;
-    const isVideoEnabled = roomConfig.videoIntro;
 
     const shuffledPlayers = [...playerNames].sort(() => 0.5 - Math.random());
     const randomImpostors = shuffledPlayers.slice(0, numImpostors);
     const randomScientist = hasScientist && shuffledPlayers.length > numImpostors ? shuffledPlayers[numImpostors] : null;
 
+    const enableTasks = roomConfig.enableTasks !== false;
+    const taskType = roomConfig.taskType || (roomConfig.mapMode === 'text' ? 'custom' : 'default');
+
     let tasksSource = null;
-    if (roomConfig.mapMode === 'text' && roomConfig.tasks) {
+    if (enableTasks && taskType === 'custom' && roomConfig.tasks && roomConfig.tasks.length > 0) {
         tasksSource = roomConfig.tasks.map(t => `${t.num}. ${t.name}: ${t.obj} (${t.pos})`);
     }
 
@@ -993,14 +1045,16 @@ btnStartRandom.addEventListener('click', async () => {
         if (randomImpostors.includes(name)) role = 'impostor';
         else if (name === randomScientist) role = 'scientist';
 
-        const assignedTasksList = getRandomTasks(tasksSource);
         const tasksObj = {};
-        assignedTasksList.forEach((taskDesc, i) => {
-            tasksObj[`task_${i}`] = {
-                desc: taskDesc,
-                completed: false
-            };
-        });
+        if (enableTasks) {
+            const assignedTasksList = getRandomTasks(tasksSource);
+            assignedTasksList.forEach((taskDesc, i) => {
+                tasksObj[`task_${i}`] = {
+                    desc: taskDesc,
+                    completed: false
+                };
+            });
+        }
 
         playersMap[name] = {
             role: role,
@@ -1046,7 +1100,7 @@ btnStartDiscussion.addEventListener('click', async () => {
 });
 
 btnStartVoting.addEventListener('click', async () => {
-    const votingDuration = (roomConfig.meetingDuration || 60) * 1000;
+    const votingDuration = (roomConfig.votingDuration || roomConfig.meetingDuration || 60) * 1000;
     await update(roomRef, {
         'state/game_status': 'voting',
         'state/voting_endtime': Date.now() + votingDuration

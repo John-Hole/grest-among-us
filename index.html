@@ -165,10 +165,30 @@
                 </div>
             </div>
 
-            <div class="form-group" style="display: flex; gap: 1rem;">
-                <div style="flex:1;">
-                    <label>Durata Discussione (sec)</label>
-                    <input type="number" id="create-meeting-duration" value="120" min="10">
+            <!-- GESTIONALE TEMPI -->
+            <div class="form-group" style="background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 12px; padding: 1rem; margin-top: 1rem; margin-bottom: 1.2rem;">
+                <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem; color: white;">⏱️ Gestionale Tempi</h3>
+                
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                    <div style="flex:1;">
+                        <label style="font-size: 0.85rem;">Durata Discussione (sec)</label>
+                        <input type="number" id="create-discussion-duration" value="0" min="0" placeholder="0 = senza limite / libera">
+                        <p style="font-size: 0.75rem; color: #8a99ad; margin-top: 0.2rem;">0 per discussione libera senza timer.</p>
+                    </div>
+                    <div style="flex:1;">
+                        <label style="font-size: 0.85rem;">Durata Votazione (sec)</label>
+                        <input type="number" id="create-voting-duration" value="60" min="5" placeholder="60">
+                        <p style="font-size: 0.75rem; color: #8a99ad; margin-top: 0.2rem;">Tempo per votare prima dell'esito.</p>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid #333; padding-top: 1rem; margin-top: 0.5rem;">
+                    <label style="font-size: 0.9rem; color: var(--accent-cyan); font-weight: bold; margin-bottom: 0.3rem; display: block;">Sequenza Durata Round (minuti)</label>
+                    <p style="font-size: 0.75rem; color: #8a99ad; margin-bottom: 0.8rem;">L'ultimo tempo della lista si ripeterà all'infinito per tutti i round successivi.</p>
+                    
+                    <div id="round-times-container" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+                    
+                    <button id="btn-add-round-time" type="button" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; margin-top: 0.8rem; background: #3f51b5; color: white;">+ Aggiungi Round alla Sequenza</button>
                 </div>
             </div>
 
@@ -177,45 +197,62 @@
                 <label style="margin:0;">Abilita Scienziato</label>
             </div>
 
-            <div class="form-group" style="display: flex; align-items: center; gap: 1rem; margin-top: 1rem;">
-                <input type="checkbox" id="create-video-intro" checked style="width: auto;">
-                <label style="margin:0;">Mostra video su tutti all'avvio</label>
-            </div>
             
-            <div class="form-group" style="display: flex; gap: 1rem; margin-top: 1rem;">
-                <div style="flex:1;">
-                    <label>Limite Giocatori</label>
-                    <input type="number" id="create-max-players" value="15" min="2" max="100">
-                </div>
-                <div style="display: flex; align-items: flex-end; padding-bottom: 0.5rem; gap: 0.5rem;">
-                    <input type="checkbox" id="create-unlimited-players" style="width: auto;">
-                    <label style="margin:0;">Unlimited</label>
-                </div>
+            <div class="form-group" style="margin-top: 1rem;">
+                <label>Limite Giocatori</label>
+                <input type="number" id="create-max-players" placeholder="Illimitato (lascia vuoto)" min="2" max="100">
+                <p style="font-size: 0.8rem; color: #8a99ad; margin-top: 0.3rem;">Lascia il campo vuoto se vuoi giocatori illimitati.</p>
             </div>
             
             <hr style="border-color: #333; margin: 1.5rem 0;">
 
-            <h3>Modalità Mappa (Esperti)</h3>
-            <div class="form-group" style="display: flex; gap: 1rem; margin-top: 1rem;">
-                <label style="display: flex; align-items: center; gap: 0.5rem; cursor:pointer;">
-                    <input type="radio" name="map-mode" value="photo" checked> Mappa Visiva (Foto)
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.5rem; cursor:pointer;">
-                    <input type="radio" name="map-mode" value="text"> Elenco Testuale
-                </label>
+            <!-- SEZIONE MAPPA -->
+            <div class="form-group" style="background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 12px; padding: 1rem; margin-bottom: 1.2rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <h3 style="margin: 0; font-size: 1.1rem; color: white;">🗺️ Mappa</h3>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--accent-cyan); font-weight: bold; margin: 0;">
+                        <input type="checkbox" id="create-enable-map" checked style="width: auto;"> Abilita Mappa
+                    </label>
+                </div>
+
+                <div id="map-options-wrapper" style="margin-top: 1rem;">
+                    <label style="color: #8a99ad; font-size: 0.85rem; margin-bottom: 0.4rem; display: block;">Seleziona Tipo Mappa</label>
+                    <select id="create-map-type" style="width: 100%; padding: 0.8rem; border-radius: 10px; background: #2a3644; color: white; border: 1px solid #444; font-family: var(--font-ui);">
+                        <option value="photo">Mappa Visiva (Carica Foto)</option>
+                        <option value="vector">Mappa Interattiva Oratorio (Vettoriale)</option>
+                    </select>
+
+                    <div id="map-photo-config" class="form-group" style="margin-top: 1rem;">
+                        <label style="font-size: 0.85rem;">Carica Immagine Mappa (verrà compressa)</label>
+                        <input type="file" id="map-image-upload" accept="image/jpeg, image/png">
+                        <canvas id="map-canvas" style="display:none;"></canvas>
+                        <p id="upload-status" style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--accent-cyan);"></p>
+                    </div>
+                </div>
             </div>
 
-            <div id="map-photo-config" class="form-group">
-                <label>Carica Immagine Mappa (verrà compressa)</label>
-                <input type="file" id="map-image-upload" accept="image/jpeg, image/png">
-                <canvas id="map-canvas" style="display:none;"></canvas>
-                <p id="upload-status" style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--accent-cyan);"></p>
-            </div>
+            <!-- SEZIONE TASK -->
+            <div class="form-group" style="background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 12px; padding: 1rem; margin-bottom: 1.2rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <h3 style="margin: 0; font-size: 1.1rem; color: white;">📋 Task</h3>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--accent-cyan); font-weight: bold; margin: 0;">
+                        <input type="checkbox" id="create-enable-tasks" checked style="width: auto;"> Abilita Task
+                    </label>
+                </div>
 
-            <div id="map-text-config" class="form-group hidden">
-                <label>Configura Task Testuali</label>
-                <div id="text-tasks-container"></div>
-                <button id="btn-add-text-task" class="btn" style="padding: 0.5rem; font-size: 0.8rem; margin-top: 0.5rem;">+ Aggiungi Task</button>
+                <div id="task-options-wrapper" style="margin-top: 1rem;">
+                    <label style="color: #8a99ad; font-size: 0.85rem; margin-bottom: 0.4rem; display: block;">Seleziona Tipo Task</label>
+                    <select id="create-task-type" style="width: 100%; padding: 0.8rem; border-radius: 10px; background: #2a3644; color: white; border: 1px solid #444; font-family: var(--font-ui);">
+                        <option value="default">Task Predefinite (Standard Oratorio - 17 Task)</option>
+                        <option value="custom">Task Personalizzate (Elenco Testuale Custom)</option>
+                    </select>
+
+                    <div id="map-text-config" class="form-group hidden" style="margin-top: 1rem;">
+                        <label style="font-size: 0.85rem;">Configura Task Testuali Personalizzate</label>
+                        <div id="text-tasks-container"></div>
+                        <button id="btn-add-text-task" class="btn" style="padding: 0.5rem; font-size: 0.8rem; margin-top: 0.5rem;">+ Aggiungi Task</button>
+                    </div>
+                </div>
             </div>
 
             <div style="display: flex; gap: 0.8rem; margin-top: 1.5rem; flex-wrap: wrap; justify-content: center;">

@@ -174,12 +174,22 @@ function startConnection() {
     }
 
     // Render task list in left panel & center table
-    function renderTasks(configTasks) {
+    function renderTasks(configTasks, enableTasks = true) {
         const leftTaskList = document.getElementById('left-tasks-list');
         const textTasksBody = document.getElementById('text-tasks-body');
         
         if (leftTaskList) leftTaskList.innerHTML = '';
         if (textTasksBody) textTasksBody.innerHTML = '';
+
+        if (enableTasks === false) {
+            if (leftTaskList) {
+                leftTaskList.innerHTML = '<li style="padding: 1rem; color: #888; text-align: center;">Task disabilitate</li>';
+            }
+            if (textTasksBody) {
+                textTasksBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #888; padding: 1rem;">Task disabilitate</td></tr>';
+            }
+            return;
+        }
 
         let tasksArray = [];
 
@@ -299,11 +309,20 @@ function startConnection() {
     async function renderMapConfig(config) {
         if (!config) return;
         
-        renderTasks(config.tasks);
+        const enableMap = config.enableMap !== false;
+        const enableTasks = config.enableTasks !== false;
+        const mapType = config.mapType || (config.mapMode === 'text' ? 'vector' : 'photo');
 
-        if (config.mapMode === 'text') {
+        renderTasks(config.tasks, enableTasks);
+
+        if (!enableMap) {
             if (mapViewWrapper) mapViewWrapper.classList.add('hidden');
-            if (textMapContainer) textMapContainer.classList.remove('hidden');
+            if (textMapContainer) textMapContainer.classList.add('hidden');
+            return;
+        }
+
+        if (mapType === 'vector') {
+            await loadSVGMap();
         } else {
             // Check if user uploaded a custom map image in Firebase
             const imgSnapshot = await get(ref(db, `images/${roomCode}`));

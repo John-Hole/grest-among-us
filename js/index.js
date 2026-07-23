@@ -43,13 +43,21 @@ const templatesGrid = document.getElementById('templates-grid');
 const createTemplateName = document.getElementById('create-template-name');
 const createImpostors = document.getElementById('create-impostors');
 const createScientist = document.getElementById('create-scientist');
-const createKillCooldown = document.getElementById('create-kill-cooldown');
-const createMaxMeetings = document.getElementById('create-max-meetings');
-const createMeetingDuration = document.getElementById('create-meeting-duration');
-const createVideoIntro = document.getElementById('create-video-intro');
+const createDiscussionDuration = document.getElementById('create-discussion-duration');
+const createVotingDuration = document.getElementById('create-voting-duration');
+const btnAddRoundTime = document.getElementById('btn-add-round-time');
+const roundTimesContainer = document.getElementById('round-times-container');
 const createMaxPlayers = document.getElementById('create-max-players');
-const createUnlimitedPlayers = document.getElementById('create-unlimited-players');
-const mapRadios = document.getElementsByName('map-mode');
+
+// Map & Task DOM elements
+const createEnableMap = document.getElementById('create-enable-map');
+const mapOptionsWrapper = document.getElementById('map-options-wrapper');
+const createMapType = document.getElementById('create-map-type');
+
+const createEnableTasks = document.getElementById('create-enable-tasks');
+const taskOptionsWrapper = document.getElementById('task-options-wrapper');
+const createTaskType = document.getElementById('create-task-type');
+
 const mapPhotoConfig = document.getElementById('map-photo-config');
 const mapTextConfig = document.getElementById('map-text-config');
 const mapImageUpload = document.getElementById('map-image-upload');
@@ -65,18 +73,45 @@ let currentUser = null;
 let currentBase64Image = null;
 let userTemplates = {};
 
+const defaultBaseTasks = [
+    { num: '1', name: 'Canestri', obj: '3 canestri da tiro libero', pos: 'Canestro Oratorio' },
+    { num: '2', name: 'Trova l\'oggetto', obj: 'Trova 10 oggetti nella scatola di acqua sporca', pos: 'Panchine Rosse' },
+    { num: '3', name: 'Rebus', obj: 'Risolvi 2 fogli di rebus', pos: 'Atrio' },
+    { num: '4', name: 'Puzzle', obj: 'Componi un puzzle', pos: 'Atrio' },
+    { num: '5', name: 'Pulisci il bagno', obj: '1 minuto per pulire tutto il bagno dalla tempera', pos: 'Bagno Donne' },
+    { num: '6', name: 'Matematica', obj: 'Risolvi 10 operazioni in 1.5 min', pos: 'Ex Biblioteca' },
+    { num: '7', name: 'Limbo', obj: 'Supera 3 livelli', pos: 'Ex Biblioteca' },
+    { num: '8', name: 'Avanti un altro', obj: 'Rispondi a 15 domande', pos: 'Salone' },
+    { num: '9', name: 'Centra il bicchiere', obj: 'Fai centro con i pennarelli nel bicchiere in 1.5 min', pos: 'Salone' },
+    { num: '10', name: 'Percorso bendato', obj: 'Un compagno dà le indicazioni al giocatore bendato', pos: 'Strada Principale' },
+    { num: '11', name: 'Riempi il bicchiere', obj: 'Con uno shottino pieno corri a riempire un bicchiere grande', pos: 'Strada Principale' },
+    { num: '12', name: 'Ricorda la sequenza', obj: 'Ripeti la sequenza 1 volta', pos: 'Sala Principale' },
+    { num: '13', name: 'Attacca le orecchie', obj: '1 minuto per attaccare bendati le orecchie al bianconiglio', pos: 'Sala Principale' },
+    { num: '14', name: 'Twister', obj: 'Resisti 1.5 min cambiando posizione', pos: 'Sala Principale' },
+    { num: '15', name: 'Dinosauro', obj: 'Pesca bigliettino col punteggio e gioca fino al target', pos: 'Regia' },
+    { num: '16', name: 'Whisper challenge', obj: 'Indovina 5 frasi', pos: 'Corridoio Catechismo' },
+    { num: '17', name: 'Cruciverba', obj: 'Risolvi un cruciverba', pos: 'Stanza Verde Catechismo' }
+];
+
 // Default Templates
 const baseTemplate = {
     name: "Standard Realmong",
     impostorCount: 3,
     killCooldown: 120,
     maxMeetings: 1,
-    meetingDuration: 120,
+    discussionDuration: 0,
+    votingDuration: 60,
+    meetingDuration: 60,
+    roundTimes: [10 * 60000, 7 * 60000, 5 * 60000],
     scientistEnabled: true,
-    videoIntro: true,
     maxPlayers: 'unlimited',
-    mapMode: 'photo',
-    mapImage: null
+    enableMap: true,
+    mapType: 'vector',
+    enableTasks: true,
+    taskType: 'custom',
+    mapMode: 'vector',
+    mapImage: null,
+    tasks: defaultBaseTasks
 };
 
 const emptyTemplate = {
@@ -84,18 +119,22 @@ const emptyTemplate = {
     impostorCount: 1,
     killCooldown: 120,
     maxMeetings: 1,
-    meetingDuration: 120,
+    discussionDuration: 0,
+    votingDuration: 60,
+    meetingDuration: 60,
+    roundTimes: [10 * 60000, 7 * 60000, 5 * 60000],
     scientistEnabled: false,
-    videoIntro: true,
     maxPlayers: 15,
-    mapMode: 'photo',
-    mapImage: null
+    enableMap: true,
+    mapType: 'vector',
+    enableTasks: true,
+    taskType: 'custom',
+    mapMode: 'vector',
+    mapImage: null,
+    tasks: []
 };
 
-// Handle Unlimited Checkbox
-createUnlimitedPlayers.addEventListener('change', (e) => {
-    createMaxPlayers.disabled = e.target.checked;
-});
+
 
 // Auto-fill join code from URL if present
 const urlParams = new URLSearchParams(window.location.search);
@@ -347,13 +386,24 @@ function createTemplateCard(id, data, isCustom) {
     headerRow.appendChild(menuContainer);
     card.appendChild(headerRow);
 
+    const isMapActive = data.enableMap !== false;
+    const mapTypeStr = data.mapType || (data.mapMode === 'text' ? 'vector' : 'photo');
+    const mapLabel = !isMapActive ? 'Disabilitata' : (mapTypeStr === 'vector' ? 'Vettoriale' : 'Visiva');
+
+    const isTasksActive = data.enableTasks !== false;
+    const taskTypeStr = data.taskType || (data.mapMode === 'text' || (data.tasks && data.tasks.length > 0) ? 'custom' : 'default');
+    const taskLabel = !isTasksActive ? 'Disabilitate' : (taskTypeStr === 'custom' ? 'Personalizzate' : 'Predefinite');
+
+    const discText = data.discussionDuration > 0 ? `${data.discussionDuration}s` : 'Libera';
+    const votText = `${data.votingDuration || data.meetingDuration || 60}s`;
+
     const details = document.createElement('div');
     details.style.fontSize = '0.8rem';
     details.style.color = '#aaa';
     details.innerHTML = `
-        <p style="margin: 0.25rem 0;">Impostori: <strong style="color: white;">${data.impostorCount}</strong></p>
-        <p style="margin: 0.25rem 0;">Limite: <strong style="color: white;">${data.maxPlayers === 'unlimited' ? '∞' : data.maxPlayers}</strong></p>
-        <p style="margin: 0.25rem 0;">Mappa: <strong style="color: white;">${data.mapMode === 'text' ? 'Testuale' : 'Visiva'}</strong></p>
+        <p style="margin: 0.25rem 0;">Impostori: <strong style="color: white;">${data.impostorCount}</strong> | Limite: <strong style="color: white;">${data.maxPlayers === 'unlimited' ? '∞' : data.maxPlayers}</strong></p>
+        <p style="margin: 0.25rem 0;">Discussione: <strong style="color: white;">${discText}</strong> | Votazione: <strong style="color: white;">${votText}</strong></p>
+        <p style="margin: 0.25rem 0;">Mappa: <strong style="color: white;">${mapLabel}</strong> | Task: <strong style="color: white;">${taskLabel}</strong></p>
     `;
     card.appendChild(details);
 
@@ -368,13 +418,19 @@ function setFormDisabled(disabled) {
     createImpostors.disabled = disabled;
     createKillCooldown.disabled = disabled;
     createMaxMeetings.disabled = disabled;
-    createMeetingDuration.disabled = disabled;
+    if (createDiscussionDuration) createDiscussionDuration.disabled = disabled;
+    if (createVotingDuration) createVotingDuration.disabled = disabled;
+    if (btnAddRoundTime) btnAddRoundTime.disabled = disabled;
+    document.querySelectorAll('.round-time-input, .btn-remove-round').forEach(el => el.disabled = disabled);
     createScientist.disabled = disabled;
-    createVideoIntro.disabled = disabled;
-    createUnlimitedPlayers.disabled = disabled;
-    createMaxPlayers.disabled = disabled || createUnlimitedPlayers.checked;
-    Array.from(mapRadios).forEach(r => r.disabled = disabled);
+    createMaxPlayers.disabled = disabled;
+
+    createEnableMap.disabled = disabled;
+    createMapType.disabled = disabled;
     mapImageUpload.disabled = disabled;
+
+    createEnableTasks.disabled = disabled;
+    createTaskType.disabled = disabled;
     btnAddTextTask.disabled = disabled;
     textTasksContainer.querySelectorAll('input, button').forEach(el => el.disabled = disabled);
 }
@@ -406,31 +462,39 @@ function openCreateSettings(id, data, isDuplicate = false, isBase = false) {
         createImpostors.value = data.impostorCount || 1;
         createKillCooldown.value = data.killCooldown || 120;
         createMaxMeetings.value = data.maxMeetings !== undefined ? data.maxMeetings : 1;
-        createMeetingDuration.value = data.meetingDuration || 120;
-        createVideoIntro.checked = data.videoIntro !== undefined ? data.videoIntro : true;
+        if (createDiscussionDuration) createDiscussionDuration.value = data.discussionDuration !== undefined ? data.discussionDuration : 0;
+        if (createVotingDuration) createVotingDuration.value = data.votingDuration || data.meetingDuration || 60;
         createScientist.checked = !!data.scientistEnabled;
         
-        if (data.maxPlayers === 'unlimited') {
-            createUnlimitedPlayers.checked = true;
-            createMaxPlayers.disabled = true;
+        if (data.maxPlayers === 'unlimited' || !data.maxPlayers) {
+            createMaxPlayers.value = '';
         } else {
-            createUnlimitedPlayers.checked = false;
-            createMaxPlayers.disabled = isBaseTemplate ? true : false;
-            createMaxPlayers.value = data.maxPlayers || 15;
+            createMaxPlayers.value = data.maxPlayers;
         }
 
-        if (data.mapMode === 'text') {
-            mapRadios[1].checked = true;
-            currentBase64Image = null;
-            uploadStatus.textContent = '';
-            textTasksContainer.innerHTML = '';
-            if (data.tasks) {
-                data.tasks.forEach(task => addTextTask(task));
-            }
+        // Render round times
+        if (data.roundTimes && Array.isArray(data.roundTimes) && data.roundTimes.length > 0) {
+            const minsArr = data.roundTimes.map(ms => Math.max(1, Math.round(ms / 60000)));
+            renderRoundTimesUI(minsArr);
         } else {
-            mapRadios[0].checked = true;
-            currentBase64Image = data.mapImage || null;
-            uploadStatus.textContent = currentBase64Image ? "Immagine caricata dal template." : "";
+            renderRoundTimesUI([10, 7, 5]);
+        }
+
+        // Config Mappa
+        const enableMapVal = data.enableMap !== undefined ? data.enableMap : true;
+        createEnableMap.checked = enableMapVal;
+        createMapType.value = data.mapType || (data.mapMode === 'text' ? 'vector' : 'photo');
+        currentBase64Image = data.mapImage || null;
+        uploadStatus.textContent = currentBase64Image ? "Immagine caricata dal template." : "";
+
+        // Config Task
+        const enableTasksVal = data.enableTasks !== undefined ? data.enableTasks : true;
+        createEnableTasks.checked = enableTasksVal;
+        createTaskType.value = data.taskType || (data.mapMode === 'text' || (data.tasks && data.tasks.length > 0) ? 'custom' : 'default');
+
+        textTasksContainer.innerHTML = '';
+        if (data.tasks && Array.isArray(data.tasks)) {
+            data.tasks.forEach(task => addTextTask(task));
         }
     } else {
         createTemplateSubtitle.textContent = "Crea un nuovo template personalizzato con le tue impostazioni preferite.";
@@ -443,19 +507,22 @@ function openCreateSettings(id, data, isDuplicate = false, isBase = false) {
         createImpostors.value = 1;
         createKillCooldown.value = 120;
         createMaxMeetings.value = 1;
-        createMeetingDuration.value = 120;
-        createVideoIntro.checked = true;
+        if (createDiscussionDuration) createDiscussionDuration.value = 0;
+        if (createVotingDuration) createVotingDuration.value = 60;
         createScientist.checked = false;
-        createUnlimitedPlayers.checked = false;
-        createMaxPlayers.disabled = false;
-        createMaxPlayers.value = 15;
-        mapRadios[0].checked = true;
+        createMaxPlayers.value = '';
+        renderRoundTimesUI([10, 7, 5]);
+
+        createEnableMap.checked = true;
+        createMapType.value = 'photo';
+        createEnableTasks.checked = true;
+        createTaskType.value = 'default';
         currentBase64Image = null;
         uploadStatus.textContent = '';
         textTasksContainer.innerHTML = '';
     }
     
-    toggleMapMode();
+    toggleMapAndTaskUI();
     showSection('create');
 }
 
@@ -500,17 +567,88 @@ mapImageUpload.addEventListener('change', (e) => {
     reader.readAsDataURL(file);
 });
 
-// --- TEXT TASKS LOGIC ---
-Array.from(mapRadios).forEach(r => r.addEventListener('change', toggleMapMode));
+// --- MAP & TASK TOGGLE LOGIC ---
+createEnableMap.addEventListener('change', toggleMapAndTaskUI);
+createMapType.addEventListener('change', toggleMapAndTaskUI);
+createEnableTasks.addEventListener('change', toggleMapAndTaskUI);
+createTaskType.addEventListener('change', toggleMapAndTaskUI);
 
-function toggleMapMode() {
-    if (mapRadios[0].checked) {
-        mapPhotoConfig.classList.remove('hidden');
-        mapTextConfig.classList.add('hidden');
+function toggleMapAndTaskUI() {
+    // MAP
+    if (createEnableMap.checked) {
+        mapOptionsWrapper.classList.remove('hidden');
+        if (createMapType.value === 'photo') {
+            mapPhotoConfig.classList.remove('hidden');
+        } else {
+            mapPhotoConfig.classList.add('hidden');
+        }
     } else {
+        mapOptionsWrapper.classList.add('hidden');
         mapPhotoConfig.classList.add('hidden');
-        mapTextConfig.classList.remove('hidden');
     }
+
+    // TASKS
+    if (createEnableTasks.checked) {
+        taskOptionsWrapper.classList.remove('hidden');
+        if (createTaskType.value === 'custom') {
+            mapTextConfig.classList.remove('hidden');
+        } else {
+            mapTextConfig.classList.add('hidden');
+        }
+    }
+}
+
+// --- DYNAMIC ROUND TIMES UI ---
+let currentRoundTimes = [10, 7, 5];
+
+function renderRoundTimesUI(timesArr = [10, 7, 5]) {
+    if (!roundTimesContainer) return;
+    roundTimesContainer.innerHTML = '';
+    currentRoundTimes = timesArr;
+
+    timesArr.forEach((mins, idx) => {
+        const isLast = idx === timesArr.length - 1;
+        const div = document.createElement('div');
+        div.style = `display: flex; align-items: center; gap: 0.5rem; background: rgba(0,0,0,0.2); padding: 0.4rem 0.6rem; border-radius: 8px; border: 1px solid #333;`;
+        
+        const labelText = isLast && idx > 0 ? `Round ${idx + 1}+ (ripete ∞)` : `Round ${idx + 1}`;
+        
+        div.innerHTML = `
+            <span style="font-size: 0.85rem; font-weight: bold; width: 140px; color: ${isLast ? 'var(--accent-cyan)' : 'white'};">${labelText}:</span>
+            <input type="number" class="round-time-input" value="${mins}" min="1" max="120" style="flex: 1; padding: 0.4rem; border-radius: 6px; background: #2a3644; color: white; border: 1px solid #444; font-family: var(--font-ui);">
+            <span style="font-size: 0.8rem; color: #aaa;">min</span>
+            ${timesArr.length > 1 ? `<button type="button" class="btn btn-danger btn-remove-round" style="padding: 0.2rem 0.5rem; font-size: 0.75rem; min-height: 28px;">X</button>` : ''}
+        `;
+
+        if (timesArr.length > 1) {
+            const removeBtn = div.querySelector('.btn-remove-round');
+            if (removeBtn) {
+                removeBtn.onclick = () => {
+                    currentRoundTimes.splice(idx, 1);
+                    renderRoundTimesUI(currentRoundTimes);
+                };
+            }
+        }
+
+        const inputEl = div.querySelector('.round-time-input');
+        if (inputEl) {
+            inputEl.onchange = (e) => {
+                const val = parseInt(e.target.value) || 1;
+                currentRoundTimes[idx] = val;
+            };
+        }
+
+        roundTimesContainer.appendChild(div);
+    });
+}
+
+if (btnAddRoundTime) {
+    btnAddRoundTime.addEventListener('click', (e) => {
+        e.preventDefault();
+        const lastVal = currentRoundTimes.length > 0 ? currentRoundTimes[currentRoundTimes.length - 1] : 5;
+        currentRoundTimes.push(lastVal);
+        renderRoundTimesUI(currentRoundTimes);
+    });
 }
 
 function addTextTask(taskData = { num: '', name: '', obj: '', pos: '' }) {
@@ -531,9 +669,14 @@ btnAddTextTask.addEventListener('click', () => addTextTask());
 
 // --- CREATE & JOIN ROOM ---
 function getRoomConfigFromUI() {
-    const mode = mapRadios[0].checked ? 'photo' : 'text';
+    const enableMap = createEnableMap.checked;
+    const mapType = createMapType.value;
+    
+    const enableTasks = createEnableTasks.checked;
+    const taskType = createTaskType.value;
+
     const tasks = [];
-    if (mode === 'text') {
+    if (enableTasks && taskType === 'custom') {
         const rows = textTasksContainer.querySelectorAll('.task-row');
         rows.forEach(row => {
             const inputs = row.querySelectorAll('input');
@@ -545,21 +688,42 @@ function getRoomConfigFromUI() {
             });
         });
     }
-    
-    let maxPlayers = createUnlimitedPlayers.checked ? 'unlimited' : parseInt(createMaxPlayers.value) || 15;
+
+    const discDuration = parseInt(createDiscussionDuration ? createDiscussionDuration.value : 0) || 0;
+    const votDuration = parseInt(createVotingDuration ? createVotingDuration.value : 60) || 60;
+
+    const roundInputs = document.querySelectorAll('.round-time-input');
+    const roundTimesMins = [];
+    roundInputs.forEach(input => {
+        const val = parseInt(input.value) || 1;
+        roundTimesMins.push(val);
+    });
+    if (roundTimesMins.length === 0) roundTimesMins.push(5);
+    const roundTimesMs = roundTimesMins.map(m => m * 60000);
+
+    const maxVal = createMaxPlayers.value.trim();
+    let maxPlayers = (maxVal === '' || isNaN(parseInt(maxVal)) || parseInt(maxVal) <= 0) ? 'unlimited' : parseInt(maxVal);
+
+    // Legacy mapMode compatibility
+    const mapMode = !enableMap ? 'disabled' : (mapType === 'vector' ? 'vector' : 'photo');
 
     return {
         name: createTemplateName.value.trim() || "Template Custom",
         impostorCount: parseInt(createImpostors.value) || 1,
         killCooldown: parseInt(createKillCooldown.value) || 120,
         maxMeetings: parseInt(createMaxMeetings.value) || 1,
-        meetingDuration: parseInt(createMeetingDuration.value) || 120,
-        roundTimes: [10 * 60000, 7 * 60000, 5 * 60000],
-        videoIntro: createVideoIntro.checked,
+        discussionDuration: discDuration,
+        votingDuration: votDuration,
+        meetingDuration: votDuration,
+        roundTimes: roundTimesMs,
         scientistEnabled: createScientist.checked,
-        mapMode: mode,
-        mapImage: mode === 'photo' ? currentBase64Image : null,
-        tasks: mode === 'text' ? tasks : null,
+        enableMap: enableMap,
+        mapType: mapType,
+        enableTasks: enableTasks,
+        taskType: taskType,
+        mapMode: mapMode,
+        mapImage: (enableMap && mapType === 'photo') ? currentBase64Image : null,
+        tasks: (enableTasks && taskType === 'custom') ? tasks : null,
         maxPlayers: maxPlayers
     };
 }
