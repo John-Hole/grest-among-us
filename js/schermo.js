@@ -309,7 +309,9 @@ function startConnection() {
             const imgSnapshot = await get(ref(db, `images/${roomCode}`));
             const svgContainer = document.getElementById('svg-map-container');
 
-            if (imgSnapshot.exists() && imgSnapshot.val()) {
+            // Default to vector SVG map of Oratorio
+            // Only use custom uploaded photo if it exists and is a custom uploaded image
+            if (imgSnapshot.exists() && imgSnapshot.val() && !imgSnapshot.val().includes('mappa.jpg') && imgSnapshot.val().length > 100000) {
                 const imgSrc = imgSnapshot.val();
                 if (svgContainer) {
                     svgContainer.innerHTML = `<img id="map-image" src="${imgSrc}" alt="Mappa Stanza" class="map-img">`;
@@ -317,7 +319,6 @@ function startConnection() {
                 if (mapViewWrapper) mapViewWrapper.classList.remove('hidden');
                 if (textMapContainer) textMapContainer.classList.add('hidden');
             } else {
-                // Default: load SVG map of Oratorio
                 await loadSVGMap();
             }
         }
