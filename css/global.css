@@ -1745,6 +1745,9 @@ input[type="text"], input[type="number"], input[type="password"], select {
     padding: 0.75rem 1rem !important;
     font-family: var(--font-ui) !important;
     transition: border-color 0.2s, box-shadow 0.2s !important;
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
 }
 
 input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus, select:focus {
@@ -2024,6 +2027,57 @@ input:checked + .slider:before {
 }
 
 @media (max-width: 600px) {
+    .glass-card, .dashboard-card {
+        padding: 0.9rem !important;
+        border-radius: 14px !important;
+    }
+
+    .form-grid-2col {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem !important;
+        margin-bottom: 0.85rem !important;
+    }
+
+    .template-edit-header {
+        padding: 0.85rem 1rem !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.75rem !important;
+    }
+
+    .template-edit-header #btn-create-back {
+        width: 100% !important;
+        padding: 0.65rem 1rem !important;
+        border-radius: 50px !important;
+        font-size: 0.85rem !important;
+        text-align: center;
+    }
+
+    .template-edit-actions {
+        flex-direction: column !important;
+        gap: 0.65rem !important;
+        padding: 0.85rem !important;
+    }
+
+    .template-edit-actions button {
+        width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 1 100% !important;
+        padding: 0.8rem 1rem !important;
+        font-size: 0.85rem !important;
+    }
+
+    .round-time-row {
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        padding: 0.5rem 0.65rem;
+    }
+
+    .round-time-row > div:first-child {
+        width: 100% !important;
+        margin-bottom: 0.2rem;
+    }
+
     .task-table-header {
         display: none !important;
     }
