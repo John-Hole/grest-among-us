@@ -242,7 +242,7 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
         const displayName = user.isAnonymous ? 'Ospite' : (user.displayName || user.email || 'Utente');
-        const displayEmail = user.isAnonymous ? 'Account Ospite' : (user.email || '');
+        const displayEmail = user.isAnonymous ? 'Account Ospite' : (user.email || user.displayName || 'Utente');
         
         const navUserEmailEl = document.getElementById('nav-user-email');
         if (navUserEmailEl) navUserEmailEl.textContent = displayEmail;

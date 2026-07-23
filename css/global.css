@@ -258,61 +258,105 @@ h1, h2, h3 {
     position: relative;
 }
 
-/* DESKTOP HOVER USER PROFILE DROPDOWN */
+/* DESKTOP USER PROFILE & ESCI HOVER BUTTON */
 .nav-user-dropdown-container {
     position: relative;
     display: flex;
     align-items: center;
 }
 
-.nav-user-badge {
-    background: rgba(0, 229, 255, 0.08);
-    border: 1px solid var(--accent-cyan, #00e5ff);
-    color: var(--accent-cyan, #00e5ff);
-    padding: 0.4rem 0.85rem;
+.nav-user-email-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1.15rem;
     border-radius: 50px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+    border: 1.5px solid rgba(0, 229, 255, 0.6);
+    color: #ffffff;
+    font-family: inherit;
     font-size: 0.85rem;
     font-weight: 700;
     cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 0 12px rgba(0, 229, 255, 0.25);
+    min-height: 40px;
+    user-select: none;
+    outline: none;
+}
+
+.nav-user-email-btn .user-email-default {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    transition: all 0.2s ease;
-}
-
-.nav-user-badge:hover {
-    background: rgba(0, 229, 255, 0.2);
-    box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
-}
-
-.nav-user-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 0.5rem;
-    background: #18222d;
-    border: 1px solid rgba(0, 229, 255, 0.35);
-    border-radius: 12px;
-    padding: 0.85rem 1rem;
-    min-width: 190px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
-    display: flex;
-    flex-direction: column;
     gap: 0.5rem;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-8px);
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    z-index: 10000;
+    color: #f8fafc;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+    white-space: nowrap;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* Hover trigger ONLY on Desktop (mouse devices) */
-@media (min-width: 769px) {
-    .nav-user-dropdown-container:hover .nav-user-menu,
-    .nav-user-menu:hover {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
+.nav-user-email-btn .user-email-icon {
+    font-size: 0.95rem;
+    filter: drop-shadow(0 0 4px rgba(0, 229, 255, 0.8));
+}
+
+.nav-user-email-btn .user-email-text {
+    color: #ffffff;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.nav-user-email-btn .user-email-hover {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: #ffffff;
+    font-size: 1.05rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0;
+    transform: translateY(24px) scale(0.7);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+    white-space: nowrap;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* ENORME ESCI ROSSO ON HOVER */
+.nav-user-email-btn:hover {
+    background: linear-gradient(135deg, #ff1744 0%, #d50000 100%) !important;
+    border-color: #ff5252 !important;
+    box-shadow: 0 0 30px rgba(255, 23, 68, 0.9), 0 4px 20px rgba(213, 0, 0, 0.7) !important;
+    transform: scale(1.12);
+    padding-left: 1.6rem;
+    padding-right: 1.6rem;
+}
+
+.nav-user-email-btn:hover .user-email-default {
+    opacity: 0;
+    transform: translateY(-24px) scale(0.7);
+}
+
+.nav-user-email-btn:hover .user-email-hover {
+    opacity: 1;
+    transform: translateY(0) scale(1.2);
+}
+
+.nav-user-email-btn:active {
+    transform: scale(0.96);
+    box-shadow: 0 0 15px rgba(255, 23, 68, 0.7) !important;
+}
+
+@media (max-width: 768px) {
+    .nav-user-dropdown-container {
+        display: none !important;
     }
 }
 

@@ -9,14 +9,16 @@
     if (isIndex) {
         rightSideHTML = `
             <div id="nav-user-info" class="nav-user-dropdown-container" style="display: none;">
-                <div class="nav-user-badge">
-                    <span id="nav-user-name"></span>
-                    <span style="font-size: 0.65rem; transition: transform 0.2s ease;">▼</span>
-                </div>
-                <div class="nav-user-menu">
-                    <div id="nav-user-email" style="font-size: 0.75rem; color: #94a3b8; word-break: break-all; margin-bottom: 0.2rem;"></div>
-                    <button id="nav-btn-logout-top" class="btn btn-danger btn-sm" style="width: 100%; padding: 0.45rem; font-size: 0.8rem; border-radius: 50px; font-weight: bold;">ESCI</button>
-                </div>
+                <button id="nav-btn-logout-top" class="nav-user-email-btn" title="Clicca per uscire dall'account">
+                    <span class="user-email-default">
+                        <span class="user-email-icon">📧</span>
+                        <span id="nav-user-email" class="user-email-text"></span>
+                    </span>
+                    <span class="user-email-hover">
+                        <span class="logout-icon">🚪</span>
+                        <span class="logout-text">ESCI</span>
+                    </span>
+                </button>
             </div>
             <button id="btn-show-auth" class="btn btn-sm btn-nav-auth"><span class="auth-text-desktop">ACCEDI / REGISTRATI</span><span class="auth-text-mobile">ACCEDI<br>REGISTRATI</span></button>
         `;
