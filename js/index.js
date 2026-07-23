@@ -768,16 +768,51 @@ function addTextTask(taskData = { num: '', name: '', obj: '', pos: '' }) {
     const obj = taskData?.obj ?? '';
     const pos = taskData?.pos ?? '';
 
+    const taskCount = textTasksContainer.querySelectorAll('.task-card-item').length + 1;
     const div = document.createElement('div');
-    div.className = 'task-row task-row-modern';
+    div.className = 'task-card-item';
+    
     div.innerHTML = `
-        <input type="text" placeholder="N°" value="${num}">
-        <input type="text" placeholder="Nome Task" value="${name}">
-        <input type="text" placeholder="Obiettivo" value="${obj}">
-        <input type="text" placeholder="Posizione" value="${pos}">
-        <button type="button" class="btn btn-danger" style="padding: 0.3rem 0.55rem; font-size: 0.75rem; border-radius: 8px; font-weight: 800; min-height: 32px;" title="Rimuovi task">✕</button>
+        <div class="task-card-header">
+            <span class="task-badge">Task #${num || taskCount}</span>
+            <button type="button" class="btn btn-danger btn-remove-task" style="padding: 0.25rem 0.65rem; font-size: 0.75rem; border-radius: 8px; font-weight: 800; min-height: 28px; display: inline-flex; align-items: center; gap: 0.25rem;" title="Rimuovi task">
+                ✕ ELIMINA
+            </button>
+        </div>
+        <div class="task-fields-grid">
+            <div class="task-field-group">
+                <label>N° / ID</label>
+                <input type="text" placeholder="Es. 1" value="${num}" ${currentFormDisabled ? 'disabled' : ''}>
+            </div>
+            <div class="task-field-group">
+                <label>Nome Task</label>
+                <input type="text" placeholder="Es. Canestri" value="${name}" ${currentFormDisabled ? 'disabled' : ''}>
+            </div>
+            <div class="task-field-group full-width">
+                <label>Obiettivo / Descrizione</label>
+                <input type="text" placeholder="Es. Fai 3 canestri di fila" value="${obj}" ${currentFormDisabled ? 'disabled' : ''}>
+            </div>
+            <div class="task-field-group full-width">
+                <label>Posizione / Luogo</label>
+                <input type="text" placeholder="Es. Campo da Basket" value="${pos}" ${currentFormDisabled ? 'disabled' : ''}>
+            </div>
+        </div>
     `;
-    div.querySelector('.btn-danger').onclick = () => div.remove();
+
+    const removeBtn = div.querySelector('.btn-remove-task');
+    if (removeBtn) {
+        if (currentFormDisabled) removeBtn.classList.add('hidden');
+        removeBtn.onclick = () => div.remove();
+    }
+
+    const numInput = div.querySelector('.task-field-group input');
+    if (numInput) {
+        numInput.oninput = (e) => {
+            const badge = div.querySelector('.task-badge');
+            if (badge) badge.textContent = `Task #${e.target.value.trim() || taskCount}`;
+        };
+    }
+
     textTasksContainer.appendChild(div);
 }
 
@@ -795,15 +830,17 @@ function getRoomConfigFromUI() {
 
     const tasks = [];
     if (enableTasks && taskType === 'custom') {
-        const rows = textTasksContainer.querySelectorAll('.task-row');
+        const rows = textTasksContainer.querySelectorAll('.task-card-item, .task-row');
         rows.forEach(row => {
             const inputs = row.querySelectorAll('input');
-            tasks.push({
-                num: inputs[0].value,
-                name: inputs[1].value,
-                obj: inputs[2].value,
-                pos: inputs[3].value
-            });
+            if (inputs.length >= 4) {
+                tasks.push({
+                    num: inputs[0].value.trim(),
+                    name: inputs[1].value.trim(),
+                    obj: inputs[2].value.trim(),
+                    pos: inputs[3].value.trim()
+                });
+            }
         });
     }
 
