@@ -5,7 +5,7 @@
       "$roomId": {
         // Only authenticated users can create/access rooms
         ".read": "auth != null",
-        ".write": "auth != null && root.child('rooms').child($roomId).child('creatorId').val() === auth.uid",
+        ".write": "auth != null && (!data.exists() || data.child('creatorId').val() === auth.uid)",
         ".indexOn": ["createdAt", "status"],
         
         "creatorId": {
