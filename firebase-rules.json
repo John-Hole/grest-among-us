@@ -15,7 +15,7 @@
     "rooms": {
       "$roomId": {
         ".read": "auth != null",
-        ".write": "auth != null && (!data.exists() || data.child('creatorId').val() === auth.uid || (data.child('createdAt').exists() && data.child('createdAt').val() < now - 86400000))",
+        ".write": "auth != null",
         ".indexOn": ["createdAt", "status"],
         "creatorId": {
           ".validate": "newData.isString() && newData.val().length > 0"

@@ -794,27 +794,30 @@ btnReport.addEventListener('click', async () => {
     }
 
     const maxMeetings = (roomConfig && roomConfig.maxMeetings) ? roomConfig.maxMeetings : 1;
-    const meetingsCalled = myData.meetings_called || 0;
+    const meetingsCalled = (myData && myData.meetings_called) ? myData.meetings_called : 0;
     
-    if (meetingsCalled >= maxMeetings || myData.status !== 'alive') return;
+    if (meetingsCalled >= maxMeetings || myData.status !== 'alive') {
+        alert("Hai esaurito le tue chiamate di riunione o sei morto.");
+        return;
+    }
     
-    if (confirm("Vuoi segnalare un corpo o chiamare una riunione di emergenza?")) {
-        btnReport.disabled = true;
-        
-        try {
-            await ensureAuth();
-            const updates = {};
-            const remaining = Math.max(0, (Number(currentState.timer) || Date.now()) - Date.now());
-            updates[`rooms/${roomCode}/state/game_status`] = 'emergency';
-            updates[`rooms/${roomCode}/state/timer_paused`] = true;
-            updates[`rooms/${roomCode}/state/timer_remaining`] = remaining;
-            updates[`rooms/${roomCode}/players/${myPlayerName}/meetings_called`] = meetingsCalled + 1;
-            await update(ref(db), updates);
-        } catch (err) {
-            console.error("Call meeting failed:", err);
-            btnReport.disabled = false;
-            alert("Errore durante la chiamata della riunione: " + err.message);
-        }
+    btnReport.disabled = true;
+    btnReport.textContent = "🚨 CHIAMATA...";
+    
+    try {
+        await ensureAuth();
+        const updates = {};
+        const remaining = Math.max(0, (Number(currentState.timer) || Date.now()) - Date.now());
+        updates[`rooms/${roomCode}/state/game_status`] = 'emergency';
+        updates[`rooms/${roomCode}/state/timer_paused`] = true;
+        updates[`rooms/${roomCode}/state/timer_remaining`] = remaining;
+        updates[`rooms/${roomCode}/players/${myPlayerName}/meetings_called`] = meetingsCalled + 1;
+        await update(ref(db), updates);
+    } catch (err) {
+        console.error("Call meeting failed:", err);
+        btnReport.disabled = false;
+        btnReport.textContent = "🚨 RIUNIONE";
+        alert("Errore durante la chiamata della riunione: " + err.message);
     }
 });
 
