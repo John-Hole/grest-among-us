@@ -340,7 +340,7 @@ function createTemplateCard(id, data, isCustom) {
     menuDrop.onclick = (e) => e.stopPropagation();
     
     const editBtn = document.createElement('button');
-    editBtn.textContent = 'Modifica';
+    editBtn.textContent = id === 'base' ? 'Visualizza' : 'Modifica';
     editBtn.className = 'template-menu-item';
     editBtn.onclick = (e) => { 
         e.stopPropagation(); 
@@ -445,13 +445,11 @@ function openCreateSettings(id, data, isDuplicate = false, isBase = false) {
 
     if (data) {
         if (isBaseTemplate) {
-            createTemplateSubtitle.textContent = "Stai usando il Template Base come partenza. Le modifiche verranno salvate come un nuovo template personalizzato.";
-            btnSaveTemplateOnly.classList.remove('hidden');
+            createTemplateSubtitle.innerHTML = `<span style="color: #f59e0b; font-weight: 800; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.3rem;">🔒 TEMPLATE STANDARD (SOLA VISUALIZZAZIONE)</span><br><span style="color: #94a3b8; font-size: 0.78rem;">Questo template è lo Standard ufficiale e non può essere modificato. Clicca "Duplica" per crearne una versione personalizzabile.</span>`;
+            btnSaveTemplateOnly.classList.add('hidden');
             btnSaveStartRoom.classList.remove('hidden');
-            btnSaveTemplateOnly.textContent = "SALVA COME NUOVO TEMPLATE";
             btnSaveStartRoom.textContent = "AVVIA STANZA CON QUESTI SETTAGGI";
             btnCreateCancelBottom.textContent = "INDIETRO / ANNULLA";
-            setFormDisabled(false);
         } else {
             if (isDuplicate) {
                 createTemplateSubtitle.textContent = `Stai duplicando "${data.name || 'Template'}". Le modifiche verranno salvate come un nuovo template.`;
@@ -463,10 +461,9 @@ function openCreateSettings(id, data, isDuplicate = false, isBase = false) {
             btnSaveTemplateOnly.textContent = "SALVA TEMPLATE";
             btnSaveStartRoom.textContent = "SALVA E AVVIA STANZA";
             btnCreateCancelBottom.textContent = "INDIETRO / ANNULLA";
-            setFormDisabled(false);
         }
 
-        createTemplateName.value = isBaseTemplate ? "Template Personalizzato" : ((data.name || "") + (isDuplicate ? " (Copia)" : ""));
+        createTemplateName.value = (data.name || "") + (isDuplicate ? " (Copia)" : "");
         createImpostors.value = data.impostorCount || 1;
         createKillCooldown.value = data.killCooldown || 120;
         createMaxMeetings.value = data.maxMeetings !== undefined ? data.maxMeetings : 1;
@@ -503,6 +500,8 @@ function openCreateSettings(id, data, isDuplicate = false, isBase = false) {
         textTasksContainer.innerHTML = '';
         const tasksArray = Array.isArray(data.tasks) ? data.tasks : (data.tasks && typeof data.tasks === 'object' ? Object.values(data.tasks) : []);
         tasksArray.forEach(task => addTextTask(task));
+
+        setFormDisabled(isBaseTemplate);
     } else {
         createTemplateSubtitle.textContent = "Crea un nuovo template personalizzato con le tue impostazioni preferite.";
         btnSaveTemplateOnly.classList.remove('hidden');
@@ -510,7 +509,6 @@ function openCreateSettings(id, data, isDuplicate = false, isBase = false) {
         btnSaveTemplateOnly.textContent = "SALVA TEMPLATE";
         btnSaveStartRoom.textContent = "SALVA E AVVIA STANZA";
         btnCreateCancelBottom.textContent = "INDIETRO / ANNULLA";
-        setFormDisabled(false);
 
         createTemplateName.value = "";
         createImpostors.value = 1;
@@ -529,6 +527,8 @@ function openCreateSettings(id, data, isDuplicate = false, isBase = false) {
         currentBase64Image = null;
         uploadStatus.textContent = '';
         textTasksContainer.innerHTML = '';
+
+        setFormDisabled(false);
     }
     
     toggleMapAndTaskUI();
