@@ -362,18 +362,43 @@ function createTemplateCard(id, data, isCustom) {
 // --- CREATE SETTINGS LOGIC ---
 let currentEditId = null;
 
+function setFormDisabled(disabled) {
+    createTemplateName.disabled = disabled;
+    createImpostors.disabled = disabled;
+    createKillCooldown.disabled = disabled;
+    createMaxMeetings.disabled = disabled;
+    createMeetingDuration.disabled = disabled;
+    createScientist.disabled = disabled;
+    createVideoIntro.disabled = disabled;
+    createUnlimitedPlayers.disabled = disabled;
+    createMaxPlayers.disabled = disabled || createUnlimitedPlayers.checked;
+    Array.from(mapRadios).forEach(r => r.disabled = disabled);
+    mapImageUpload.disabled = disabled;
+    btnAddTextTask.disabled = disabled;
+    textTasksContainer.querySelectorAll('input, button').forEach(el => el.disabled = disabled);
+}
+
 function openCreateSettings(id, data, isDuplicate = false, isBase = false) {
-    // Se è il template base o un duplicato, currentEditId è null (così il salvataggio genera un nuovo template).
-    // Se è un template custom esistente, usiamo l'ID per aggiornarlo.
-    currentEditId = (isDuplicate || isBase || id === 'base') ? null : id;
+    const isBaseTemplate = (isBase || id === 'base') && !isDuplicate;
+    currentEditId = (isDuplicate || isBaseTemplate) ? null : id;
 
     if (data) {
-        if (isBase || id === 'base') {
-            createTemplateSubtitle.textContent = "Stai visualizzando il Template Base. Il template base non può essere sovrascritto direttamente: le eventuali modifiche verranno salvate come nuovo template.";
-        } else if (isDuplicate) {
-            createTemplateSubtitle.textContent = `Stai duplicando "${data.name || 'Template'}". Le modifiche verranno salvate come un nuovo template.`;
+        if (isBaseTemplate) {
+            createTemplateSubtitle.textContent = "Visualizzazione dei settaggi del Template Base (Predefinito).";
+            btnSaveTemplateOnly.classList.add('hidden');
+            btnSaveStartRoom.classList.add('hidden');
+            btnCreateCancelBottom.textContent = "INDIETRO";
+            setFormDisabled(true);
         } else {
-            createTemplateSubtitle.textContent = `Stai modificando il tuo template "${data.name || 'Template'}".`;
+            if (isDuplicate) {
+                createTemplateSubtitle.textContent = `Stai duplicando "${data.name || 'Template'}". Le modifiche verranno salvate come un nuovo template.`;
+            } else {
+                createTemplateSubtitle.textContent = `Stai modificando il tuo template "${data.name || 'Template'}".`;
+            }
+            btnSaveTemplateOnly.classList.remove('hidden');
+            btnSaveStartRoom.classList.remove('hidden');
+            btnCreateCancelBottom.textContent = "INDIETRO / ANNULLA";
+            setFormDisabled(false);
         }
 
         createTemplateName.value = (data.name || "") + (isDuplicate ? " (Copia)" : "");
@@ -389,7 +414,7 @@ function openCreateSettings(id, data, isDuplicate = false, isBase = false) {
             createMaxPlayers.disabled = true;
         } else {
             createUnlimitedPlayers.checked = false;
-            createMaxPlayers.disabled = false;
+            createMaxPlayers.disabled = isBaseTemplate ? true : false;
             createMaxPlayers.value = data.maxPlayers || 15;
         }
 
@@ -408,6 +433,11 @@ function openCreateSettings(id, data, isDuplicate = false, isBase = false) {
         }
     } else {
         createTemplateSubtitle.textContent = "Crea un nuovo template personalizzato con le tue impostazioni preferite.";
+        btnSaveTemplateOnly.classList.remove('hidden');
+        btnSaveStartRoom.classList.remove('hidden');
+        btnCreateCancelBottom.textContent = "INDIETRO / ANNULLA";
+        setFormDisabled(false);
+
         createTemplateName.value = "";
         createImpostors.value = 1;
         createKillCooldown.value = 120;
