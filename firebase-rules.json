@@ -1,0 +1,138 @@
+{
+  "rules": {
+    // === ROOMS - Main game sessions ===
+    "rooms": {
+      "$roomId": {
+        // Only authenticated users can create/access rooms
+        ".read": "auth != null",
+        ".write": "auth != null && root.child('rooms').child($roomId).child('creatorId').val() === auth.uid",
+        ".indexOn": ["createdAt", "status"],
+        
+        "creatorId": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "status": {
+          ".validate": "newData.isString() && ['waiting', 'playing', 'finished'].indexOf(newData.val()) !== -1"
+        },
+        "currentRound": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        
+        // === GAME STATE - Controlled by creator only ===
+        "gameState": {
+          ".write": "root.child('rooms').child($roomId).child('creatorId').val() === auth.uid",
+          ".validate": "newData.isObject()",
+          "round": {
+            ".validate": "newData.isNumber() && newData.val() > 0"
+          },
+          "status": {
+            ".validate": "newData.isString() && ['waiting', 'playing', 'meeting', 'voting', 'finished'].indexOf(newData.val()) !== -1"
+          },
+          "timeRemaining": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          }
+        },
+        
+        // === PLAYERS - Each player manages their own data ===
+        "players": {
+          "$playerId": {
+            ".write": "auth != null && ($playerId === auth.uid || root.child('rooms').child($roomId).child('creatorId').val() === auth.uid)",
+            ".validate": "newData.hasChildren(['name', 'role', 'status'])",
+            "name": {
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 50"
+            },
+            "role": {
+              ".validate": "newData.isString() && ['crewmate', 'impostor', 'scientist'].indexOf(newData.val()) !== -1"
+            },
+            "status": {
+              ".validate": "newData.isString() && ['alive', 'dead', 'ghost'].indexOf(newData.val()) !== -1"
+            },
+            "joinedAt": {
+              ".validate": "newData.isNumber() && newData.val() <= now"
+            },
+            "lastSeen": {
+              ".validate": "newData.isNumber() && newData.val() <= now"
+            },
+            // Tasks completed by this player
+            "tasks": {
+              "$taskId": {
+                ".write": "auth != null && $playerId === auth.uid",
+                "completed": {
+                  ".validate": "newData.isBoolean()"
+                },
+                "completedAt": {
+                  ".validate": "newData.isNumber() && newData.val() <= now"
+                }
+              }
+            },
+            // Kills tracking (impostor only)
+            "kills": {
+              "$killId": {
+                ".write": "auth != null && root.child('rooms').child($roomId).child('creatorId').val() === auth.uid",
+                "targetId": {
+                  ".validate": "newData.isString()"
+                },
+                "timestamp": {
+                  ".validate": "newData.isNumber() && newData.val() <= now"
+                }
+              }
+            }
+          }
+        },
+        
+        // === VOTING SYSTEM ===
+        "votes": {
+          ".read": "auth != null",
+          "$voterId": {
+            ".write": "auth != null && $voterId === auth.uid",
+            ".validate": "newData.isString() || newData.val() === null",
+            ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0)"
+          }
+        },
+        
+        // === ROOM CONFIGURATION ===
+        "config": {
+          ".read": "auth != null",
+          ".write": "root.child('rooms').child($roomId).child('creatorId').val() === auth.uid",
+          "roundTimes": {
+            ".validate": "newData.isArray()"
+          },
+          "discussionTime": {
+            ".validate": "newData.isNumber() && newData.val() > 0"
+          },
+          "votingTime": {
+            ".validate": "newData.isNumber() && newData.val() > 0"
+          }
+        }
+      }
+    },
+    
+    // === RATE LIMITING - Prevent abuse ===
+    "rateLimit": {
+      "$userId": {
+        ".read": "auth != null && auth.uid === $userId",
+        ".write": "auth != null && auth.uid === $userId",
+        ".validate": "newData.isObject()",
+        "lastRoomCreation": {
+          ".validate": "newData.isNumber()"
+        }
+      }
+    },
+    
+    // === PUBLIC METADATA (no auth required) ===
+    "publicMetadata": {
+      ".read": true,
+      ".write": false,
+      "version": {
+        ".validate": "newData.isString()"
+      },
+      "maintenance": {
+        ".validate": "newData.isBoolean()"
+      }
+    },
+    
+    // === DEFAULT: Deny everything else ===
+    ".read": false,
+    ".write": false
+  }
+}
