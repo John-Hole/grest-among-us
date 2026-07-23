@@ -276,6 +276,11 @@ function updateUI(state, playersMap) {
 
         if (myData.role === 'impostor') {
             scientistUI.classList.add('hidden');
+            if (myData.status === 'alive') {
+                killSection.classList.remove('hidden');
+            } else {
+                killSection.classList.add('hidden');
+            }
             renderImpostorTasks(myData.tasks || []);
             updateKillSelector(playersMap);
         } else {
@@ -422,31 +427,39 @@ function renderImpostorTasks(tasksObj) {
     let idx = 1;
     for(const taskId in tasksObj) {
         const taskData = tasksObj[taskId];
+        const isDone = taskData.completed;
         const li = document.createElement('li');
-        li.className = `giocatore-task-item`;
+        li.className = `giocatore-task-item ${isDone ? 'completed' : ''}`;
         li.innerHTML = `
             <div class="giocatore-task-header">
                 <span class="task-num">#${idx}</span>
-                <span class="task-status-pill pending" id="fake-pill-${taskId}">IN CORSO</span>
+                <span class="task-status-pill ${isDone ? 'done' : 'pending'}" id="fake-pill-${taskId}">${isDone ? '✔ COMPLETATO' : 'IN CORSO'}</span>
             </div>
             <div class="task-info">
                 <div class="task-title">${taskData.desc}</div>
             </div>
-            <button class="task-btn" id="fake-task-btn-${taskId}">SPUNTA TASK</button>
+            <button class="task-btn ${isDone ? 'btn-done' : ''}" ${isDone ? 'disabled' : ''} id="fake-task-btn-${taskId}">
+                ${isDone ? '✔ COMPLETATA' : 'SPUNTA TASK'}
+            </button>
         `;
-        const btn = li.querySelector(`#fake-task-btn-${taskId}`);
-        btn.onclick = (e) => {
-            li.classList.add('completed');
-            btn.disabled = true;
-            btn.classList.add('btn-done');
-            btn.textContent = '✔ COMPLETATA';
-            const pill = li.querySelector(`#fake-pill-${taskId}`);
-            if (pill) {
-                pill.classList.remove('pending');
-                pill.classList.add('done');
-                pill.textContent = '✔ COMPLETATO';
-            }
-        };
+        
+        if (!isDone) {
+            const btn = li.querySelector(`#fake-task-btn-${taskId}`);
+            btn.onclick = async (e) => {
+                const targetBtn = e.currentTarget;
+                targetBtn.disabled = true;
+                targetBtn.classList.add('btn-done');
+                targetBtn.textContent = '✔ COMPLETATA';
+                const pill = li.querySelector(`#fake-pill-${taskId}`);
+                if (pill) {
+                    pill.classList.remove('pending');
+                    pill.classList.add('done');
+                    pill.textContent = '✔ COMPLETATO';
+                }
+                li.classList.add('completed');
+                await completeTask(taskId);
+            };
+        }
         taskList.appendChild(li);
         idx++;
     }
@@ -513,7 +526,6 @@ btnKill.addEventListener('click', async () => {
             status: 'killed_hidden'
         });
         killTargetSelect.value = "";
-        killSection.classList.add('hidden'); // auto hide after kill
     }
 });
 

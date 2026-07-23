@@ -115,31 +115,8 @@ async function loadAndInitSVGMap() {
 }
 
 function attachSVGInteractivity(svgEl) {
-    const tooltip = document.getElementById('room-tooltip');
-    const roomPaths = svgEl.querySelectorAll('path[id]');
-
-    roomPaths.forEach(path => {
-        const roomId = path.getAttribute('id') || '';
-        if (!roomId) return;
-
-        path.addEventListener('mouseenter', (e) => {
-            if (tooltip) {
-                tooltip.textContent = `📍 ${roomId}`;
-                tooltip.style.display = 'block';
-            }
-        });
-
-        path.addEventListener('mousemove', (e) => {
-            if (tooltip) {
-                tooltip.style.left = e.clientX + 'px';
-                tooltip.style.top = e.clientY + 'px';
-            }
-        });
-
-        path.addEventListener('mouseleave', () => {
-            if (tooltip) tooltip.style.display = 'none';
-        });
-    });
+    // Border highlight on hover is handled by CSS in mappa_oratorio.html (.svg-container svg path[id]:hover)
+    // No floating tooltip label popup is needed since room names are rendered directly on the SVG.
 }
 
 // 5. Zoom & Label Controls
