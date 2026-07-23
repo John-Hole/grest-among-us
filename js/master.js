@@ -244,12 +244,6 @@ if (cfgVoting) {
 
 if (btnProjector) {
     btnProjector.href = `schermo.html?room=${roomCode}`;
-    btnProjector.addEventListener('click', (e) => {
-        if (!btnProjector.href) {
-            e.preventDefault();
-            window.open(`schermo.html?room=${roomCode}`, '_blank');
-        }
-    });
 }
 
 // Update UI text
