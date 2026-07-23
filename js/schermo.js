@@ -216,13 +216,11 @@ function startConnection() {
             tasksArray.forEach(t => {
                 const li = document.createElement('li');
                 li.className = 'schermo-task-item';
-                const titleText = t.name || t.obj || '';
-                const hasSeparateObj = Boolean(t.obj && t.obj.trim() !== '' && t.obj.trim() !== (t.name || '').trim());
+                const taskMainText = t.obj || t.name || '';
                 li.innerHTML = `
                     <span class="task-num">#${escapeHtml(t.num)}</span>
                     <div class="task-info">
-                        <div class="task-title">${escapeHtml(titleText)}</div>
-                        ${hasSeparateObj ? `<div class="task-desc">${escapeHtml(t.obj)}</div>` : ''}
+                        <div class="task-title">${escapeHtml(taskMainText)}</div>
                         ${t.pos ? `<div class="task-location">📍 ${escapeHtml(t.pos)}</div>` : ''}
                     </div>
                 `;
@@ -236,12 +234,10 @@ function startConnection() {
         if (textTasksBody) {
             tasksArray.forEach(t => {
                 const tr = document.createElement('tr');
-                const titleText = t.name || t.obj || '';
-                const hasSeparateObj = Boolean(t.obj && t.obj.trim() !== '' && t.obj.trim() !== (t.name || '').trim());
+                const taskMainText = t.obj || t.name || '';
                 tr.innerHTML = `
                     <td class="task-td-num">${escapeHtml(t.num)}</td>
-                    <td class="task-td-name">${escapeHtml(titleText)}</td>
-                    <td class="task-td-obj">${hasSeparateObj ? escapeHtml(t.obj) : '-'}</td>
+                    <td class="task-td-name">${escapeHtml(taskMainText)}</td>
                     <td class="task-td-pos">${t.pos ? escapeHtml(t.pos) : '-'}</td>
                 `;
                 textTasksBody.appendChild(tr);
