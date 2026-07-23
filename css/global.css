@@ -255,6 +255,65 @@ h1, h2, h3 {
 .navbar-right {
     display: flex;
     align-items: center;
+    position: relative;
+}
+
+/* DESKTOP HOVER USER PROFILE DROPDOWN */
+.nav-user-dropdown-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.nav-user-badge {
+    background: rgba(0, 229, 255, 0.08);
+    border: 1px solid var(--accent-cyan, #00e5ff);
+    color: var(--accent-cyan, #00e5ff);
+    padding: 0.4rem 0.85rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+}
+
+.nav-user-badge:hover {
+    background: rgba(0, 229, 255, 0.2);
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+}
+
+.nav-user-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background: #18222d;
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    min-width: 190px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 10000;
+}
+
+/* Hover trigger ONLY on Desktop (mouse devices) */
+@media (min-width: 769px) {
+    .nav-user-dropdown-container:hover .nav-user-menu,
+    .nav-user-menu:hover {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
 }
 
 .btn-nav-auth {

@@ -238,7 +238,10 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
         const displayName = user.isAnonymous ? 'Ospite' : (user.displayName || user.email || 'Utente');
+        const displayEmail = user.isAnonymous ? 'Account Ospite' : (user.email || '');
         
+        const navUserEmailEl = document.getElementById('nav-user-email');
+        if (navUserEmailEl) navUserEmailEl.textContent = displayEmail;
         if (authStatusEl) authStatusEl.textContent = `Loggato come: ${displayName}`;
         if (btnLogoutEl) btnLogoutEl.classList.remove('hidden');
         if (btnShowAuthEl) btnShowAuthEl.style.display = 'none';
