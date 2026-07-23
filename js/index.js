@@ -1006,10 +1006,14 @@ btnSaveStartRoom.addEventListener('click', async () => {
 async function startRoomWithConfig(config) {
     if (!auth.currentUser) {
         try {
+            console.log("[Room] No user, signing in anonymously...");
             await signInAnonymously(auth);
+            console.log("[Room] Sign-in successful, uid:", auth.currentUser?.uid);
         } catch (e) {
-            console.error("Auto sign-in failed:", e);
+            console.error("[Room] Auto sign-in failed:", e);
         }
+    } else {
+        console.log("[Room] Already authenticated as:", auth.currentUser.uid);
     }
 
     const imageToSave = config.mapImage;
@@ -1020,6 +1024,7 @@ async function startRoomWithConfig(config) {
     const roomCode = generateRoomCode();
     
     const uid = auth.currentUser ? auth.currentUser.uid : 'unknown';
+    console.log("[Room] Creating room with creatorId:", uid, "roomCode:", roomCode);
 
     const roomData = {
         creatorId: uid,
@@ -1037,11 +1042,13 @@ async function startRoomWithConfig(config) {
 
     try {
         await set(ref(db, `rooms/${roomCode}`), roomData);
+        console.log("[Room] Room created successfully!");
         if (imageToSave) {
             await set(ref(db, `rooms/${roomCode}/mapImage`), imageToSave);
         }
         window.location.href = `master.html?room=${roomCode}`;
     } catch (error) {
+        console.error("[Room] Write error:", error);
         alert("Errore creazione stanza: " + error.message);
     }
 }
