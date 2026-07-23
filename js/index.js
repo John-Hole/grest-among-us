@@ -1014,12 +1014,15 @@ async function startRoomWithConfig(config) {
 
     const imageToSave = config.mapImage;
     const roomConfig = { ...config };
-    delete roomConfig.mapImage; // Separiamo l'immagine dal nodo principale
-    delete roomConfig.name; // Non serve nella stanza
+    delete roomConfig.mapImage;
+    delete roomConfig.name;
 
     const roomCode = generateRoomCode();
     
+    const uid = auth.currentUser ? auth.currentUser.uid : 'unknown';
+
     const roomData = {
+        creatorId: uid,
         config: roomConfig,
         state: {
             game_status: 'waiting',
@@ -1035,7 +1038,7 @@ async function startRoomWithConfig(config) {
     try {
         await set(ref(db, `rooms/${roomCode}`), roomData);
         if (imageToSave) {
-            await set(ref(db, `images/${roomCode}`), imageToSave);
+            await set(ref(db, `rooms/${roomCode}/mapImage`), imageToSave);
         }
         window.location.href = `master.html?room=${roomCode}`;
     } catch (error) {

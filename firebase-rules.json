@@ -68,7 +68,7 @@
             // Kills tracking (impostor only)
             "kills": {
               "$killId": {
-                ".write": "auth != null && root.child('rooms').child($roomId).child('creatorId').val() === auth.uid",
+".write": "auth != null && (!data.exists() || root.child('rooms').child($roomId).child('creatorId').val() === auth.uid)",
                 "targetId": {
                   ".validate": "newData.isString()"
                 },
