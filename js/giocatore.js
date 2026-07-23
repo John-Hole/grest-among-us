@@ -8,7 +8,7 @@ let myPlayerName = urlParams.get('player');
 
 if (!roomCode || !myPlayerName) {
     alert("Manca il codice stanza o il nome giocatore.");
-    window.location.href = "index.html";
+    window.location.href = "/";
 }
 
 // Elements
@@ -97,7 +97,7 @@ onValue(roomRef, async (snapshot) => {
                 await remove(ref(db, `images/${roomCode}`));
             } catch (e) {}
             alert("La stanza è scaduta (superato 1 giorno dalla creazione) ed è stata eliminata.");
-            window.location.href = "index.html";
+            window.location.href = "/";
             return;
         }
 
@@ -637,7 +637,7 @@ async function rejoinRoom() {
         const snapshot = await get(ref(db, `rooms/${roomCode}`));
         if (!snapshot.exists()) {
             alert("La stanza non esiste più.");
-            window.location.href = "index.html";
+            window.location.href = "/";
             return;
         }
 

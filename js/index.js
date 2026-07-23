@@ -196,7 +196,7 @@ btnGoJoin.addEventListener('click', () => {
     showSection('join');
 });
 btnGoSchermo?.addEventListener('click', () => {
-    window.location.href = 'schermo.html';
+    window.location.href = 'schermo';
 });
 btnAuthBack.addEventListener('click', () => showSection('home'));
 btnTplBack.addEventListener('click', () => showSection('home'));
@@ -1144,7 +1144,7 @@ async function startRoomWithConfig(config) {
         if (imageToSave) {
             await set(ref(db, `rooms/${roomCode}/mapImage`), imageToSave);
         }
-        window.location.href = `master.html?room=${roomCode}`;
+        window.location.href = `master?room=${roomCode}`;
     } catch (error) {
         console.error("[Room] Write error:", error);
         alert("Errore creazione stanza: " + error.message);
@@ -1217,7 +1217,7 @@ btnJoinRoom.addEventListener('click', async () => {
             meetings_called: 0
         });
 
-        window.location.href = `giocatore.html?room=${code}&player=${encodeURIComponent(name)}`;
+        window.location.href = `giocatore?room=${code}&player=${encodeURIComponent(name)}`;
     } catch (error) {
         alert("Errore di connessione: " + error.message);
     }

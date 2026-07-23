@@ -11,7 +11,7 @@ const gameStatusText = document.getElementById('game-status-text');
 
 if (!roomCode) {
     alert("Nessun codice stanza fornito.");
-    window.location.href = "index.html";
+    window.location.href = "/";
 }
 
 const roomRef = ref(db, `rooms/${roomCode}`);
@@ -99,7 +99,7 @@ if (roomCode) {
     onValue(roomRef, snapshot => {
         if (!snapshot.exists()) {
             alert("La stanza non esiste più.");
-            window.location.href = "index.html";
+            window.location.href = "/";
             return;
         }
 
@@ -109,14 +109,14 @@ if (roomCode) {
         const players = room.players || {};
         if (!myPlayerName || !players[myPlayerName] || players[myPlayerName].role !== 'scientist') {
             alert("Accesso negato: Solo il giocatore con ruolo 'Scienziato' può accedere a questo monitor.");
-            window.location.href = `giocatore.html?room=${encodeURIComponent(roomCode)}${myPlayerName ? `&player=${encodeURIComponent(myPlayerName)}` : ''}`;
+            window.location.href = `giocatore?room=${encodeURIComponent(roomCode)}${myPlayerName ? `&player=${encodeURIComponent(myPlayerName)}` : ''}`;
             return;
         }
 
         // 24-hour expiration check
         if (room.createdAt && (Date.now() - room.createdAt > 24 * 60 * 60 * 1000)) {
             alert("La stanza è scaduta (durata massima: 24h).");
-            window.location.href = "index.html";
+            window.location.href = "/";
             return;
         }
 

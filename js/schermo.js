@@ -494,7 +494,7 @@ function startConnection() {
             // 24-hour expiration check
             if (data.createdAt && (Date.now() - data.createdAt > 24 * 60 * 60 * 1000)) {
                 alert("La stanza visualizzata è scaduta (durata massima: 24h).");
-                window.location.href = "index.html";
+                window.location.href = "/";
                 return;
             }
 
@@ -503,7 +503,7 @@ function startConnection() {
                 const qrContainer = document.getElementById("qrcode");
                 if (qrContainer) {
                     qrContainer.innerHTML = '';
-                    const joinUrl = `${window.location.origin}${window.location.pathname.replace('schermo.html', 'index.html')}?room=${roomCode}`;
+                    const joinUrl = `${window.location.origin}/?room=${roomCode}`;
                     new QRCode(qrContainer, {
                         text: joinUrl,
                         width: 150,

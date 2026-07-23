@@ -9,7 +9,7 @@ const roomCode = urlParams.get('room');
 
 if (!roomCode) {
     alert("Nessun codice stanza fornito.");
-    window.location.href = "index.html";
+    window.location.href = "/";
 }
 
 // Elements
@@ -225,7 +225,7 @@ if (cfgVoting) {
 }
 
 if (btnProjector) {
-    btnProjector.href = `schermo.html?room=${roomCode}`;
+    btnProjector.href = `schermo?room=${roomCode}`;
 }
 
 // Update UI text
@@ -506,7 +506,7 @@ function updateKickedSection(kickedMap) {
             onAuthStateChanged(auth, (user) => {
                 if (!user || user.uid !== data.creatorId) {
                     alert("Accesso negato: Solo l'host creatore della stanza può accedere al pannello Master.");
-                    window.location.href = "index.html";
+                    window.location.href = "/";
                     return;
                 }
             });
@@ -519,7 +519,7 @@ function updateKickedSection(kickedMap) {
                 await remove(ref(db, `images/${roomCode}`));
             } catch (e) {}
             alert("Questa stanza è scaduta (superato 1 giorno dalla creazione) ed è stata eliminata.");
-            window.location.href = "index.html";
+            window.location.href = "/";
             return;
         }
 
