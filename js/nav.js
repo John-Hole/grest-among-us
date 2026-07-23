@@ -7,7 +7,13 @@
     
     let rightSideHTML = '';
     if (isIndex) {
-        rightSideHTML = `<button id="btn-show-auth" class="btn btn-sm btn-nav-auth"><span class="auth-text-desktop">ACCEDI / REGISTRATI</span><span class="auth-text-mobile">ACCEDI<br>REGISTRATI</span></button>`;
+        rightSideHTML = `
+            <div id="nav-user-info" style="display: none; align-items: center; gap: 0.6rem;">
+                <span id="nav-user-name" style="font-size: 0.85rem; font-weight: bold; color: var(--accent-cyan, #00e5ff); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+                <button id="nav-btn-logout-top" class="btn btn-danger btn-sm" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; border-radius: 50px;">ESCI</button>
+            </div>
+            <button id="btn-show-auth" class="btn btn-sm btn-nav-auth"><span class="auth-text-desktop">ACCEDI / REGISTRATI</span><span class="auth-text-mobile">ACCEDI<br>REGISTRATI</span></button>
+        `;
     } else if (isMaster || isGiocatore || isSchermo || isScienziato) {
         rightSideHTML = `<button onclick="if(confirm('Vuoi uscire dalla schermata generale?')) window.location.href='index.html'" class="btn btn-danger btn-sm" style="padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: 50px;">ESCI</button>`;
     }

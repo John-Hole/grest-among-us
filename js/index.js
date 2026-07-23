@@ -229,12 +229,22 @@ onAuthStateChanged(auth, (user) => {
     // Render base templates synchronously before any network request
     renderBaseTemplates();
 
+    const authStatusEl = document.getElementById('nav-auth-status');
+    const btnLogoutEl = document.getElementById('nav-btn-logout');
+    const btnShowAuthEl = document.getElementById('btn-show-auth');
+    const navUserInfoEl = document.getElementById('nav-user-info');
+    const navUserNameEl = document.getElementById('nav-user-name');
+
     if (user) {
         currentUser = user;
-        const displayName = user.isAnonymous ? 'Ospite' : (user.email || user.displayName || 'Utente');
-        authStatus.textContent = `Loggato come: ${displayName}`;
-        btnLogout.classList.remove('hidden');
-        btnShowAuth.classList.add('hidden');
+        const displayName = user.isAnonymous ? 'Ospite' : (user.displayName || user.email || 'Utente');
+        
+        if (authStatusEl) authStatusEl.textContent = `Loggato come: ${displayName}`;
+        if (btnLogoutEl) btnLogoutEl.classList.remove('hidden');
+        if (btnShowAuthEl) btnShowAuthEl.style.display = 'none';
+        if (navUserInfoEl) navUserInfoEl.style.display = 'flex';
+        if (navUserNameEl) navUserNameEl.textContent = `👤 ${displayName}`;
+
         loadUserTemplates(user.uid);
         
         if (urlParams.get('go') === 'account') {
@@ -242,9 +252,10 @@ onAuthStateChanged(auth, (user) => {
         }
     } else {
         currentUser = null;
-        authStatus.textContent = "Non loggato";
-        btnLogout.classList.add('hidden');
-        btnShowAuth.classList.remove('hidden');
+        if (authStatusEl) authStatusEl.textContent = "Non loggato";
+        if (btnLogoutEl) btnLogoutEl.classList.add('hidden');
+        if (btnShowAuthEl) btnShowAuthEl.style.display = 'inline-block';
+        if (navUserInfoEl) navUserInfoEl.style.display = 'none';
         userTemplates = {};
         
         if (urlParams.get('go') === 'account') {
@@ -392,10 +403,17 @@ btnAnonLogin.addEventListener('click', async () => {
     }
 });
 
-btnLogout.addEventListener('click', async () => {
-    await signOut(auth);
-    showSection('home');
-});
+const handleLogout = async () => {
+    try {
+        await signOut(auth);
+        showSection('home');
+    } catch (e) {
+        console.error("Logout error:", e);
+    }
+};
+
+document.getElementById('nav-btn-logout-top')?.addEventListener('click', handleLogout);
+btnLogout?.addEventListener('click', handleLogout);
 
 
 // Close dropdowns when clicking outside
