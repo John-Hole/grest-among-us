@@ -1,6 +1,6 @@
 import { db, auth } from './firebase-config.js';
 import { ref, set, get, child, remove } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, signInAnonymously, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, signInAnonymously, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
 // DOM Elements - Sections
 const homeSection = document.getElementById('section-home');
@@ -301,6 +301,15 @@ btnLogin.addEventListener('click', async () => {
     }
 });
 
+// Check for Google login redirect result if popup was blocked previously
+getRedirectResult(auth).then((result) => {
+    if (result && result.user) {
+        showSection('home');
+    }
+}).catch((error) => {
+    console.error("Redirect login error:", error);
+});
+
 btnGoogleLogin.addEventListener('click', async () => {
     try {
         const provider = new GoogleAuthProvider();
@@ -309,8 +318,18 @@ btnGoogleLogin.addEventListener('click', async () => {
     } catch (error) {
         if (error.code === 'auth/popup-closed-by-user') {
             console.log('Google login cancelled');
+        } else if (error.code === 'auth/popup-blocked') {
+            console.warn('Popup blocked, falling back to redirect...');
+            try {
+                const provider = new GoogleAuthProvider();
+                await signInWithRedirect(auth, provider);
+            } catch (err) {
+                alert("Il tuo browser sta bloccando i popup. Abilita i popup nella barra degli indirizzi o usa l'accesso Email / Ospite.");
+            }
+        } else if (error.code === 'auth/unauthorized-domain') {
+            alert("Il dominio " + window.location.hostname + " non è ancora stato autorizzato nelle impostazioni di Firebase Authentication.");
         } else {
-            alert("Errore login Google: " + error.message);
+            alert("Errore login Google: " + (error.message || error.code));
         }
     }
 });
