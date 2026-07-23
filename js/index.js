@@ -58,7 +58,7 @@ const createMapType = document.getElementById('create-map-type');
 
 const createEnableTasks = document.getElementById('create-enable-tasks');
 const taskOptionsWrapper = document.getElementById('task-options-wrapper');
-const createTaskType = document.getElementById('create-task-type');
+const createTaskType = document.getElementById('create-task-type'); // may be null (removed)
 
 const mapPhotoConfig = document.getElementById('map-photo-config');
 const mapTextConfig = document.getElementById('map-text-config');
@@ -463,7 +463,7 @@ function setFormDisabled(disabled) {
     mapImageUpload.disabled = disabled;
 
     createEnableTasks.disabled = disabled;
-    createTaskType.disabled = disabled;
+    if (createTaskType) createTaskType.disabled = disabled;
     if (btnAddTextTask) {
         btnAddTextTask.disabled = disabled;
         if (disabled) btnAddTextTask.classList.add('hidden');
@@ -531,7 +531,7 @@ function openCreateSettings(id, data, isDuplicate = false, isBase = false) {
         // Config Task
         const enableTasksVal = data.enableTasks !== undefined ? data.enableTasks : true;
         createEnableTasks.checked = enableTasksVal;
-        createTaskType.value = data.taskType || (data.mapMode === 'text' || (data.tasks && data.tasks.length > 0) ? 'custom' : 'default');
+        if (createTaskType) createTaskType.value = 'custom';
 
         textTasksContainer.innerHTML = '';
         const tasksArray = Array.isArray(data.tasks) ? data.tasks : (data.tasks && typeof data.tasks === 'object' ? Object.values(data.tasks) : []);
@@ -559,7 +559,7 @@ function openCreateSettings(id, data, isDuplicate = false, isBase = false) {
         createEnableMap.checked = true;
         createMapType.value = 'photo';
         createEnableTasks.checked = true;
-        createTaskType.value = 'default';
+        if (createTaskType) createTaskType.value = 'custom';
         currentBase64Image = null;
         uploadStatus.textContent = '';
         textTasksContainer.innerHTML = '';
@@ -617,7 +617,7 @@ mapImageUpload.addEventListener('change', (e) => {
 createEnableMap.addEventListener('change', toggleMapAndTaskUI);
 createMapType.addEventListener('change', toggleMapAndTaskUI);
 createEnableTasks.addEventListener('change', toggleMapAndTaskUI);
-createTaskType.addEventListener('change', toggleMapAndTaskUI);
+if (createTaskType) createTaskType.addEventListener('change', toggleMapAndTaskUI);
 
 let cachedVectorSVG = null;
 
@@ -689,11 +689,7 @@ function toggleMapAndTaskUI() {
     // TASKS
     if (createEnableTasks.checked) {
         taskOptionsWrapper.classList.remove('hidden');
-        if (createTaskType.value === 'custom') {
-            mapTextConfig.classList.remove('hidden');
-        } else {
-            mapTextConfig.classList.add('hidden');
-        }
+        mapTextConfig.classList.remove('hidden');
     } else {
         taskOptionsWrapper.classList.add('hidden');
         mapTextConfig.classList.add('hidden');
@@ -846,10 +842,10 @@ function getRoomConfigFromUI() {
     const mapType = createMapType.value;
     
     const enableTasks = createEnableTasks.checked;
-    const taskType = createTaskType.value;
+    const taskType = 'custom';
 
     const tasks = [];
-    if (enableTasks && taskType === 'custom') {
+    if (enableTasks) {
         const rows = textTasksContainer.querySelectorAll('.task-row-compact');
         rows.forEach((row, idx) => {
             const taskInput = row.querySelector('.task-input');
@@ -902,7 +898,7 @@ function getRoomConfigFromUI() {
         taskType: taskType,
         mapMode: mapMode,
         mapImage: (enableMap && mapType === 'photo') ? currentBase64Image : null,
-        tasks: (enableTasks && taskType === 'custom') ? tasks : null,
+        tasks: enableTasks ? tasks : null,
         maxPlayers: maxPlayers
     };
 }
