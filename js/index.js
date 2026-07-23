@@ -254,20 +254,50 @@ onAuthStateChanged(auth, (user) => {
 });
 
 btnLogin.addEventListener('click', async () => {
-    try {
-        await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-        showSection('home');
-    } catch (error) {
-        alert("Errore login: " + error.message);
-    }
-});
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
 
-btnRegister.addEventListener('click', async () => {
+    if (!email || !password) {
+        return alert("Inserisci sia l'email che la password.");
+    }
+
     try {
-        await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+        // Tenta prima l'accesso
+        await signInWithEmailAndPassword(auth, email, password);
         showSection('home');
-    } catch (error) {
-        alert("Errore registrazione: " + error.message);
+    } catch (loginError) {
+        console.log("Login error:", loginError.code, loginError.message);
+
+        // Se l'account non esiste (user-not-found o invalid-credential in Firebase v10), registra automaticamente
+        if (loginError.code === 'auth/user-not-found' || loginError.code === 'auth/invalid-credential') {
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                alert("Nuovo account creato ed effettuato l'accesso con successo!");
+                showSection('home');
+                return;
+            } catch (regError) {
+                console.log("Reg error:", regError.code, regError.message);
+                if (regError.code === 'auth/email-already-in-use') {
+                    alert("Password errata per questa email.");
+                } else if (regError.code === 'auth/weak-password') {
+                    alert("La password deve contenere almeno 6 caratteri.");
+                } else if (regError.code === 'auth/invalid-email') {
+                    alert("Indirizzo email non valido.");
+                } else {
+                    alert("Password errata o inserita una credenziale non valida.");
+                }
+                return;
+            }
+        }
+
+        // Altri errori di login
+        if (loginError.code === 'auth/wrong-password') {
+            alert("Password errata per questa email.");
+        } else if (loginError.code === 'auth/invalid-email') {
+            alert("Indirizzo email non valido.");
+        } else {
+            alert("Errore di accesso: " + (loginError.message || "Credenziali non valide."));
+        }
     }
 });
 
