@@ -75,24 +75,40 @@ let currentUser = null;
 let currentBase64Image = null;
 let userTemplates = {};
 
+// All room names from the vector SVG map for the location dropdown
+const MAP_VECTOR_LOCATIONS = [
+    'Salone', 'Teatro', 'Palco', 'Canestro', 'Atrio', 'Mensa', 'Cucina',
+    'Regia', 'Sala Musica', 'Sala Animatori', 'Sala Materiali', 'Sala Gialla',
+    'Sala Verde', 'Sala Viola', 'Sala Chiusa',
+    'Corridoio Salone', 'Corridoio Bagni',
+    'Strada Laterale', 'Strada Retro', 'Retro Cucina', 'Rampa Strada',
+    'Rampa Palco SX', 'Rampa Palco DX',
+    'Ingresso Sotto Chiesa', 'Collegamento Suore',
+    'Locale Tecnico', 'Ripostiglio Palco', 'Ripostiglio Bagno', 'Caldaia',
+    'Bagno Disabili', 'Antibagno M', 'Antibagno F',
+    'WC Maschi 1', 'WC Maschi 2', 'WC Maschi 3',
+    'WC Femmine 1', 'WC Femmine 2', 'WC Femmine 3',
+    'WC Teatro 1', 'WC Teatro 2', 'WC Teatro 3'
+];
+
 const defaultBaseTasks = [
-    { num: '1', name: 'Canestri', obj: '3 canestri da tiro libero', pos: 'Canestro Oratorio' },
-    { num: '2', name: 'Trova l\'oggetto', obj: 'Trova 10 oggetti nella scatola di acqua sporca', pos: 'Panchine Rosse' },
+    { num: '1', name: 'Canestri', obj: '3 canestri da tiro libero', pos: 'Canestro' },
+    { num: '2', name: 'Trova l\'oggetto', obj: 'Trova 10 oggetti nella scatola di acqua sporca', pos: 'Atrio' },
     { num: '3', name: 'Rebus', obj: 'Risolvi 2 fogli di rebus', pos: 'Atrio' },
     { num: '4', name: 'Puzzle', obj: 'Componi un puzzle', pos: 'Atrio' },
-    { num: '5', name: 'Pulisci il bagno', obj: '1 minuto per pulire tutto il bagno dalla tempera', pos: 'Bagno Donne' },
-    { num: '6', name: 'Matematica', obj: 'Risolvi 10 operazioni in 1.5 min', pos: 'Ex Biblioteca' },
-    { num: '7', name: 'Limbo', obj: 'Supera 3 livelli', pos: 'Ex Biblioteca' },
+    { num: '5', name: 'Pulisci il bagno', obj: '1 minuto per pulire tutto il bagno dalla tempera', pos: 'Bagno Disabili' },
+    { num: '6', name: 'Matematica', obj: 'Risolvi 10 operazioni in 1.5 min', pos: 'Sala Materiali' },
+    { num: '7', name: 'Limbo', obj: 'Supera 3 livelli', pos: 'Sala Materiali' },
     { num: '8', name: 'Avanti un altro', obj: 'Rispondi a 15 domande', pos: 'Salone' },
     { num: '9', name: 'Centra il bicchiere', obj: 'Fai centro con i pennarelli nel bicchiere in 1.5 min', pos: 'Salone' },
-    { num: '10', name: 'Percorso bendato', obj: 'Un compagno dà le indicazioni al giocatore bendato', pos: 'Strada Principale' },
-    { num: '11', name: 'Riempi il bicchiere', obj: 'Con uno shottino pieno corri a riempire un bicchiere grande', pos: 'Strada Principale' },
-    { num: '12', name: 'Ricorda la sequenza', obj: 'Ripeti la sequenza 1 volta', pos: 'Sala Principale' },
-    { num: '13', name: 'Attacca le orecchie', obj: '1 minuto per attaccare bendati le orecchie al bianconiglio', pos: 'Sala Principale' },
-    { num: '14', name: 'Twister', obj: 'Resisti 1.5 min cambiando posizione', pos: 'Sala Principale' },
+    { num: '10', name: 'Percorso bendato', obj: 'Un compagno dà le indicazioni al giocatore bendato', pos: 'Strada Laterale' },
+    { num: '11', name: 'Riempi il bicchiere', obj: 'Con uno shottino pieno corri a riempire un bicchiere grande', pos: 'Strada Laterale' },
+    { num: '12', name: 'Ricorda la sequenza', obj: 'Ripeti la sequenza 1 volta', pos: 'Sala Gialla' },
+    { num: '13', name: 'Attacca le orecchie', obj: '1 minuto per attaccare bendati le orecchie al bianconiglio', pos: 'Sala Gialla' },
+    { num: '14', name: 'Twister', obj: 'Resisti 1.5 min cambiando posizione', pos: 'Sala Gialla' },
     { num: '15', name: 'Dinosauro', obj: 'Pesca bigliettino col punteggio e gioca fino al target', pos: 'Regia' },
-    { num: '16', name: 'Whisper challenge', obj: 'Indovina 5 frasi', pos: 'Corridoio Catechismo' },
-    { num: '17', name: 'Cruciverba', obj: 'Risolvi un cruciverba', pos: 'Stanza Verde Catechismo' }
+    { num: '16', name: 'Whisper challenge', obj: 'Indovina 5 frasi', pos: 'Corridoio Salone' },
+    { num: '17', name: 'Cruciverba', obj: 'Risolvi un cruciverba', pos: 'Sala Verde' }
 ];
 
 // Default Templates
@@ -453,7 +469,7 @@ function setFormDisabled(disabled) {
         if (disabled) btnAddTextTask.classList.add('hidden');
         else btnAddTextTask.classList.remove('hidden');
     }
-    textTasksContainer.querySelectorAll('input, button').forEach(el => {
+    textTasksContainer.querySelectorAll('input, select, button').forEach(el => {
         el.disabled = disabled;
         if (el.tagName === 'BUTTON' && disabled) el.classList.add('hidden');
     });
@@ -759,65 +775,69 @@ if (btnAddRoundTime) {
     });
 }
 
+function buildLocationOptions(selectedPos) {
+    let opts = '<option value="">📍 Seleziona luogo...</option>';
+    let found = false;
+    MAP_VECTOR_LOCATIONS.forEach(loc => {
+        const sel = (loc === selectedPos) ? 'selected' : '';
+        if (sel) found = true;
+        opts += `<option value="${loc}" ${sel}>${loc}</option>`;
+    });
+    // If existing pos doesn't match any SVG room, add it as custom
+    if (selectedPos && !found) {
+        opts += `<option value="${selectedPos}" selected>${selectedPos}</option>`;
+    }
+    return opts;
+}
+
 function addTextTask(taskData = { num: '', name: '', obj: '', pos: '' }) {
     if (typeof taskData === 'string') {
         taskData = { num: '', name: taskData, obj: '', pos: '' };
     }
-    const num = taskData?.num ?? '';
     const name = taskData?.name ?? '';
     const obj = taskData?.obj ?? '';
     const pos = taskData?.pos ?? '';
 
-    const taskCount = textTasksContainer.querySelectorAll('.task-card-item').length + 1;
+    // Build display text: prefer obj (detailed), fallback to name
+    const taskText = obj || name;
+
+    const taskCount = textTasksContainer.querySelectorAll('.task-row-compact').length + 1;
     const div = document.createElement('div');
-    div.className = 'task-card-item';
-    
+    div.className = 'task-row-compact';
+
     div.innerHTML = `
-        <div class="task-card-header">
-            <span class="task-badge">Task #${num || taskCount}</span>
-            <button type="button" class="btn btn-danger btn-remove-task" style="padding: 0.25rem 0.65rem; font-size: 0.75rem; border-radius: 8px; font-weight: 800; min-height: 28px; display: inline-flex; align-items: center; gap: 0.25rem;" title="Rimuovi task">
-                ✕ ELIMINA
-            </button>
-        </div>
-        <div class="task-fields-grid">
-            <div class="task-field-group">
-                <label>N° / ID</label>
-                <input type="text" placeholder="Es. 1" value="${num}" ${currentFormDisabled ? 'disabled' : ''}>
-            </div>
-            <div class="task-field-group">
-                <label>Nome Task</label>
-                <input type="text" placeholder="Es. Canestri" value="${name}" ${currentFormDisabled ? 'disabled' : ''}>
-            </div>
-            <div class="task-field-group full-width">
-                <label>Obiettivo / Descrizione</label>
-                <input type="text" placeholder="Es. Fai 3 canestri di fila" value="${obj}" ${currentFormDisabled ? 'disabled' : ''}>
-            </div>
-            <div class="task-field-group full-width">
-                <label>Posizione / Luogo</label>
-                <input type="text" placeholder="Es. Campo da Basket" value="${pos}" ${currentFormDisabled ? 'disabled' : ''}>
-            </div>
-        </div>
+        <span class="task-row-num">${taskCount}</span>
+        <input type="text" class="task-input" placeholder="Es. Fai 3 canestri" value="${taskText.replace(/"/g, '&quot;')}" ${currentFormDisabled ? 'disabled' : ''}>
+        <select class="task-location-select" ${currentFormDisabled ? 'disabled' : ''}>
+            ${buildLocationOptions(pos)}
+        </select>
+        <button type="button" class="btn-remove-task-compact" title="Rimuovi" ${currentFormDisabled ? 'style="display:none;"' : ''}>✕</button>
     `;
 
-    const removeBtn = div.querySelector('.btn-remove-task');
+    const removeBtn = div.querySelector('.btn-remove-task-compact');
     if (removeBtn) {
-        if (currentFormDisabled) removeBtn.classList.add('hidden');
-        removeBtn.onclick = () => div.remove();
-    }
-
-    const numInput = div.querySelector('.task-field-group input');
-    if (numInput) {
-        numInput.oninput = (e) => {
-            const badge = div.querySelector('.task-badge');
-            if (badge) badge.textContent = `Task #${e.target.value.trim() || taskCount}`;
+        removeBtn.onclick = () => {
+            div.remove();
+            renumberTasks();
         };
     }
 
     textTasksContainer.appendChild(div);
 }
 
+function renumberTasks() {
+    textTasksContainer.querySelectorAll('.task-row-compact').forEach((row, i) => {
+        const numSpan = row.querySelector('.task-row-num');
+        if (numSpan) numSpan.textContent = i + 1;
+    });
+}
+
 if (btnAddTextTask) {
-    btnAddTextTask.addEventListener('click', () => addTextTask());
+    btnAddTextTask.addEventListener('click', () => {
+        addTextTask();
+        // Scroll to bottom of container
+        textTasksContainer.scrollTop = textTasksContainer.scrollHeight;
+    });
 }
 
 // --- CREATE & JOIN ROOM ---
@@ -830,15 +850,18 @@ function getRoomConfigFromUI() {
 
     const tasks = [];
     if (enableTasks && taskType === 'custom') {
-        const rows = textTasksContainer.querySelectorAll('.task-card-item, .task-row');
-        rows.forEach(row => {
-            const inputs = row.querySelectorAll('input');
-            if (inputs.length >= 4) {
+        const rows = textTasksContainer.querySelectorAll('.task-row-compact');
+        rows.forEach((row, idx) => {
+            const taskInput = row.querySelector('.task-input');
+            const locSelect = row.querySelector('.task-location-select');
+            const taskText = taskInput ? taskInput.value.trim() : '';
+            const taskPos = locSelect ? locSelect.value : '';
+            if (taskText) {
                 tasks.push({
-                    num: inputs[0].value.trim(),
-                    name: inputs[1].value.trim(),
-                    obj: inputs[2].value.trim(),
-                    pos: inputs[3].value.trim()
+                    num: String(idx + 1),
+                    name: taskText,
+                    obj: taskText,
+                    pos: taskPos
                 });
             }
         });
