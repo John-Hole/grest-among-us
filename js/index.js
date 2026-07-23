@@ -42,6 +42,8 @@ const templatesGrid = document.getElementById('templates-grid');
 // Settings / Create Inputs
 const createTemplateName = document.getElementById('create-template-name');
 const createImpostors = document.getElementById('create-impostors');
+const createKillCooldown = document.getElementById('create-kill-cooldown');
+const createMaxMeetings = document.getElementById('create-max-meetings');
 const createScientist = document.getElementById('create-scientist');
 const createDiscussionDuration = document.getElementById('create-discussion-duration');
 const createVotingDuration = document.getElementById('create-voting-duration');
@@ -161,6 +163,7 @@ function showSection(sectionName) {
     if (sectionName === 'join') joinSection.classList.remove('hidden');
     if (sectionName === 'create') createSection.classList.remove('hidden');
     if (sectionName === 'templates') templatesSection.classList.remove('hidden');
+    window.scrollTo(0, 0);
 }
 
 btnShowAuth.addEventListener('click', () => showSection('auth'));
@@ -308,28 +311,85 @@ async function loadUserTemplates(uid) {
 
 function createTemplateCard(id, data, isCustom) {
     const card = document.createElement('div');
-    card.style = `background: var(--card-bg); border-radius: 14px; padding: 1.2rem; border: 2px solid #333; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; gap: 0.8rem; position: relative;`;
+    card.style = `background: var(--card-bg); border-radius: 12px; padding: 1.2rem; position: relative; border: 2px solid #333; transition: all 0.2s; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between;`;
     card.onmouseover = () => card.style.borderColor = 'var(--accent-cyan)';
     card.onmouseout = () => card.style.borderColor = '#333';
+    card.onclick = () => startRoomWithConfig(data);
 
-    // Header Flex Row (Title + Badge)
+    // Header Flex Row (Title + 3 Dots Menu Button)
     const headerRow = document.createElement('div');
-    headerRow.style = `display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;`;
+    headerRow.style = `display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.8rem;`;
 
     const title = document.createElement('h3');
     title.textContent = data.name || (id === 'base' ? 'Standard Realmong' : id);
-    title.style = `margin: 0; font-size: 1.15rem; font-weight: 800; color: white; word-break: break-word; flex: 1;`;
+    title.style = `margin: 0; font-size: 1.1rem; font-weight: 700; color: white; word-break: break-word; flex: 1;`;
     headerRow.appendChild(title);
 
-    if (id === 'base') {
-        const badge = document.createElement('span');
-        badge.textContent = 'BASE';
-        badge.style = `font-size: 0.65rem; background: rgba(0, 229, 255, 0.15); color: var(--accent-cyan); padding: 0.2rem 0.5rem; border-radius: 6px; font-weight: bold; border: 1px solid rgba(0, 229, 255, 0.3);`;
-        headerRow.appendChild(badge);
+    // 3-dots Menu Container
+    const menuContainer = document.createElement('div');
+    menuContainer.style = `position: relative;`;
+
+    const menuBtn = document.createElement('button');
+    menuBtn.style = `appearance: none; -webkit-appearance: none; background: transparent; border: none; outline: none; box-shadow: none; color: #8a99ad; cursor: pointer; padding: 0; margin: 0; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px;`;
+    menuBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>`;
+    menuBtn.className = 'template-menu-btn';
+    menuBtn.title = 'Opzioni template';
+    
+    const menuDrop = document.createElement('div');
+    menuDrop.className = 'template-menu-dropdown hidden';
+    menuDrop.onclick = (e) => e.stopPropagation();
+    
+    const editBtn = document.createElement('button');
+    editBtn.textContent = 'Modifica';
+    editBtn.className = 'template-menu-item';
+    editBtn.onclick = (e) => { 
+        e.stopPropagation(); 
+        menuDrop.classList.add('hidden');
+        openCreateSettings(id, data, false, !isCustom); 
+    };
+    
+    const dupeBtn = document.createElement('button');
+    dupeBtn.textContent = 'Duplica';
+    dupeBtn.className = 'template-menu-item';
+    dupeBtn.onclick = (e) => { 
+        e.stopPropagation(); 
+        menuDrop.classList.add('hidden');
+        openCreateSettings(id, data, true, false); 
+    };
+    
+    menuDrop.appendChild(editBtn);
+    menuDrop.appendChild(dupeBtn);
+
+    if (isCustom) {
+        const delBtn = document.createElement('button');
+        delBtn.textContent = 'Elimina';
+        delBtn.className = 'template-menu-item template-menu-item-danger';
+        delBtn.onclick = async (e) => { 
+            e.stopPropagation(); 
+            menuDrop.classList.add('hidden');
+            if(confirm(`Sicuro di voler eliminare il template "${data.name || id}"?`)) {
+                await remove(ref(db, `users/${currentUser.uid}/templates/${id}`));
+                delete userTemplates[id];
+                renderAllTemplates();
+            }
+        };
+        menuDrop.appendChild(delBtn);
     }
+
+    menuBtn.onclick = (e) => {
+        e.stopPropagation();
+        const wasHidden = menuDrop.classList.contains('hidden');
+        document.querySelectorAll('.template-menu-dropdown').forEach(d => d.classList.add('hidden'));
+        if (wasHidden) {
+            menuDrop.classList.remove('hidden');
+        }
+    };
+
+    menuContainer.appendChild(menuBtn);
+    menuContainer.appendChild(menuDrop);
+    headerRow.appendChild(menuContainer);
     card.appendChild(headerRow);
 
-    // Details Summary
     const isMapActive = data.enableMap !== false;
     const mapTypeStr = data.mapType || (data.mapMode === 'text' ? 'vector' : 'photo');
     const mapLabel = !isMapActive ? 'Disabilitata' : (mapTypeStr === 'vector' ? 'Vettoriale' : 'Visiva');
@@ -351,63 +411,6 @@ function createTemplateCard(id, data, isCustom) {
     `;
     card.appendChild(details);
 
-    // Action Buttons Row (AVVIA, MODIFICA, DUPLICA, ELIMINA)
-    const actionsRow = document.createElement('div');
-    actionsRow.style = `display: flex; gap: 0.4rem; margin-top: 0.5rem; flex-wrap: wrap;`;
-
-    // 1. AVVIA Button (Primary Action)
-    const startBtn = document.createElement('button');
-    startBtn.className = 'btn';
-    startBtn.style = `flex: 2; min-width: 85px; background: var(--accent-cyan); color: black; font-weight: bold; font-size: 0.8rem; padding: 0.5rem 0.6rem; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.3rem;`;
-    startBtn.innerHTML = `<span>▶</span> <span>AVVIA</span>`;
-    startBtn.onclick = (e) => {
-        e.stopPropagation();
-        startRoomWithConfig(data);
-    };
-    actionsRow.appendChild(startBtn);
-
-    // 2. MODIFICA Button (Opens Create/Edit Settings)
-    const editBtn = document.createElement('button');
-    editBtn.className = 'btn';
-    editBtn.style = `flex: 1; min-width: 80px; background: #2a3644; color: white; font-weight: bold; font-size: 0.8rem; padding: 0.5rem 0.6rem; border-radius: 8px; border: 1px solid #444; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.2rem;`;
-    editBtn.innerHTML = `<span>✏️</span> <span>MODIFICA</span>`;
-    editBtn.onclick = (e) => {
-        e.stopPropagation();
-        openCreateSettings(id, data, false, !isCustom);
-    };
-    actionsRow.appendChild(editBtn);
-
-    // 3. DUPLICA Button
-    const dupeBtn = document.createElement('button');
-    dupeBtn.className = 'btn';
-    dupeBtn.style = `padding: 0.5rem 0.6rem; background: #2a3644; color: #ccc; font-size: 0.8rem; border-radius: 8px; border: 1px solid #444; cursor: pointer;`;
-    dupeBtn.title = 'Duplica Template';
-    dupeBtn.textContent = '📋';
-    dupeBtn.onclick = (e) => {
-        e.stopPropagation();
-        openCreateSettings(id, data, true, false);
-    };
-    actionsRow.appendChild(dupeBtn);
-
-    // 4. ELIMINA Button (Only for custom user templates)
-    if (isCustom) {
-        const delBtn = document.createElement('button');
-        delBtn.className = 'btn btn-danger';
-        delBtn.style = `padding: 0.5rem 0.6rem; font-size: 0.8rem; border-radius: 8px; cursor: pointer;`;
-        delBtn.title = 'Elimina Template';
-        delBtn.textContent = '🗑️';
-        delBtn.onclick = async (e) => {
-            e.stopPropagation();
-            if (confirm(`Sicuro di voler eliminare il template "${data.name || id}"?`)) {
-                await remove(ref(db, `users/${currentUser.uid}/templates/${id}`));
-                delete userTemplates[id];
-                renderAllTemplates();
-            }
-        };
-        actionsRow.appendChild(delBtn);
-    }
-
-    card.appendChild(actionsRow);
     templatesGrid.appendChild(card);
 }
 
