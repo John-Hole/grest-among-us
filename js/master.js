@@ -214,27 +214,8 @@ if (modalLogs) {
 }
 
 // Click Listeners for Preset Inputs inside Pop-up 1
-const roundPresets = [3, 5, 7, 10, 12, 15];
 const votingPresets = [0, 30, 45, 60, 90, 120];
 
-if (cfgRound1) {
-    const parentBox = cfgRound1.closest('.preset-input-box') || cfgRound1;
-    parentBox.addEventListener('click', () => {
-        openPresetPicker(cfgRound1, "🎯 TEMPO ROUND 1", roundPresets, false);
-    });
-}
-if (cfgRound2) {
-    const parentBox = cfgRound2.closest('.preset-input-box') || cfgRound2;
-    parentBox.addEventListener('click', () => {
-        openPresetPicker(cfgRound2, "🎯 TEMPO ROUND 2", roundPresets, false);
-    });
-}
-if (cfgRound3) {
-    const parentBox = cfgRound3.closest('.preset-input-box') || cfgRound3;
-    parentBox.addEventListener('click', () => {
-        openPresetPicker(cfgRound3, "🎯 TEMPO ROUND 3+", roundPresets, false);
-    });
-}
 if (cfgVoting) {
     const parentBox = cfgVoting.closest('.preset-input-box') || cfgVoting;
     parentBox.addEventListener('click', () => {
