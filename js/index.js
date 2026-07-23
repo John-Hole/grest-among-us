@@ -371,28 +371,38 @@ btnLogin.addEventListener('click', async () => {
 // Check for Google login redirect result if popup was blocked previously
 getRedirectResult(auth).then((result) => {
     if (result && result.user) {
-        showSection('home');
+        console.log("Google redirect login success:", result.user.email);
+        showSection('templates');
     }
 }).catch((error) => {
     console.error("Redirect login error:", error);
+    if (error.code && error.code !== 'auth/credential-already-in-use') {
+        showAuthError("Errore Google: " + (error.message || error.code));
+    }
 });
 
 btnGoogleLogin.addEventListener('click', () => {
+    clearAuthError();
     const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider).then(() => {
-        showSection('home');
+    signInWithPopup(auth, provider).then((result) => {
+        if (result && result.user) {
+            console.log("Google popup login success:", result.user.email);
+            showSection('templates');
+        }
     }).catch((error) => {
+        console.error("Google popup error:", error);
         if (error.code === 'auth/popup-closed-by-user') {
-            console.log('Google login cancelled');
+            console.log('Google login cancelled by user');
         } else if (error.code === 'auth/popup-blocked') {
             console.warn('Popup blocked, falling back to redirect...');
-            signInWithRedirect(auth, provider).catch(() => {
-                showAuthError("Impossibile aprire la finestra di Google.");
+            showAuthError("Reindirizzamento a Google in corso...");
+            signInWithRedirect(auth, provider).catch((err) => {
+                showAuthError("Errore Google Redirect: " + (err.message || err.code));
             });
         } else if (error.code === 'auth/unauthorized-domain') {
-            showAuthError("Il dominio " + window.location.hostname + " non è ancora stato autorizzato su Firebase.");
+            showAuthError("Il dominio " + window.location.hostname + " non è autorizzato su Firebase.");
         } else {
-            showAuthError("Errore login Google: " + (error.message || error.code));
+            showAuthError("Errore Google: " + (error.message || error.code));
         }
     });
 });
