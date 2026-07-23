@@ -1,5 +1,7 @@
 /**
  * Environment Loader - Loads Firebase config from multiple sources
+ * Project: Realmong Us
+ * 
  * This file bridges between development (.env.local) and production (Vercel env vars)
  * 
  * Priority order:
@@ -52,17 +54,19 @@ export const loadFirebaseConfig = async () => {
     '⚠️ WARNING: Using hardcoded Firebase config!\n' +
     'Set environment variables (.env.local or Vercel) instead.\n' +
     'Public API keys in source code are a security risk.\n' +
-    'See .env.example for setup instructions.'
+    'See .env.example for setup instructions.\n' +
+    'Project: Realmong Us'
   );
 
+  // Fallback to placeholder (project needs to be set up)
   return {
-    apiKey: "AIzaSyDP523x9SZZ6MVkvl3tVbuv5SBpbzVsxr4",
-    authDomain: "grest-among-us.firebaseapp.com",
-    databaseURL: "https://grest-among-us-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "grest-among-us",
-    storageBucket: "grest-among-us.firebasestorage.app",
-    messagingSenderId: "113254807143",
-    appId: "1:113254807143:web:f9491251c65d4d717b46c2"
+    apiKey: "AIzaSyDP523x9SZZ6MVkvl3tVbuv5SBpbzVsxr4", // DEPRECATED - update with your project
+    authDomain: "realmong-us.firebaseapp.com",
+    databaseURL: "https://realmong-us-default-rtdb.region.firebasedatabase.app",
+    projectId: "realmong-us",
+    storageBucket: "realmong-us.appspot.com",
+    messagingSenderId: "your-sender-id", // DEPRECATED - update with your project
+    appId: "your-app-id" // DEPRECATED - update with your project
   };
 };
 

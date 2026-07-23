@@ -13,7 +13,7 @@ Anonymous authentication allows players to join games without creating an accoun
 ### Via Firebase Console Web UI:
 
 1. Go to [Firebase Console](https://console.firebase.google.com)
-2. Select project **"grest-among-us"**
+2. Select project **"realmong-us"**
 3. Navigate to **Authentication** → **Sign-in method** tab
 4. Click **Anonymous**
 5. Toggle the **Enable** switch

@@ -1,17 +1,43 @@
-# 🔐 Firebase Security Setup
+# 🔐 Firebase Security Setup - Realmong Us
 
-## Step 1: Apply Realtime Database Rules
-
-### Via Firebase Console:
+## Step 1: Create Firebase Project
 
 1. Go to [Firebase Console](https://console.firebase.google.com)
-2. Select project **"grest-among-us"**
-3. Navigate to **Realtime Database** → **Rules** tab
-4. Copy the content of `firebase-rules.json` from this repository
-5. Paste into the Rules editor
-6. Click **Publish** (⚠️ This will lock down the database!)
+2. Click **"Create a new project"**
+3. Project name: **"Realmong Us"**
+4. Project ID: **"realmong-us"**
+5. Create project and wait for completion
 
-### Via Firebase CLI (Recommended):
+## Step 2: Get Firebase Credentials
+
+1. Project Settings (⚙️ icon) → Project Settings
+2. Under "Your apps", select the **Web** app
+3. Copy credentials to `.env.local` file:
+   ```
+   VITE_FIREBASE_API_KEY=your-api-key
+   VITE_FIREBASE_AUTH_DOMAIN=realmong-us.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=realmong-us
+   VITE_FIREBASE_STORAGE_BUCKET=realmong-us.appspot.com
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+   VITE_FIREBASE_APP_ID=your-app-id
+   ```
+4. For Database URL, go to **Realtime Database** → Copy URL and add to `.env.local`
+
+## Step 3: Enable Realtime Database
+
+1. Go to **Realtime Database** tab
+2. Click **"Create Database"**
+3. Start in **production mode**
+4. Choose region (closest to your location)
+
+## Step 4: Apply Database Security Rules
+
+1. Navigate to **Realtime Database** → **Rules** tab
+2. Copy content from `firebase-rules.json`
+3. Paste into Rules editor
+4. Click **Publish** (⚠️ This locks down the database!)
+
+**Alternative: Via Firebase CLI:**
 
 ```bash
 npm install -g firebase-tools
@@ -19,40 +45,29 @@ firebase login
 firebase deploy --only database:rules
 ```
 
-Or use the included deploy script:
-```bash
-npm run firebase:rules:deploy
-```
+## Step 5: Enable Anonymous Authentication
 
----
+1. Go to **Authentication** → **Sign-in method** tab
+2. Click **Anonymous**
+3. Toggle **Enable**
+4. Click **Save**
 
-## Step 2: Enable Firebase Authentication
+## Step 6: Update Vercel Environment Variables
 
-### Authentication Methods to Enable:
-
-1. **Anonymous Authentication**
-   - Go to Firebase Console → Authentication → Sign-in method
-   - Enable "Anonymous"
-   - This allows temporary users to join games without email/password
-
-2. **Email/Password (Optional)**
-   - Enable if you want account creation for frequent players
-
----
-
-## Step 3: Update Vercel Environment Variables
-
-Add these to your Vercel project settings (Settings → Environment Variables):
-
-```
-VITE_FIREBASE_API_KEY=AIzaSyDP523x9SZZ6MVkvl3tVbuv5SBpbzVsxr4
-VITE_FIREBASE_AUTH_DOMAIN=grest-among-us.firebaseapp.com
-VITE_FIREBASE_DATABASE_URL=https://grest-among-us-default-rtdb.europe-west1.firebasedatabase.app
-VITE_FIREBASE_PROJECT_ID=grest-among-us
-VITE_FIREBASE_STORAGE_BUCKET=grest-among-us.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID=113254807143
-VITE_FIREBASE_APP_ID=1:113254807143:web:f9491251c65d4d717b46c2
-```
+1. Go to [Vercel Dashboard](https://vercel.com)
+2. Select project **"realmong-us"**
+3. Settings → **Environment Variables**
+4. Add all values from `.env.local`:
+   ```
+   VITE_FIREBASE_API_KEY=your-actual-value
+   VITE_FIREBASE_AUTH_DOMAIN=realmong-us.firebaseapp.com
+   VITE_FIREBASE_DATABASE_URL=https://realmong-us-default-rtdb.region.firebasedatabase.app
+   VITE_FIREBASE_PROJECT_ID=realmong-us
+   VITE_FIREBASE_STORAGE_BUCKET=realmong-us.appspot.com
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your-actual-value
+   VITE_FIREBASE_APP_ID=your-actual-value
+   ```
+5. Set availability: **Production**
 
 ---
 

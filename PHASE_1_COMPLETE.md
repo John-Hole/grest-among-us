@@ -109,13 +109,13 @@ Go to [Vercel Dashboard](https://vercel.com/dashboard)
 3. Add all variables from `.env.local`:
 
 ```
-VITE_FIREBASE_API_KEY=AIzaSyDP523x9SZZ6MVkvl3tVbuv5SBpbzVsxr4
-VITE_FIREBASE_AUTH_DOMAIN=grest-among-us.firebaseapp.com
-VITE_FIREBASE_DATABASE_URL=https://grest-among-us-default-rtdb.europe-west1.firebasedatabase.app
-VITE_FIREBASE_PROJECT_ID=grest-among-us
-VITE_FIREBASE_STORAGE_BUCKET=grest-among-us.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID=113254807143
-VITE_FIREBASE_APP_ID=1:113254807143:web:f9491251c65d4d717b46c2
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=realmong-us.firebaseapp.com
+VITE_FIREBASE_DATABASE_URL=https://realmong-us-default-rtdb.region.firebasedatabase.app
+VITE_FIREBASE_PROJECT_ID=realmong-us
+VITE_FIREBASE_STORAGE_BUCKET=realmong-us.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
 ```
 
 4. Set availability: **Production** (for main branch)
@@ -133,13 +133,13 @@ firebase login
 firebase deploy --only database:rules
 
 # Or use this for target project:
-firebase deploy --only database:rules -P grest-among-us
+firebase deploy --only database:rules -P realmong-us
 ```
 
 ### Step 3: Enable Anonymous Auth in Firebase Console
 
 1. [Firebase Console](https://console.firebase.google.com)
-2. Select **grest-among-us** project
+2. Select **realmong-us** project
 3. **Authentication** → **Sign-in method**
 4. Enable **Anonymous**
 5. Save
