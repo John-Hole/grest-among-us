@@ -363,30 +363,24 @@ getRedirectResult(auth).then((result) => {
     console.error("Redirect login error:", error);
 });
 
-btnGoogleLogin.addEventListener('click', async () => {
-    clearAuthError();
-    try {
-        const provider = new GoogleAuthProvider();
-        await signInWithPopup(auth, provider);
+btnGoogleLogin.addEventListener('click', () => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider).then(() => {
         showSection('home');
-    } catch (error) {
+    }).catch((error) => {
         if (error.code === 'auth/popup-closed-by-user') {
             console.log('Google login cancelled');
         } else if (error.code === 'auth/popup-blocked') {
-            console.warn('Popup blocked by browser/adblocker, redirecting to Google...');
-            showAuthError("AdBlock o il browser ha bloccato il popup. Reindirizzamento a Google in corso...");
-            try {
-                const provider = new GoogleAuthProvider();
-                await signInWithRedirect(auth, provider);
-            } catch (err) {
-                showAuthError("Gli AdBlocker del browser bloccano il login Google. Metti in pausa AdBlock su questo sito.");
-            }
+            console.warn('Popup blocked, falling back to redirect...');
+            signInWithRedirect(auth, provider).catch(() => {
+                showAuthError("Impossibile aprire la finestra di Google.");
+            });
         } else if (error.code === 'auth/unauthorized-domain') {
             showAuthError("Il dominio " + window.location.hostname + " non è ancora stato autorizzato su Firebase.");
         } else {
             showAuthError("Errore login Google: " + (error.message || error.code));
         }
-    }
+    });
 });
 
 btnAnonLogin.addEventListener('click', async () => {
