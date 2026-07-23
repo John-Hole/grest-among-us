@@ -1113,11 +1113,13 @@ btnStartRandom.addEventListener('click', async () => {
             });
         }
 
+        const existingToken = (currentPlayers && currentPlayers[name]) ? currentPlayers[name].token : null;
         playersMap[name] = {
             role: role,
             status: 'alive',
             tasks: tasksObj,
-            meetings_called: 0
+            meetings_called: 0,
+            ...(existingToken ? { token: existingToken } : {})
         };
     });
 

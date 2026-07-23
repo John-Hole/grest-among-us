@@ -422,6 +422,9 @@ if (playerNameBox) {
 
 let lastRenderedVotesSignature = '';
 
+let selectedVoteTarget = null;
+let lastRenderedVotesSignature = '';
+
 function renderVotingUI(playersMap) {
     const isAlive = myData && myData.status === 'alive';
     const myVote = currentVotes ? currentVotes[myPlayerName] : null;
@@ -448,7 +451,7 @@ function renderVotingUI(playersMap) {
     }
     alivePlayers.sort();
 
-    const currentSig = `alive_${alivePlayers.join(',')}_vote_${myVote || 'none'}`;
+    const currentSig = `alive_${alivePlayers.join(',')}_selected_${selectedVoteTarget || 'none'}`;
     if (lastRenderedVotesSignature === currentSig && votingOptions.children.length > 0) {
         return;
     }
@@ -458,6 +461,7 @@ function renderVotingUI(playersMap) {
     votingOptions.innerHTML = '';
 
     alivePlayers.forEach(name => {
+        const isSelected = selectedVoteTarget === name;
         const btn = document.createElement('button');
         btn.className = 'btn';
         btn.style.width = '100%';
@@ -465,18 +469,30 @@ function renderVotingUI(playersMap) {
         btn.style.fontSize = '0.95rem';
         btn.style.fontWeight = 'bold';
         btn.style.borderRadius = '12px';
-        btn.style.background = name === myPlayerName ? 'rgba(255, 255, 255, 0.15)' : 'var(--card-bg)';
-        btn.style.border = name === myPlayerName ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.1)';
-        btn.textContent = name === myPlayerName ? `${name} (Tu)` : name;
+        btn.style.transition = 'all 0.2s ease';
         
-        btn.onclick = async () => {
-            if (confirm(`Confermi di voler votare ${name}?`)) {
-                await castVote(name);
-            }
+        if (isSelected) {
+            btn.style.background = 'rgba(0, 229, 255, 0.2)';
+            btn.style.border = '2px solid var(--accent-cyan)';
+            btn.style.color = '#38bdf8';
+            btn.textContent = name === myPlayerName ? `✔ ${name} (Tu)` : `✔ ${name}`;
+        } else {
+            btn.style.background = name === myPlayerName ? 'rgba(255, 255, 255, 0.1)' : 'var(--card-bg)';
+            btn.style.border = name === myPlayerName ? '1px solid rgba(255,255,255,0.25)' : '1px solid rgba(255,255,255,0.1)';
+            btn.style.color = '#fff';
+            btn.textContent = name === myPlayerName ? `${name} (Tu)` : name;
+        }
+
+        btn.onclick = () => {
+            selectedVoteTarget = name;
+            lastRenderedVotesSignature = '';
+            renderVotingUI(playersMap);
         };
         votingOptions.appendChild(btn);
     });
 
+    // Skip button
+    const isSkipSelected = selectedVoteTarget === 'SKIP';
     const skipBtn = document.createElement('button');
     skipBtn.className = 'btn';
     skipBtn.style.width = '100%';
@@ -484,16 +500,50 @@ function renderVotingUI(playersMap) {
     skipBtn.style.fontSize = '0.95rem';
     skipBtn.style.fontWeight = 'bold';
     skipBtn.style.borderRadius = '12px';
-    skipBtn.style.background = 'rgba(117, 117, 117, 0.4)';
-    skipBtn.style.border = '1px solid rgba(255, 255, 255, 0.2)';
-    skipBtn.style.color = '#fff';
-    skipBtn.textContent = '⏭️ SKIP (Non espellere)';
-    skipBtn.onclick = async () => {
-        if (confirm("Sei sicuro di voler skippare il voto?")) {
-            await castVote('SKIP');
-        }
+    skipBtn.style.transition = 'all 0.2s ease';
+
+    if (isSkipSelected) {
+        skipBtn.style.background = 'rgba(239, 68, 68, 0.25)';
+        skipBtn.style.border = '2px solid #ef4444';
+        skipBtn.style.color = '#fca5a5';
+        skipBtn.textContent = '✔ ⏭️ SKIP (Non espellere)';
+    } else {
+        skipBtn.style.background = 'rgba(117, 117, 117, 0.3)';
+        skipBtn.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+        skipBtn.style.color = '#e2e8f0';
+        skipBtn.textContent = '⏭️ SKIP (Non espellere)';
+    }
+
+    skipBtn.onclick = () => {
+        selectedVoteTarget = 'SKIP';
+        lastRenderedVotesSignature = '';
+        renderVotingUI(playersMap);
     };
     votingOptions.appendChild(skipBtn);
+
+    // Confirm button
+    if (selectedVoteTarget) {
+        const confirmBtn = document.createElement('button');
+        confirmBtn.className = 'btn';
+        confirmBtn.style.width = '100%';
+        confirmBtn.style.padding = '1.1rem';
+        confirmBtn.style.marginTop = '0.8rem';
+        confirmBtn.style.fontSize = '1.05rem';
+        confirmBtn.style.fontWeight = '800';
+        confirmBtn.style.borderRadius = '14px';
+        confirmBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        confirmBtn.style.color = '#ffffff';
+        confirmBtn.style.boxShadow = '0 4px 15px rgba(16, 185, 129, 0.4)';
+        confirmBtn.style.border = 'none';
+        confirmBtn.textContent = selectedVoteTarget === 'SKIP' ? 'CONFERMA SKIP VOTO ➔' : `CONFERMA VOTO PER ${selectedVoteTarget.toUpperCase()} ➔`;
+
+        confirmBtn.onclick = async () => {
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'INVIO VOTO IN CORSO...';
+            await castVote(selectedVoteTarget);
+        };
+        votingOptions.appendChild(confirmBtn);
+    }
 }
 
 async function castVote(voteTarget) {
@@ -680,27 +730,23 @@ btnKill.addEventListener('click', async () => {
 
     const target = killTargetSelect.value;
     if (!target) {
-        alert("Seleziona un bersaglio dal menu a tendina prima di cliccare KILL!");
+        alert("Seleziona prima un bersaglio dal menu a tendina!");
         return;
     }
     
-    if (confirm(`Sei sicuro di voler uccidere ${target}?`)) {
-        if (btnKill) btnKill.disabled = true;
-        try {
-            await ensureAuth();
-            await update(ref(db, `rooms/${roomCode}/players/${target}`), {
-                status: 'killed_hidden'
-            });
+    if (btnKill) btnKill.disabled = true;
+    try {
+        await ensureAuth();
+        await set(ref(db, `rooms/${roomCode}/players/${target}/status`), 'killed_hidden');
 
-            const cdSec = (roomConfig && roomConfig.killCooldown) ? roomConfig.killCooldown : 120;
-            killCooldownEnd = Date.now() + (cdSec * 1000);
-            startCooldownTimer();
-            killTargetSelect.value = "";
-        } catch (err) {
-            console.error("Kill action failed:", err);
-            if (btnKill) btnKill.disabled = false;
-            alert("Errore durante l'uccisione: " + err.message);
-        }
+        const cdSec = (roomConfig && roomConfig.killCooldown) ? roomConfig.killCooldown : 120;
+        killCooldownEnd = Date.now() + (cdSec * 1000);
+        startCooldownTimer();
+        killTargetSelect.value = "";
+    } catch (err) {
+        console.error("Kill action failed:", err);
+        if (btnKill) btnKill.disabled = false;
+        alert("Errore durante l'uccisione: " + err.message);
     }
 });
 
