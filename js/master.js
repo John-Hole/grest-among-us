@@ -1091,9 +1091,9 @@ btnStartRandom.addEventListener('click', async () => {
             const titleText = t.name || t.obj || '';
             const hasSeparateObj = Boolean(t.obj && t.obj.trim() !== '' && t.obj.trim() !== (t.name || '').trim());
             if (hasSeparateObj) {
-                return `${t.num}. ${titleText}: ${t.obj}${t.pos ? ` (${t.pos})` : ''}`;
+                return `${t.num}. ${titleText}: ${t.obj}${t.pos ? ` | ${t.pos}` : ''}`;
             }
-            return `${t.num}. ${titleText}${t.pos ? ` (${t.pos})` : ''}`;
+            return `${t.num}. ${titleText}${t.pos ? ` | ${t.pos}` : ''}`;
         });
     }
 

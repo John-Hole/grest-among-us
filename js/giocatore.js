@@ -81,10 +81,10 @@ if (btnHideDead) {
 }
 
 // Setup onDisconnect to remove ghost players and their votes
-const myPlayerRef = ref(db, `rooms/${roomCode}/players/${myPlayerName}`);
+let myPlayerRef = ref(db, `rooms/${roomCode}/players/${myPlayerName}`);
 onDisconnect(myPlayerRef).remove();
 
-const myVoteRef = ref(db, `rooms/${roomCode}/votes/${myPlayerName}`);
+let myVoteRef = ref(db, `rooms/${roomCode}/votes/${myPlayerName}`);
 onDisconnect(myVoteRef).remove();
 
 const roomRef = ref(db, `rooms/${roomCode}`);
@@ -252,6 +252,8 @@ function updateUI(state, playersMap) {
 
     if (state.game_status === 'emergency') {
         overlayMeeting.classList.remove('hidden');
+        overlayDead.classList.add('hidden');
+        roleScreen.classList.add('hidden');
         gameScreen.classList.add('hidden');
         votingUI.classList.add('hidden');
         overlayMeetingH1.textContent = "EMERGENZA!";
@@ -265,6 +267,8 @@ function updateUI(state, playersMap) {
         return;
     } else if (state.game_status === 'discussion') {
         overlayMeeting.classList.remove('hidden');
+        overlayDead.classList.add('hidden');
+        roleScreen.classList.add('hidden');
         gameScreen.classList.add('hidden');
         votingUI.classList.add('hidden');
         overlayMeetingH1.textContent = "DISCUSSIONE";
@@ -273,12 +277,16 @@ function updateUI(state, playersMap) {
         return;
     } else if (state.game_status === 'voting') {
         overlayMeeting.classList.add('hidden');
+        overlayDead.classList.add('hidden');
+        roleScreen.classList.add('hidden');
         gameScreen.classList.add('hidden');
         votingUI.classList.remove('hidden');
         renderVotingUI(playersMap);
         return;
     } else if (state.game_status === 'crewmates_win') {
         overlayMeeting.classList.remove('hidden');
+        overlayDead.classList.add('hidden');
+        roleScreen.classList.add('hidden');
         gameScreen.classList.add('hidden');
         votingUI.classList.add('hidden');
         overlayMeetingH1.textContent = "🏆 VITTORIA CREWMATE!";
@@ -287,6 +295,8 @@ function updateUI(state, playersMap) {
         return;
     } else if (state.game_status === 'impostors_win') {
         overlayMeeting.classList.remove('hidden');
+        overlayDead.classList.add('hidden');
+        roleScreen.classList.add('hidden');
         gameScreen.classList.add('hidden');
         votingUI.classList.add('hidden');
         overlayMeetingH1.textContent = "🏆 VITTORIA IMPOSTORI!";
@@ -397,56 +407,89 @@ function updateUI(state, playersMap) {
     }
 }
 
-// Impostor Toggle Kill Menu
-playerNameDisplay.addEventListener('click', () => {
-    if (myData && myData.role === 'impostor' && myData.status === 'alive') {
-        killSection.classList.toggle('hidden');
-    }
-});
+// Header Name Click Listener
+if (playerNameBox) {
+    playerNameBox.addEventListener('click', () => {
+        if (currentState && currentState.game_status === 'waiting') {
+            promptChangeName();
+        } else {
+            const roleCap = myData && myData.role ? myData.role.toUpperCase() : 'CREWMATE';
+            const statusCap = myData && myData.status ? myData.status.toUpperCase() : 'ALIVE';
+            alert(`Sei connesso come: ${myPlayerName}\nStanza: ${roomCode}\nRuolo: ${roleCap}\nStato: ${statusCap}`);
+        }
+    });
+}
+
+let lastRenderedVotesSignature = '';
 
 function renderVotingUI(playersMap) {
-    if (myData.status !== 'alive') {
+    const isAlive = myData && myData.status === 'alive';
+    const myVote = currentVotes ? currentVotes[myPlayerName] : null;
+
+    if (!isAlive) {
         votingOptions.innerHTML = '';
-        votingStatus.innerHTML = '<h3 style="color: var(--accent-red);">Sei morto, non puoi votare. Attendi.</h3>';
+        votingStatus.innerHTML = '<h3 style="color: var(--accent-red); margin-top: 1rem;">Sei morto, non puoi votare. Attendi l\'esito.</h3>';
+        lastRenderedVotesSignature = 'dead';
         return;
     }
 
-    if (currentVotes[myPlayerName]) {
+    if (myVote) {
         votingOptions.innerHTML = '';
-        votingStatus.innerHTML = `<h3 style="color: var(--accent-green);">Hai votato: ${escapeHtml(currentVotes[myPlayerName])}</h3><p>Attendi gli altri...</p>`;
+        votingStatus.innerHTML = `<h3 style="color: var(--accent-green); margin-top: 1rem;">✔ Hai votato: <strong>${escapeHtml(myVote)}</strong></h3><p style="color: #94a3b8; margin-top: 0.5rem;">Attendi il termine della votazione...</p>`;
+        lastRenderedVotesSignature = `voted_${myVote}`;
         return;
     }
 
+    const alivePlayers = [];
+    for (const name in playersMap) {
+        if (playersMap[name].status === 'alive') {
+            alivePlayers.push(name);
+        }
+    }
+    alivePlayers.sort();
+
+    const currentSig = `alive_${alivePlayers.join(',')}_vote_${myVote || 'none'}`;
+    if (lastRenderedVotesSignature === currentSig && votingOptions.children.length > 0) {
+        return;
+    }
+
+    lastRenderedVotesSignature = currentSig;
     votingStatus.innerHTML = '';
     votingOptions.innerHTML = '';
 
-    for (const name in playersMap) {
-        if (playersMap[name].status === 'alive') {
-            const btn = document.createElement('button');
-            btn.className = 'btn';
-            btn.style.width = '100%';
-            btn.style.padding = '1rem';
-            btn.style.background = name === myPlayerName ? '#555' : 'var(--card-bg)';
-            btn.textContent = name === myPlayerName ? `${name} (Tu)` : name;
-            
-            btn.onclick = async () => {
-                if(confirm(`Confermi di voler votare ${name}?`)) {
-                    await castVote(name);
-                }
-            };
-            votingOptions.appendChild(btn);
-        }
-    }
+    alivePlayers.forEach(name => {
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.style.width = '100%';
+        btn.style.padding = '0.95rem';
+        btn.style.fontSize = '0.95rem';
+        btn.style.fontWeight = 'bold';
+        btn.style.borderRadius = '12px';
+        btn.style.background = name === myPlayerName ? 'rgba(255, 255, 255, 0.15)' : 'var(--card-bg)';
+        btn.style.border = name === myPlayerName ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.1)';
+        btn.textContent = name === myPlayerName ? `${name} (Tu)` : name;
+        
+        btn.onclick = async () => {
+            if (confirm(`Confermi di voler votare ${name}?`)) {
+                await castVote(name);
+            }
+        };
+        votingOptions.appendChild(btn);
+    });
 
-    // Skip button
     const skipBtn = document.createElement('button');
     skipBtn.className = 'btn';
     skipBtn.style.width = '100%';
-    skipBtn.style.padding = '1rem';
-    skipBtn.style.background = 'var(--dead-gray)';
-    skipBtn.textContent = 'SKIP (Non espellere)';
+    skipBtn.style.padding = '0.95rem';
+    skipBtn.style.fontSize = '0.95rem';
+    skipBtn.style.fontWeight = 'bold';
+    skipBtn.style.borderRadius = '12px';
+    skipBtn.style.background = 'rgba(117, 117, 117, 0.4)';
+    skipBtn.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+    skipBtn.style.color = '#fff';
+    skipBtn.textContent = '⏭️ SKIP (Non espellere)';
     skipBtn.onclick = async () => {
-        if(confirm("Sei sicuro di voler skippare il voto?")) {
+        if (confirm("Sei sicuro di voler skippare il voto?")) {
             await castVote('SKIP');
         }
     };
@@ -564,43 +607,64 @@ function renderImpostorTasks(tasksObj) {
 }
 
 function updateKillSelector(players) {
+    if (!killTargetSelect) return;
     const currentVal = killTargetSelect.value;
-    killTargetSelect.innerHTML = '<option value="">-- Seleziona Vittima --</option>';
     
+    const aliveTargets = [];
     for (const name in players) {
-        if (players[name].status === 'alive' && name !== myPlayerName && players[name].role !== 'impostor') {
-            const opt = document.createElement('option');
-            opt.value = name;
-            opt.textContent = name;
-            killTargetSelect.appendChild(opt);
+        if (players[name] && players[name].status === 'alive' && name !== myPlayerName && players[name].role !== 'impostor') {
+            aliveTargets.push(name);
         }
     }
-    if (currentVal) {
+    aliveTargets.sort();
+
+    killTargetSelect.innerHTML = '<option value="">-- Seleziona Vittima --</option>';
+    aliveTargets.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        killTargetSelect.appendChild(opt);
+    });
+
+    if (currentVal && aliveTargets.includes(currentVal)) {
         killTargetSelect.value = currentVal;
     }
 }
 
 function startCooldownTimer() {
     clearInterval(killInterval);
-    killInterval = setInterval(() => {
-        if(myData && myData.status !== 'alive') {
+    if (!myData || myData.role !== 'impostor') return;
+
+    const tick = () => {
+        if (!myData || myData.status !== 'alive') {
             clearInterval(killInterval);
+            if (btnKill) {
+                btnKill.disabled = true;
+                btnKill.textContent = "SEI MORTO";
+            }
             return;
         }
 
         const remaining = killCooldownEnd - Date.now();
         if (remaining <= 0) {
-            btnKill.textContent = "KILL";
-            btnKill.disabled = false;
+            if (btnKill) {
+                btnKill.textContent = "🗡️ KILL BERSAGLIO";
+                btnKill.disabled = false;
+            }
             clearInterval(killInterval);
         } else {
             const secs = Math.floor(remaining / 1000);
             const m = Math.floor(secs / 60);
             const s = secs % 60;
-            btnKill.textContent = `COOLDOWN (${m}:${s.toString().padStart(2, '0')})`;
-            btnKill.disabled = true;
+            if (btnKill) {
+                btnKill.textContent = `COOLDOWN (${m}:${s.toString().padStart(2, '0')})`;
+                btnKill.disabled = true;
+            }
         }
-    }, 1000);
+    };
+
+    tick();
+    killInterval = setInterval(tick, 1000);
 }
 
 btnKill.addEventListener('click', async () => {
@@ -616,11 +680,12 @@ btnKill.addEventListener('click', async () => {
 
     const target = killTargetSelect.value;
     if (!target) {
-        alert("Seleziona un bersaglio!");
+        alert("Seleziona un bersaglio dal menu a tendina prima di cliccare KILL!");
         return;
     }
     
     if (confirm(`Sei sicuro di voler uccidere ${target}?`)) {
+        if (btnKill) btnKill.disabled = true;
         try {
             await ensureAuth();
             await update(ref(db, `rooms/${roomCode}/players/${target}`), {
@@ -633,6 +698,7 @@ btnKill.addEventListener('click', async () => {
             killTargetSelect.value = "";
         } catch (err) {
             console.error("Kill action failed:", err);
+            if (btnKill) btnKill.disabled = false;
             alert("Errore durante l'uccisione: " + err.message);
         }
     }
@@ -844,6 +910,8 @@ async function promptChangeName() {
         }
 
         myPlayerName = cleanName;
+        myPlayerRef = ref(db, `rooms/${roomCode}/players/${myPlayerName}`);
+        myVoteRef = ref(db, `rooms/${roomCode}/votes/${myPlayerName}`);
         playerNameDisplay.textContent = cleanName;
         localStorage.setItem('lastNickname', cleanName);
 

@@ -181,7 +181,7 @@
         <!-- Header Bar with Name (Status as Background) and Call Button -->
         <div class="glass-card header-player-card">
             <!-- Player Name with Status background (Green if alive, Red if dead) -->
-            <div id="player-name-box" class="header-name-status-box name-box-alive" style="display: flex; align-items: center; gap: 0.5rem; flex: 1; cursor: pointer;">
+            <div id="player-name-box" class="header-name-status-box name-box-alive" style="display: flex; align-items: center; gap: 0.5rem; flex: 1; cursor: pointer;" title="Clicca per info o cambiare nome">
                 <span id="player-status-icon" style="font-size: 1.1rem; flex-shrink: 0;">🟢</span>
                 <h2 id="player-name-display" style="font-size: 0.95rem; word-break: break-all; margin: 0; text-transform: none; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Nome</h2>
             </div>
@@ -221,14 +221,14 @@
             <div class="glass-card-header">
                 <div class="glass-card-header-left">
                     <span class="header-icon">🗡️</span>
-                    <h2 style="color: #ef4444;">MENU SEGRETO (IMPOSTORE)</h2>
+                    <h2 style="color: #ef4444;">MENU ELIMINAZIONE (IMPOSTORE)</h2>
                 </div>
             </div>
-            <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.4rem; font-weight: 600;">Seleziona bersaglio:</label>
-            <select id="kill-target-select">
+            <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.4rem; font-weight: 600;">Seleziona bersaglio da uccidere:</label>
+            <select id="kill-target-select" style="margin-bottom: 0.8rem;">
                 <!-- Populated by JS -->
             </select>
-            <button id="btn-kill" class="btn btn-danger kill-btn" style="min-height: 52px; font-size: 1.1rem; font-weight: 800; border-radius: 12px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);">KILL BERSAGLIO</button>
+            <button id="btn-kill" class="btn btn-danger kill-btn" style="width: 100%; min-height: 52px; font-size: 1.1rem; font-weight: 800; border-radius: 12px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);">KILL BERSAGLIO</button>
         </div>
 
         <!-- Scientist Vitals UI -->

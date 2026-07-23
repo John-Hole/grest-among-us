@@ -43,9 +43,9 @@
         "players": {
           "$playerName": {
             ".write": "auth != null",
-            ".validate": "newData.hasChildren(['name', 'role', 'status'])",
+            ".validate": "newData.hasChildren(['role', 'status'])",
             "name": {
-              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 50"
+              ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0 && newData.val().length <= 50)"
             },
             "role": {
               ".validate": "newData.isString() && ['crewmate', 'impostor', 'scientist'].indexOf(newData.val()) !== -1"

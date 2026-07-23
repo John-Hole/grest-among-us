@@ -1,22 +1,22 @@
 // Liste giocatori rimosse (gestite dinamicamente dal Realtime Database)
 export const TASKS_LIST = [
-    "1. Canestri: 3 canestri da tiro libero (canestro oratorio)",
-    "2. Trova l'oggetto: trova 10 oggetti dentro la scatola piena di acqua sporca (panchine rosse)",
-    "3. Rebus: risolvi 2 fogli di rebus (atrio)",
-    "4. Puzzle: componi un puzzle (atrio)",
-    "5. Pulisci il bagno: 1 minuto per pulire tutto il bagno dalla tempera con la spugnetta (bagno donne)",
-    "6. Matematica: risolvi 10 operazioni in 1 minuto e mezzo (ex biblioteca)",
-    "7. Limbo: supera 3 livelli (ex biblioteca)",
-    "8. Avanti un'altro: rispondi a 15 domande (salone)",
-    "9. C'entra il bicchiere: fai c'entro con i pennarelli nel bicchiere in un minuto e mezzo (salone)",
-    "10. Percorso bendato: un compagno dà le indicazioni al giocatore per fare il percorso (strada principale)",
-    "11. Riempi il bicchiere: con un bicchiere da shottino pieno corri per riempire un bicchiere grande, avanti e dietro fino a quando non sarà pieno (strada principale)",
-    "12. Ricorda la sequenza: ripeti la sequenza 1 volta (sala principale)",
-    "13. Attacca le orecchie al bianconiglio: 1 minuto per attaccare bendati le orecchie al bianconiglio con 3 tentativi, al terzo possono essere guidati a voce dal compagno (sala principale)",
-    "14. Twister: resisti un minuto e mezzo cambiando posizione (sala principale)",
-    "15. Dinosauro: pesca un bigliettino dove c'è scritto il punteggio da raggiungere e poi giocare fino a quando non ci arriva (regia)",
-    "16. Whisper challenge: indovina 5 frasi (corridoio catechismo)",
-    "17. Cruciverba: risolvi un cruciverba (stanza verde catechismo)"
+    "1. 3 canestri da tiro libero | Canestro",
+    "2. Trova 10 oggetti dentro la scatola piena di acqua sporca | Atrio",
+    "3. Risolvi 2 fogli di rebus | Atrio",
+    "4. Componi un puzzle | Atrio",
+    "5. 1 minuto per pulire tutto il bagno dalla tempera con la spugnetta | Bagno Disabili",
+    "6. Risolvi 10 operazioni in 1 minuto e mezzo | Sala Materiali",
+    "7. Supera 3 livelli di limbo | Sala Materiali",
+    "8. Rispondi a 15 domande | Salone",
+    "9. Fai centro con i pennarelli nel bicchiere in 1.5 min | Salone",
+    "10. Un compagno dà le indicazioni al giocatore bendato | Strada Laterale",
+    "11. Con uno shottino pieno corri a riempire un bicchiere grande | Strada Laterale",
+    "12. Ripeti la sequenza 1 volta | Sala Gialla",
+    "13. 1 minuto per attaccare bendati le orecchie al bianconiglio | Sala Gialla",
+    "14. Resisti 1.5 min cambiando posizione | Sala Gialla",
+    "15. Pesca bigliettino col punteggio e gioca fino al target | Regia",
+    "16. Indovina 5 frasi | Corridoio Salone",
+    "17. Risolvi un cruciverba | Sala Verde"
 ];
 
 export const ROUND_TIMES = [
