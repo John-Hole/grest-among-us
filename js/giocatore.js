@@ -372,7 +372,7 @@ function updateUI(state, playersMap) {
             }
         }
 
-        const maxMeetings = roomConfig.maxMeetings || 1;
+        const maxMeetings = (roomConfig && roomConfig.maxMeetings !== undefined) ? roomConfig.maxMeetings : 1;
         const meetingsCalled = myData.meetings_called || 0;
         const meetingsLeft = Math.max(0, maxMeetings - meetingsCalled);
 
@@ -395,12 +395,12 @@ function updateUI(state, playersMap) {
         if (!hasSeenRoleThisRound) {
             hasSeenRoleThisRound = true;
             roleScreen.classList.remove('hidden');
-            roleText.textContent = myData.role.toUpperCase();
+            roleText.textContent = (myData.role || 'crewmate').toUpperCase();
             roleText.className = 'role-text';
             if (myData.role === 'impostor') roleText.classList.add('role-impostor');
             else roleText.classList.add('role-crewmate');
             
-            const cdSec = roomConfig.killCooldown || 120;
+            const cdSec = (roomConfig && roomConfig.killCooldown) ? roomConfig.killCooldown : 120;
             killCooldownEnd = Date.now() + (cdSec * 1000);
             startCooldownTimer();
         }
