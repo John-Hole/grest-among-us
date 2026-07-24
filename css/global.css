@@ -3369,6 +3369,89 @@ input:checked + .slider:before {
     40% { transform: translateX(6px); }
     60% { transform: translateX(-4px); }
     80% { transform: translateX(4px); }
+/* TIMER CONTROLS SINGLE ROW CARD (COMPACT MASTER TIMER) */
+.timer-controls-single-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 0.65rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.timer-card-clock {
+    font-size: clamp(1.15rem, 4vw, 1.45rem) !important;
+    font-weight: 900 !important;
+    color: #38bdf8;
+    background: rgba(0, 0, 0, 0.4) !important;
+    padding: 0.45rem 0.85rem !important;
+    border-radius: 12px !important;
+    border: 1.5px solid rgba(56, 189, 248, 0.3) !important;
+    letter-spacing: 0.5px !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    user-select: none !important;
+    transition: all 0.2s ease !important;
+}
+
+.timer-card-clock:hover {
+    border-color: rgba(56, 189, 248, 0.6) !important;
+    background: rgba(56, 189, 248, 0.1) !important;
+    transform: scale(1.02);
+}
+
+.timer-card-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.45rem !important;
+    flex-shrink: 0 !important;
+}
+
+.btn-timer-pause-compact {
+    background: linear-gradient(135deg, #ea580c, #c2410c) !important;
+    color: white !important;
+    border-radius: 50px !important;
+    font-weight: 800 !important;
+    padding: 0.45rem 0.85rem !important;
+    font-size: 0.8rem !important;
+    border: none !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    box-shadow: 0 2px 8px rgba(234, 88, 12, 0.35) !important;
+    transition: all 0.2s ease !important;
+    user-select: none !important;
+}
+
+.btn-timer-pause-compact:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.5) !important;
+}
+
+.btn-timer-add-compact {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: white !important;
+    border-radius: 50px !important;
+    font-weight: 800 !important;
+    padding: 0.45rem 0.85rem !important;
+    font-size: 0.8rem !important;
+    border: none !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35) !important;
+    transition: all 0.2s ease !important;
+    user-select: none !important;
+}
+
+.btn-timer-add-compact:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5) !important;
 }
 
 /* ===========================================================================

@@ -93,24 +93,19 @@
                     </button>
                 </div>
 
-                <!-- Timer Controls Card (Mostrato SOLO AD AVVIO EFFETTUATO) -->
-                <div id="timer-controls" class="glass-card hidden">
-                    <div class="glass-card-header">
-                        <div class="glass-card-header-left">
-                            <span class="header-icon">⏱️</span>
-                            <h2>GESTIONE TIMER IN CORSO</h2>
+                <!-- Timer Controls Card (Mostrato SOLO AD AVVIO EFFETTUATO - SINGLE LINE) -->
+                <div id="timer-controls" class="glass-card hidden" style="padding: 0.75rem 1rem !important;">
+                    <div class="timer-controls-single-row">
+                        <!-- Left: Live Clock Display (clickable for modal) -->
+                        <div id="master-live-clock" class="timer-card-clock" title="Clicca sul tempo per aprire i controlli avanzati">
+                            --:--
                         </div>
-                    </div>
 
-                    <!-- Live Clock Display (Clicca per aprire la gestione completa) -->
-                    <div id="master-live-clock" style="font-size: 2.2rem; font-weight: 900; color: #38bdf8; text-align: center; margin: 0.4rem 0 0.8rem 0; background: rgba(0,0,0,0.35); padding: 0.6rem; border-radius: 14px; border: 1.5px solid rgba(56, 189, 248, 0.3); letter-spacing: 1px; cursor: pointer;" title="Clicca sul tempo per aprire i controlli avanzati">
-                        --:--
-                    </div>
-
-                    <!-- Solo 2 tasti veloci: Pausa/Riprendi e +1 MIN -->
-                    <div style="display: flex; gap: 0.6rem;">
-                        <button id="btn-timer-pause-card" class="btn" style="flex: 1; background: #ea580c; color: white; border-radius: 50px; font-weight: 800; padding: 0.65rem 0.5rem; font-size: 0.85rem; border: none; cursor: pointer;">⏸️ PAUSA</button>
-                        <button id="btn-timer-add-card" class="btn" style="flex: 1; background: #00c853; color: white; border-radius: 50px; font-weight: 800; padding: 0.65rem 0.5rem; font-size: 0.85rem; border: none; cursor: pointer;">+ 1 MIN</button>
+                        <!-- Right: Quick Action Buttons (Pause & +1 Min) -->
+                        <div class="timer-card-actions">
+                            <button id="btn-timer-pause-card" class="btn btn-timer-pause-compact">⏸️ PAUSA</button>
+                            <button id="btn-timer-add-card" class="btn btn-timer-add-compact">+ 1 MIN</button>
+                        </div>
                     </div>
                 </div>
 
