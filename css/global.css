@@ -2543,12 +2543,12 @@ input:checked + .slider:before {
     }
 
     /* Inner layout wrappers inside main page containers (zero extra padding to prevent double gutters) */
-    .template-edit-container,
-    .master-grid,
-    .master-left-col,
-    .master-right-col,
-    .template-edit-grid,
-    .template-edit-col {
+    .template-edit-container:not(.hidden),
+    .master-grid:not(.hidden),
+    .master-left-col:not(.hidden),
+    .master-right-col:not(.hidden),
+    .template-edit-grid:not(.hidden),
+    .template-edit-col:not(.hidden) {
         display: flex !important;
         flex-direction: column !important;
         gap: var(--mobile-section-gap) !important;
@@ -2919,3 +2919,11 @@ input:checked + .slider:before {
     font-style: italic;
 }
 
+/* ===========================================================================
+   ABSOLUTE HIGHEST PRIORITY HIDDEN UTILITY
+   =========================================================================== */
+.hidden,
+body .hidden,
+html body .hidden {
+    display: none !important;
+}
