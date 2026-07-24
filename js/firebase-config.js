@@ -26,11 +26,30 @@ export function ensureAuth() {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       unsubscribe();
       if (user) {
+        try {
+          const displayName = user.isAnonymous ? 'Ospite' : (user.displayName || user.email || 'Utente');
+          const displayEmail = user.isAnonymous ? 'Account Ospite' : (user.email || user.displayName || 'Utente');
+          localStorage.setItem('realmong_user_cache', JSON.stringify({
+            uid: user.uid,
+            displayName,
+            email: displayEmail,
+            isAnonymous: user.isAnonymous
+          }));
+        } catch (e) {}
         resolve(user);
       } else {
         try {
           const cred = await signInAnonymously(auth);
-          resolve(cred.user);
+          const u = cred.user;
+          try {
+            localStorage.setItem('realmong_user_cache', JSON.stringify({
+              uid: u.uid,
+              displayName: 'Ospite',
+              email: 'Account Ospite',
+              isAnonymous: true
+            }));
+          } catch (e) {}
+          resolve(u);
         } catch (e) {
           console.error("Auto sign-in failed:", e);
           resolve(null);

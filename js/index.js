@@ -245,6 +245,15 @@ onAuthStateChanged(auth, (user) => {
         const displayName = user.isAnonymous ? 'Ospite' : (user.displayName || user.email || 'Utente');
         const displayEmail = user.isAnonymous ? 'Account Ospite' : (user.email || user.displayName || 'Utente');
         
+        try {
+            localStorage.setItem('realmong_user_cache', JSON.stringify({
+                uid: user.uid,
+                displayName,
+                email: displayEmail,
+                isAnonymous: user.isAnonymous
+            }));
+        } catch (e) {}
+
         const navUserEmailEl = document.getElementById('nav-user-email');
         if (navUserEmailEl) navUserEmailEl.textContent = displayEmail;
         if (authStatusEl) authStatusEl.textContent = `Loggato come: ${displayName}`;
@@ -260,6 +269,10 @@ onAuthStateChanged(auth, (user) => {
         }
     } else {
         currentUser = null;
+        try {
+            localStorage.removeItem('realmong_user_cache');
+        } catch (e) {}
+
         if (authStatusEl) authStatusEl.textContent = "Non loggato";
         if (btnLogoutEl) btnLogoutEl.classList.add('hidden');
         if (btnShowAuthEl) btnShowAuthEl.style.display = 'inline-block';
@@ -385,6 +398,9 @@ btnAnonLogin.addEventListener('click', async () => {
 
 const handleLogout = async () => {
     try {
+        try {
+            localStorage.removeItem('realmong_user_cache');
+        } catch (e) {}
         await signOut(auth);
         showSection('home');
     } catch (e) {

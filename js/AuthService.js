@@ -37,6 +37,16 @@ class AuthService {
         if (user) {
           this.currentUser = user;
           try {
+            const displayName = user.isAnonymous ? 'Ospite' : (user.displayName || user.email || 'Utente');
+            const displayEmail = user.isAnonymous ? 'Account Ospite' : (user.email || user.displayName || 'Utente');
+            localStorage.setItem('realmong_user_cache', JSON.stringify({
+              uid: user.uid,
+              displayName,
+              email: displayEmail,
+              isAnonymous: user.isAnonymous
+            }));
+          } catch (e) {}
+          try {
             this.idToken = await getIdToken(user);
           } catch (e) {
             console.error('Failed to get ID token:', e);
@@ -44,6 +54,9 @@ class AuthService {
         } else {
           this.currentUser = null;
           this.idToken = null;
+          try {
+            localStorage.removeItem('realmong_user_cache');
+          } catch (e) {}
         }
         
         this.notifyAuthStateChanged();
@@ -209,6 +222,9 @@ class AuthService {
       this.playerName = null;
       this.idToken = null;
       sessionStorage.removeItem('playerSession');
+      try {
+        localStorage.removeItem('realmong_user_cache');
+      } catch (e) {}
       this.notifyAuthStateChanged();
       console.log('✅ Logout successful');
     } catch (error) {

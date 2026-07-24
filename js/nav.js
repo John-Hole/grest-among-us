@@ -5,14 +5,25 @@
     const isScienziato = window.location.pathname.includes('scienziato');
     const isIndex = !isMaster && !isGiocatore && !isSchermo && !isScienziato;
     
+    let cachedUser = null;
+    try {
+        const rawCache = localStorage.getItem('realmong_user_cache');
+        if (rawCache) cachedUser = JSON.parse(rawCache);
+    } catch (e) {}
+
+    const isUserLoggedIn = !!(cachedUser && cachedUser.uid);
+    const userEmailText = isUserLoggedIn ? (cachedUser.email || cachedUser.displayName || 'Utente') : '';
+    const authStatusText = isUserLoggedIn ? `Loggato come: ${cachedUser.displayName || 'Utente'}` : 'Non loggato';
+    const logoutBtnClass = isUserLoggedIn ? 'btn btn-danger' : 'btn btn-danger hidden';
+
     let rightSideHTML = '';
     if (isIndex) {
         rightSideHTML = `
-            <div id="nav-user-info" class="nav-user-dropdown-container" style="display: none;">
+            <div id="nav-user-info" class="nav-user-dropdown-container" style="display: ${isUserLoggedIn ? 'flex' : 'none'};">
                 <button id="nav-btn-logout-top" class="nav-user-email-btn" title="Clicca per uscire dall'account">
                     <span class="user-email-default">
                         <span class="user-email-icon">📧</span>
-                        <span id="nav-user-email" class="user-email-text"></span>
+                        <span id="nav-user-email" class="user-email-text">${userEmailText}</span>
                     </span>
                     <span class="user-email-hover">
                         <span class="logout-icon">🚪</span>
@@ -20,7 +31,7 @@
                     </span>
                 </button>
             </div>
-            <button id="btn-show-auth" class="btn btn-sm btn-nav-auth"><span class="auth-text-desktop">ACCEDI / REGISTRATI</span><span class="auth-text-mobile">ACCEDI<br>REGISTRATI</span></button>
+            <button id="btn-show-auth" class="btn btn-sm btn-nav-auth" style="display: ${isUserLoggedIn ? 'none' : 'inline-block'};"><span class="auth-text-desktop">ACCEDI / REGISTRATI</span><span class="auth-text-mobile">ACCEDI<br>REGISTRATI</span></button>
         `;
     } else if (isMaster || isGiocatore || isSchermo || isScienziato) {
         rightSideHTML = `<button onclick="if(confirm('Vuoi uscire dalla schermata generale?')) window.location.href='/'" class="btn btn-danger btn-sm" style="padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: 50px;">ESCI</button>`;
@@ -39,8 +50,8 @@
             <a href="#" id="nav-schermo">Schermata generale</a>
             <a href="#" id="nav-account">Account (Template)</a>
             <div style="flex-grow: 1;"></div>
-            <div id="nav-auth-status" style="font-size: 0.8rem; color: #ccc; margin-bottom: 10px;">Non loggato</div>
-            <button id="nav-btn-logout" class="btn btn-danger hidden" style="padding: 10px; font-size: 0.8rem; border-radius: 50px;">LOGOUT ACCOUNT</button>
+            <div id="nav-auth-status" style="font-size: 0.8rem; color: #ccc; margin-bottom: 10px;">${authStatusText}</div>
+            <button id="nav-btn-logout" class="${logoutBtnClass}" style="padding: 10px; font-size: 0.8rem; border-radius: 50px;">LOGOUT ACCOUNT</button>
         </div>
     `;
     document.body.insertAdjacentHTML('afterbegin', navHTML);
