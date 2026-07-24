@@ -93,15 +93,22 @@
                     </button>
                 </div>
 
-                <!-- Timer Controls Card (Mostrato SOLO AD AVVIO EFFETTUATO - SINGLE LINE) -->
-                <div id="timer-controls" class="glass-card hidden" style="padding: 0.75rem 1rem !important;">
+                <!-- Timer Controls Card (Mostrato SOLO AD AVVIO EFFETTUATO) -->
+                <div id="timer-controls" class="glass-card hidden">
+                    <div class="glass-card-header" style="margin-bottom: 0.65rem;">
+                        <div class="glass-card-header-left">
+                            <span class="header-icon">⏱️</span>
+                            <h2>GESTIONE TIMER IN CORSO</h2>
+                        </div>
+                    </div>
+
                     <div class="timer-controls-single-row">
                         <!-- Left: Live Clock Display (clickable for modal) -->
                         <div id="master-live-clock" class="timer-card-clock" title="Clicca sul tempo per aprire i controlli avanzati">
                             --:--
                         </div>
 
-                        <!-- Right: Quick Action Buttons (Pause & +1 Min) -->
+                        <!-- Right: Quick Action Buttons (Icon-only Pause & +1 MIN) -->
                         <div class="timer-card-actions">
                             <button id="btn-timer-pause-card" class="btn btn-timer-icon-btn" title="Pausa / Riprendi Timer">⏸️</button>
                             <button id="btn-timer-add-card" class="btn btn-timer-add-compact" title="Aggiungi 1 Minuto">+ 1 MIN</button>

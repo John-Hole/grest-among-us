@@ -768,6 +768,11 @@ function renderMasterTimer() {
             liveClockText = `▶️ ${remSec}`;
             modalTimerText = `▶️ ${remSec}`;
             timerColor = left <= 30000 ? "#ef4444" : "#38bdf8";
+
+            // When round timer reaches 00:00, automatically call emergency meeting!
+            if (left <= 0 && currentState.timer && currentState.timer > 0) {
+                callEmergencyMeeting();
+            }
         }
     } else if (status === 'emergency') {
         if (currentTimerPill) currentTimerPill.classList.add('hidden');
@@ -1184,15 +1189,26 @@ btnStartRandom.addEventListener('click', async () => {
     await update(roomRef, updates);
 });
 
-btnCallMeeting.addEventListener('click', async () => {
-    // We are going to emergency. Pause the timer.
-    const remaining = Math.max(0, currentState.timer - Date.now());
-    await update(roomRef, {
-        'state/game_status': 'emergency',
-        'state/timer_paused': true,
-        'state/timer_remaining': remaining
-    });
-});
+let isAutoTriggeringEmergency = false;
+
+async function callEmergencyMeeting() {
+    if (!roomRef || !currentState || isAutoTriggeringEmergency) return;
+    isAutoTriggeringEmergency = true;
+    try {
+        const remaining = Math.max(0, (currentState.timer || Date.now()) - Date.now());
+        await update(roomRef, {
+            'state/game_status': 'emergency',
+            'state/timer_paused': true,
+            'state/timer_remaining': remaining
+        });
+    } catch (e) {
+        console.error("Emergency call error:", e);
+    } finally {
+        setTimeout(() => { isAutoTriggeringEmergency = false; }, 3000);
+    }
+}
+
+btnCallMeeting.addEventListener('click', callEmergencyMeeting);
 
 btnStartDiscussion.addEventListener('click', async () => {
     await update(roomRef, {
