@@ -58,8 +58,7 @@
         <div id="side-nav" class="side-nav">
             <div class="side-nav-header">
                 <div class="side-nav-brand">
-                    <span class="side-nav-logo">🚀</span>
-                    <span class="side-nav-title">MENU GIOCO</span>
+                    <span class="side-nav-title glitch-text">REALMONG US</span>
                 </div>
                 <button id="side-nav-close" class="side-nav-close" aria-label="Chiudi menu">✕</button>
             </div>
