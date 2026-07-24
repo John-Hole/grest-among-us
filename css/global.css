@@ -2806,13 +2806,13 @@ input:checked + .slider:before {
     }
 
     /* Top-level page containers (Exact 0.75rem / 12px page gutters from screen edge) */
-    .master-layout-container,
-    .player-app-container,
-    .scienziato-container,
-    .mobile-app,
-    .hub-layout,
-    .schermo-lobby-container,
-    .section-container {
+    .master-layout-container:not(.hidden),
+    .player-app-container:not(.hidden),
+    .scienziato-container:not(.hidden),
+    .mobile-app:not(.hidden),
+    .hub-layout:not(.hidden),
+    .schermo-lobby-container:not(.hidden),
+    .section-container:not(.hidden) {
         display: flex !important;
         flex-direction: column !important;
         width: 100% !important;
@@ -3385,20 +3385,16 @@ input:checked + .slider:before {
     40% { transform: translateX(6px); }
     60% { transform: translateX(-4px); }
     80% { transform: translateX(4px); }
-/* SINGLE-LINE MASTER TIMER BAR & PIXEL CLOCK */
-.master-timer-bar {
+/* MASTER TIMER CARD & PIXEL CLOCK */
+.timer-card-body {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
     justify-content: space-between !important;
-    padding: 0.65rem 1rem !important;
     gap: 0.75rem !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    background: linear-gradient(135deg, rgba(18, 24, 37, 0.95) 0%, rgba(10, 15, 25, 0.95) 100%) !important;
-    border: 1.5px solid rgba(56, 189, 248, 0.35) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 12px rgba(56, 189, 248, 0.12) !important;
 }
 
 #master-live-clock {
@@ -3407,30 +3403,30 @@ input:checked + .slider:before {
     justify-content: center !important;
     gap: 0.5rem !important;
     font-family: var(--font-pixel) !important;
-    font-size: clamp(0.78rem, 3.2vw, 1.05rem) !important;
+    font-size: clamp(0.85rem, 3.5vw, 1.1rem) !important;
     font-weight: 800 !important;
     letter-spacing: 0.5px !important;
     color: var(--accent-cyan) !important;
-    background: rgba(0, 0, 0, 0.5) !important;
-    padding: 0.45rem 0.85rem !important;
+    background: rgba(0, 0, 0, 0.45) !important;
+    padding: 0.55rem 0.85rem !important;
     border-radius: 12px !important;
-    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+    border: 1px solid rgba(56, 189, 248, 0.25) !important;
     cursor: pointer !important;
     white-space: nowrap !important;
     text-overflow: ellipsis !important;
     overflow: hidden !important;
     user-select: none !important;
     transition: all 0.2s ease !important;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 8px rgba(0, 229, 255, 0.15) !important;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 229, 255, 0.1) !important;
     flex: 1 1 auto !important;
     min-width: 0 !important;
     line-height: 1.2 !important;
 }
 
 #master-live-clock:hover {
-    border-color: rgba(0, 229, 255, 0.6) !important;
+    border-color: rgba(0, 229, 255, 0.5) !important;
     background: rgba(0, 229, 255, 0.08) !important;
-    transform: scale(1.02) !important;
+    transform: translateY(-1px) !important;
 }
 
 .timer-card-actions {
@@ -3451,12 +3447,12 @@ input:checked + .slider:before {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-size: 0.95rem !important;
-    background: linear-gradient(135deg, #ff5252, #d50000) !important;
+    font-size: 1rem !important;
+    background: linear-gradient(135deg, #ea580c, #c2410c) !important;
     color: white !important;
-    border: 1px solid rgba(255, 82, 82, 0.5) !important;
+    border: 1px solid rgba(234, 88, 12, 0.5) !important;
     cursor: pointer !important;
-    box-shadow: 0 0 12px rgba(255, 23, 68, 0.4) !important;
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.35) !important;
     transition: all 0.2s ease !important;
     user-select: none !important;
     flex-shrink: 0 !important;
@@ -3464,7 +3460,7 @@ input:checked + .slider:before {
 
 .btn-timer-icon-btn:hover {
     transform: scale(1.08) !important;
-    box-shadow: 0 0 18px rgba(255, 23, 68, 0.75) !important;
+    box-shadow: 0 6px 16px rgba(234, 88, 12, 0.55) !important;
 }
 
 .btn-timer-add-compact {
@@ -3477,7 +3473,7 @@ input:checked + .slider:before {
     border: none !important;
     cursor: pointer !important;
     white-space: nowrap !important;
-    box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4) !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35) !important;
     transition: all 0.2s ease !important;
     user-select: none !important;
     flex-shrink: 0 !important;
@@ -3485,7 +3481,7 @@ input:checked + .slider:before {
 
 .btn-timer-add-compact:hover {
     transform: translateY(-1px) !important;
-    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.6) !important;
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.55) !important;
 }
 
 /* ===========================================================================
@@ -3493,6 +3489,8 @@ input:checked + .slider:before {
    =========================================================================== */
 .hidden,
 body .hidden,
-html body .hidden {
+html body .hidden,
+div.hidden,
+html body div.hidden {
     display: none !important;
 }

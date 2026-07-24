@@ -257,6 +257,7 @@ function updateUI(state, playersMap) {
         overlayDead.classList.add('hidden');
         roleScreen.classList.add('hidden');
         gameScreen.classList.add('hidden');
+        waitingScreen.classList.add('hidden');
         votingUI.classList.add('hidden');
         overlayMeetingH1.textContent = "EMERGENZA!";
         overlayMeetingH1.style.color = "var(--accent-red)";
@@ -272,6 +273,7 @@ function updateUI(state, playersMap) {
         overlayDead.classList.add('hidden');
         roleScreen.classList.add('hidden');
         gameScreen.classList.add('hidden');
+        waitingScreen.classList.add('hidden');
         votingUI.classList.add('hidden');
         overlayMeetingH1.textContent = "DISCUSSIONE";
         overlayMeetingH1.style.color = "#ffeb3b";
@@ -292,6 +294,7 @@ function updateUI(state, playersMap) {
         overlayDead.classList.add('hidden');
         roleScreen.classList.add('hidden');
         gameScreen.classList.add('hidden');
+        waitingScreen.classList.add('hidden');
         votingUI.classList.remove('hidden');
         renderVotingUI(playersMap);
         return;
@@ -300,6 +303,7 @@ function updateUI(state, playersMap) {
         overlayDead.classList.add('hidden');
         roleScreen.classList.add('hidden');
         gameScreen.classList.add('hidden');
+        waitingScreen.classList.add('hidden');
         votingUI.classList.add('hidden');
         overlayMeetingH1.textContent = "📊 ESITO VOTI";
         overlayMeetingH1.style.color = "#c084fc";
@@ -310,6 +314,7 @@ function updateUI(state, playersMap) {
         overlayDead.classList.add('hidden');
         roleScreen.classList.add('hidden');
         gameScreen.classList.add('hidden');
+        waitingScreen.classList.add('hidden');
         votingUI.classList.add('hidden');
         overlayMeetingH1.textContent = "🏆 VITTORIA CREWMATE!";
         overlayMeetingH1.style.color = "var(--accent-cyan)";
@@ -320,6 +325,7 @@ function updateUI(state, playersMap) {
         overlayDead.classList.add('hidden');
         roleScreen.classList.add('hidden');
         gameScreen.classList.add('hidden');
+        waitingScreen.classList.add('hidden');
         votingUI.classList.add('hidden');
         overlayMeetingH1.textContent = "🏆 VITTORIA IMPOSTORI!";
         overlayMeetingH1.style.color = "var(--accent-red)";

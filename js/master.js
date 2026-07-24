@@ -708,11 +708,15 @@ function updateUI(state, players) {
             if (state.timer_paused) {
                 btnTimerPauseCard.textContent = "▶️";
                 btnTimerPauseCard.title = "Riprendi Timer";
-                btnTimerPauseCard.style.background = "#00c853";
+                btnTimerPauseCard.style.background = "linear-gradient(135deg, #10b981, #059669)";
+                btnTimerPauseCard.style.borderColor = "rgba(16, 185, 129, 0.5)";
+                btnTimerPauseCard.style.boxShadow = "0 4px 12px rgba(16, 185, 129, 0.35)";
             } else {
                 btnTimerPauseCard.textContent = "⏸️";
                 btnTimerPauseCard.title = "Pausa Timer";
-                btnTimerPauseCard.style.background = "#ea580c";
+                btnTimerPauseCard.style.background = "linear-gradient(135deg, #ea580c, #c2410c)";
+                btnTimerPauseCard.style.borderColor = "rgba(234, 88, 12, 0.5)";
+                btnTimerPauseCard.style.boxShadow = "0 4px 12px rgba(234, 88, 12, 0.35)";
             }
         }
     } 

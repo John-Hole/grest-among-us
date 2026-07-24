@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Realmong Us - Pannello Master</title>
-    <link rel="stylesheet" href="css/global.css?v=3">
+    <link rel="stylesheet" href="css/global.css?v=5">
 </head>
 <body>
     <div class="master-layout-container">
@@ -93,17 +93,25 @@
                     </button>
                 </div>
 
-                <!-- Timer Controls Card (Mostrato SOLO AD AVVIO EFFETTUATO - SINGLE LINE BAR) -->
-                <div id="timer-controls" class="glass-card master-timer-bar hidden">
-                    <!-- Left: Live Clock Display in Pixel Font (Clickable for advanced modal) -->
-                    <div id="master-live-clock" class="timer-clock-badge" title="Clicca sul tempo per aprire i controlli avanzati">
-                        --:--
+                <!-- Timer Controls Card (Mostrato SOLO AD AVVIO EFFETTUATO - SEGUI STILE GLASS CARD) -->
+                <div id="timer-controls" class="glass-card hidden">
+                    <div class="glass-card-header">
+                        <div class="glass-card-header-left">
+                            <span class="header-icon">⏱️</span>
+                            <h2>CONTROLLO TIMER</h2>
+                        </div>
                     </div>
+                    <div class="timer-card-body">
+                        <!-- Left: Live Clock Display in Pixel Font (Clickable for advanced modal) -->
+                        <div id="master-live-clock" class="timer-clock-badge" title="Clicca sul tempo per aprire i controlli avanzati">
+                            --:--
+                        </div>
 
-                    <!-- Right: Quick Action Buttons (Icon-only Pause & +1 MIN) -->
-                    <div class="timer-card-actions">
-                        <button id="btn-timer-pause-card" class="btn btn-timer-icon-btn" title="Pausa / Riprendi Timer">⏸️</button>
-                        <button id="btn-timer-add-card" class="btn btn-timer-add-compact" title="Aggiungi 1 Minuto">+ 1 MIN</button>
+                        <!-- Right: Quick Action Buttons (Icon-only Pause & +1 MIN) -->
+                        <div class="timer-card-actions">
+                            <button id="btn-timer-pause-card" class="btn btn-timer-icon-btn" title="Pausa / Riprendi Timer">⏸️</button>
+                            <button id="btn-timer-add-card" class="btn btn-timer-add-compact" title="Aggiungi 1 Minuto">+ 1 MIN</button>
+                        </div>
                     </div>
                 </div>
 
