@@ -72,9 +72,27 @@ const btnSaveStartRoom = document.getElementById('btn-save-start-room');
 const btnSaveTemplateOnly = document.getElementById('btn-save-template-only');
 const createTemplateSubtitle = document.getElementById('create-template-subtitle');
 
-let currentUser = null;
+// Synchronously restore cached user if valid, avoiding race conditions on rapid clicks after page reload
+let cachedUser = null;
+try {
+    const rawCache = localStorage.getItem('realmong_user_cache');
+    if (rawCache) {
+        const parsed = JSON.parse(rawCache);
+        if (parsed && parsed.expiresAt && Date.now() < parsed.expiresAt && parsed.uid) {
+            cachedUser = parsed;
+        }
+    }
+} catch (e) {}
+
+let currentUser = cachedUser;
 let currentBase64Image = null;
 let userTemplates = {};
+
+let isAuthReady = false;
+let authReadyResolve;
+const authReadyPromise = new Promise((resolve) => {
+    authReadyResolve = resolve;
+});
 
 // All room names from the vector SVG map for the location dropdown
 const MAP_VECTOR_LOCATIONS = [
@@ -98,62 +116,39 @@ const defaultBaseTasks = [
     { num: '3', name: 'Risolvi 2 fogli di rebus', obj: 'Risolvi 2 fogli di rebus', pos: 'Atrio' },
     { num: '4', name: 'Componi un puzzle', obj: 'Componi un puzzle', pos: 'Atrio' },
     { num: '5', name: '1 minuto per pulire tutto il bagno dalla tempera', obj: '1 minuto per pulire tutto il bagno dalla tempera', pos: 'Bagno Disabili' },
-    { num: '6', name: 'Risolvi 10 operazioni in 1.5 min', obj: 'Risolvi 10 operazioni in 1.5 min', pos: 'Sala Materiali' },
-    { num: '7', name: 'Supera 3 livelli', obj: 'Supera 3 livelli', pos: 'Sala Materiali' },
-    { num: '8', name: 'Rispondi a 15 domande', obj: 'Rispondi a 15 domande', pos: 'Salone' },
-    { num: '9', name: 'Fai centro con i pennarelli nel bicchiere in 1.5 min', obj: 'Fai centro con i pennarelli nel bicchiere in 1.5 min', pos: 'Salone' },
-    { num: '10', name: 'Un compagno dà le indicazioni al giocatore bendato', obj: 'Un compagno dà le indicazioni al giocatore bendato', pos: 'Strada Laterale' },
-    { num: '11', name: 'Con uno shottino pieno corri a riempire un bicchiere grande', obj: 'Con uno shottino pieno corri a riempire un bicchiere grande', pos: 'Strada Laterale' },
-    { num: '12', name: 'Ripeti la sequenza 1 volta', obj: 'Ripeti la sequenza 1 volta', pos: 'Sala Gialla' },
-    { num: '13', name: '1 minuto per attaccare bendati le orecchie al bianconiglio', obj: '1 minuto per attaccare bendati le orecchie al bianconiglio', pos: 'Sala Gialla' },
-    { num: '14', name: 'Resisti 1.5 min cambiando posizione', obj: 'Resisti 1.5 min cambiando posizione', pos: 'Sala Gialla' },
-    { num: '15', name: 'Pesca bigliettino col punteggio e gioca fino al target', obj: 'Pesca bigliettino col punteggio e gioca fino al target', pos: 'Regia' },
-    { num: '16', name: 'Indovina 5 frasi', obj: 'Indovina 5 frasi', pos: 'Corridoio Salone' },
-    { num: '17', name: 'Risolvi un cruciverba', obj: 'Risolvi un cruciverba', pos: 'Sala Verde' }
+    { num: '6', name: 'Trova 20 stecchini di legno sotterrati sotto la terra', obj: 'Trova 20 stecchini di legno sotterrati sotto la terra', pos: 'Strada Retro' },
+    { num: '7', name: 'Trova 5 sassi grossi come una mano', obj: 'Trova 5 sassi grossi come una mano', pos: 'Strada Laterale' },
+    { num: '8', name: 'Dividi per colore 100 perline', obj: 'Dividi per colore 100 perline', pos: 'Mensa' },
+    { num: '9', name: '30 palleggi al muro', obj: '30 palleggi al muro', pos: 'Rampa Strada' },
+    { num: '10', name: 'Riempi 1 bottiglia da 1,5 litri d’acqua con la spugnetta', obj: 'Riempi 1 bottiglia da 1,5 litri d’acqua con la spugnetta', pos: 'Mensa' },
+    { num: '11', name: 'Travasa 1 boccia di riso usando una pinzetta', obj: 'Travasa 1 boccia di riso usando una pinzetta', pos: 'Cucina' },
+    { num: '12', name: 'Costruisci la torre di legno più alta che puoi', obj: 'Costruisci la torre di legno più alta che puoi', pos: 'Salone' },
+    { num: '13', name: 'Componi il puzzle', obj: 'Componi il puzzle', pos: 'Salone' },
+    { num: '14', name: 'Infila 10 perline in un filo', obj: 'Infila 10 perline in un filo', pos: 'Atrio' },
+    { num: '15', name: 'Risolvi un labirinto su foglio', obj: 'Risolvi un labirinto su foglio', pos: 'Atrio' }
 ];
 
-// Default Templates
 const baseTemplate = {
     name: "Standard Realmong",
-    impostorCount: 3,
+    impostors: 2,
     killCooldown: 120,
-    maxMeetings: 1,
-    discussionDuration: 0,
-    votingDuration: 60,
-    meetingDuration: 60,
-    roundTimes: [10 * 60000, 7 * 60000, 5 * 60000],
-    scientistEnabled: true,
-    maxPlayers: 'unlimited',
+    maxMeetingsPerPlayer: 1,
+    enableScientist: false,
+    discussionDuration: 180,
+    votingDuration: 120,
+    roundTimes: [
+        { round: 1, duration: 900 },
+        { round: 2, duration: 900 },
+        { round: 3, duration: 600 }
+    ],
+    maxPlayers: null,
     enableMap: true,
-    mapType: 'vector',
     enableTasks: true,
     taskType: 'custom',
     mapMode: 'vector',
     mapImage: null,
-    tasks: defaultBaseTasks
+    tasks: [...defaultBaseTasks]
 };
-
-const emptyTemplate = {
-    name: "Vuoto",
-    impostorCount: 1,
-    killCooldown: 120,
-    maxMeetings: 1,
-    discussionDuration: 0,
-    votingDuration: 60,
-    meetingDuration: 60,
-    roundTimes: [10 * 60000, 7 * 60000, 5 * 60000],
-    scientistEnabled: false,
-    maxPlayers: 15,
-    enableMap: true,
-    mapType: 'vector',
-    enableTasks: true,
-    taskType: 'custom',
-    mapMode: 'vector',
-    mapImage: null,
-    tasks: []
-};
-
-
 
 // Auto-fill join code from URL if present
 const urlParams = new URLSearchParams(window.location.search);
@@ -183,12 +178,19 @@ function showSection(sectionName) {
     window.scrollTo(0, 0);
 }
 
-btnShowAuth?.addEventListener('click', () => {
+btnShowAuth?.addEventListener('click', async () => {
     if (currentUser) {
         showSection('templates');
-    } else {
-        showSection('auth');
+        return;
     }
+    if (!isAuthReady) {
+        const user = await authReadyPromise;
+        if (user || currentUser) {
+            showSection('templates');
+            return;
+        }
+    }
+    showSection('auth');
 });
 btnGoJoin.addEventListener('click', () => {
     const savedName = localStorage.getItem('lastNickname');
@@ -204,12 +206,19 @@ btnJoinBack.addEventListener('click', () => showSection('home'));
 btnCreateBack?.addEventListener('click', () => { currentEditId = null; showSection('templates'); });
 btnCreateCancelBottom?.addEventListener('click', () => { currentEditId = null; showSection('templates'); });
 
-btnGoCreate.addEventListener('click', () => {
+btnGoCreate.addEventListener('click', async () => {
     if (currentUser) {
         showSection('templates');
-    } else {
-        authModal.classList.remove('hidden');
+        return;
     }
+    if (!isAuthReady) {
+        const user = await authReadyPromise;
+        if (user || currentUser) {
+            showSection('templates');
+            return;
+        }
+    }
+    authModal.classList.remove('hidden');
 });
 
 btnPromptLogin.addEventListener('click', () => {
@@ -231,6 +240,11 @@ btnPromptGuest.addEventListener('click', async () => {
 
 // --- AUTH LOGIC ---
 onAuthStateChanged(auth, (user) => {
+    isAuthReady = true;
+    if (authReadyResolve) {
+        authReadyResolve(user);
+    }
+
     // Render base templates synchronously before any network request
     renderBaseTemplates();
 
@@ -242,6 +256,9 @@ onAuthStateChanged(auth, (user) => {
 
     if (user) {
         currentUser = user;
+        if (authModal && !authModal.classList.contains('hidden')) {
+            authModal.classList.add('hidden');
+        }
         const displayName = user.isAnonymous ? 'Ospite' : (user.displayName || user.email || 'Utente');
         const displayEmail = user.isAnonymous ? 'Account Ospite' : (user.email || user.displayName || 'Utente');
         

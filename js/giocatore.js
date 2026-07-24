@@ -80,12 +80,11 @@ if (btnHideDead) {
     });
 }
 
-// Setup onDisconnect to remove ghost players and their votes
+// Setup onDisconnect: Keep player nodes persistent so background tabs and socket glitches don't delete players
 let myPlayerRef = ref(db, `rooms/${roomCode}/players/${myPlayerName}`);
-onDisconnect(myPlayerRef).remove();
-
 let myVoteRef = ref(db, `rooms/${roomCode}/votes/${myPlayerName}`);
-onDisconnect(myVoteRef).remove();
+try { onDisconnect(myPlayerRef).cancel(); } catch(e){}
+try { onDisconnect(myVoteRef).cancel(); } catch(e){}
 
 const roomRef = ref(db, `rooms/${roomCode}`);
 onValue(roomRef, async (snapshot) => {
@@ -112,14 +111,9 @@ onValue(roomRef, async (snapshot) => {
             hasSeenDeadOverlay = false;
         }
 
-        // Manage onDisconnect: Protect player node during active game so F5 refresh doesn't remove the player
-        if (currentState && currentState.game_status !== 'waiting') {
-            try { onDisconnect(myPlayerRef).cancel(); } catch(e){}
-            try { onDisconnect(myVoteRef).cancel(); } catch(e){}
-        } else {
-            onDisconnect(myPlayerRef).remove();
-            onDisconnect(myVoteRef).remove();
-        }
+        // Keep player nodes persistent during both waiting and active game
+        try { onDisconnect(myPlayerRef).cancel(); } catch(e){}
+        try { onDisconnect(myVoteRef).cancel(); } catch(e){}
 
         if (data.players && data.players[myPlayerName]) {
             myData = data.players[myPlayerName];
@@ -1063,14 +1057,6 @@ async function rejoinRoom() {
         try { onDisconnect(newPlayerRef).cancel(); } catch(e){}
         try { onDisconnect(newVoteRef).cancel(); } catch(e){}
 
-        // Setup onDisconnect: Protect node if game is in progress
-        if (roomData.state && roomData.state.game_status !== 'waiting') {
-            // Do not remove on disconnect during active game
-        } else {
-            onDisconnect(newPlayerRef).remove();
-            onDisconnect(newVoteRef).remove();
-        }
-
         if (playerNameDisplay) playerNameDisplay.textContent = myPlayerName;
 
     } catch (err) {
@@ -1142,9 +1128,8 @@ async function promptChangeName() {
 
             try { onDisconnect(oldNameRef).cancel(); } catch(e){}
             try { onDisconnect(oldVoteRef).cancel(); } catch(e){}
-
-            onDisconnect(newNameRef).remove();
-            onDisconnect(newVoteRef).remove();
+            try { onDisconnect(newNameRef).cancel(); } catch(e){}
+            try { onDisconnect(newVoteRef).cancel(); } catch(e){}
         }
 
         myPlayerName = cleanName;
