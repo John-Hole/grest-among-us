@@ -886,86 +886,95 @@ async function checkVotes(state, players, votes) {
 let finalizingMeeting = false;
 
 async function resolveMeeting(players, votes, state) {
-    if (resolvingMeeting || state.game_status !== 'voting') return;
+    if (resolvingMeeting || !state || state.game_status !== 'voting') return;
     resolvingMeeting = true;
 
-    // Count votes
-    const voteCounts = {};
-    for (const p in votes) {
-        const v = votes[p];
-        voteCounts[v] = (voteCounts[v] || 0) + 1;
-    }
-
-    let maxVotes = 0;
-    let ejected = null;
-    let tie = false;
-
-    for (const v in voteCounts) {
-        if (voteCounts[v] > maxVotes) {
-            maxVotes = voteCounts[v];
-            ejected = v;
-            tie = false;
-        } else if (voteCounts[v] === maxVotes) {
-            tie = true;
+    try {
+        // Count votes
+        const voteCounts = {};
+        for (const p in votes) {
+            const v = votes[p];
+            voteCounts[v] = (voteCounts[v] || 0) + 1;
         }
+
+        let maxVotes = 0;
+        let ejected = null;
+        let tie = false;
+
+        for (const v in voteCounts) {
+            if (voteCounts[v] > maxVotes) {
+                maxVotes = voteCounts[v];
+                ejected = v;
+                tie = false;
+            } else if (voteCounts[v] === maxVotes) {
+                tie = true;
+            }
+        }
+
+        if (tie || !ejected) {
+            ejected = 'SKIP';
+        }
+
+        const resultsEndTime = Date.now() + 7000; // 7 secondi di visione dell'esito voti
+
+        const updates = {};
+        updates['state/game_status'] = 'voting_results';
+        updates['state/last_ejected'] = ejected;
+        updates['state/last_votes'] = votes || {};
+        updates['state/results_endtime'] = resultsEndTime;
+
+        await update(roomRef, updates);
+        addLog(`🗳️ Votazione conclusa! Esito voti in visione per 7s...`);
+    } catch (err) {
+        console.error("Errore durante la risoluzione del meeting:", err);
+        resolvingMeeting = false;
     }
-
-    if (tie || !ejected) {
-        ejected = 'SKIP';
-    }
-
-    const resultsEndTime = Date.now() + 7000; // 7 secondi di visione dell'esito voti
-
-    const updates = {};
-    updates['state/game_status'] = 'voting_results';
-    updates['state/last_ejected'] = ejected;
-    updates['state/last_votes'] = votes || {};
-    updates['state/results_endtime'] = resultsEndTime;
-
-    await update(roomRef, updates);
-    addLog(`🗳️ Votazione conclusa! Esito voti in visione per 7s...`);
 }
 
 async function finalizeMeetingToPlaying() {
     if (!currentState || currentState.game_status !== 'voting_results' || finalizingMeeting) return;
     finalizingMeeting = true;
 
-    const ejected = currentState.last_ejected;
-    const players = currentState.players || currentPlayers || {};
-    let nextRound = (currentState.round || 1) + 1;
+    try {
+        const ejected = currentState.last_ejected;
+        const players = currentState.players || currentPlayers || {};
+        let nextRound = (currentState.round || 1) + 1;
 
-    if (ejected && ejected !== 'SKIP' && players[ejected]) {
-        players[ejected].status = 'killed_revealed';
-    }
-
-    // Convert killed_hidden to killed_revealed
-    for (const name in players) {
-        if (players[name] && players[name].status === 'killed_hidden') {
-            players[name].status = 'killed_revealed';
+        if (ejected && ejected !== 'SKIP' && players[ejected]) {
+            players[ejected].status = 'killed_revealed';
         }
+
+        // Convert killed_hidden to killed_revealed
+        for (const name in players) {
+            if (players[name] && players[name].status === 'killed_hidden') {
+                players[name].status = 'killed_revealed';
+            }
+        }
+
+        const roundDuration = getRoundDuration(nextRound);
+        const endTime = Date.now() + roundDuration;
+
+        const updates = {};
+        updates['state/game_status'] = 'playing';
+        updates['state/round'] = nextRound;
+        updates['state/timer'] = endTime;
+        updates['state/timer_paused'] = false;
+        updates['state/timer_remaining'] = 0;
+        updates['votes'] = null; // Clear active votes
+
+        for (const name in players) {
+            updates[`players/${name}`] = players[name];
+        }
+
+        await update(roomRef, updates);
+        addLog(`🚀 Transizione a gioco avviata, esito espulsione in corso.`);
+        await checkWinConditions(currentState, players);
+    } catch (err) {
+        console.error("Errore durante la finalizzazione del meeting:", err);
+    } finally {
+        resolvingMeeting = false;
+        finalizingMeeting = false;
     }
-
-    const roundDuration = getRoundDuration(nextRound);
-    const endTime = Date.now() + roundDuration;
-
-    const updates = {};
-    updates['state/game_status'] = 'playing';
-    updates['state/round'] = nextRound;
-    updates['state/timer'] = endTime;
-    updates['state/timer_paused'] = false;
-    updates['state/timer_remaining'] = 0;
-    updates['votes'] = null; // Clear active votes
-
-    for (const name in players) {
-        updates[`players/${name}`] = players[name];
-    }
-
-    await update(roomRef, updates);
-    resolvingMeeting = false;
-    finalizingMeeting = false;
-
-    addLog(`🚀 Transizione a gioco avviata, esito espulsione in corso.`);
-    await checkWinConditions(currentState, players);
 }
 
 
@@ -1217,6 +1226,8 @@ btnStartDiscussion.addEventListener('click', async () => {
 });
 
 btnStartVoting.addEventListener('click', async () => {
+    resolvingMeeting = false;
+    finalizingMeeting = false;
     let votSec = 60;
     if (roomConfig) {
         const rawVot = roomConfig.votingDuration !== undefined ? roomConfig.votingDuration : roomConfig.meetingDuration;
@@ -1233,7 +1244,8 @@ btnStartVoting.addEventListener('click', async () => {
 
 btnEndMeeting.addEventListener('click', async () => {
     if(confirm("Vuoi forzare il termine della votazione ora?")) {
-        await resolveMeeting(currentPlayers, currentVotes, currentState);
+        resolvingMeeting = false;
+        await resolveMeeting(currentPlayers, currentVotes || {}, currentState);
     }
 });
 

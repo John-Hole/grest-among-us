@@ -3385,45 +3385,52 @@ input:checked + .slider:before {
     40% { transform: translateX(6px); }
     60% { transform: translateX(-4px); }
     80% { transform: translateX(4px); }
-/* TIMER CONTROLS SINGLE ROW CARD (COMPACT MASTER TIMER) */
-.timer-controls-single-row {
+/* SINGLE-LINE MASTER TIMER BAR & PIXEL CLOCK */
+.master-timer-bar {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
     justify-content: space-between !important;
+    padding: 0.65rem 1rem !important;
     gap: 0.75rem !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    background: linear-gradient(135deg, rgba(18, 24, 37, 0.95) 0%, rgba(10, 15, 25, 0.95) 100%) !important;
+    border: 1.5px solid rgba(56, 189, 248, 0.35) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 12px rgba(56, 189, 248, 0.12) !important;
 }
 
-.timer-card-clock {
-    font-size: clamp(1.2rem, 4vw, 1.5rem) !important;
-    font-weight: 900 !important;
-    color: #38bdf8 !important;
-    background: rgba(0, 0, 0, 0.45) !important;
-    padding: 0.5rem 0.85rem !important;
-    border-radius: 12px !important;
-    border: 1.5px solid rgba(56, 189, 248, 0.35) !important;
-    letter-spacing: 1px !important;
-    cursor: pointer !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
-    display: flex !important;
+#master-live-clock {
+    display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    gap: 0.5rem !important;
+    font-family: var(--font-pixel) !important;
+    font-size: clamp(0.78rem, 3.2vw, 1.05rem) !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px !important;
+    color: var(--accent-cyan) !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    padding: 0.45rem 0.85rem !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+    overflow: hidden !important;
     user-select: none !important;
     transition: all 0.2s ease !important;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 8px rgba(0, 229, 255, 0.15) !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    line-height: 1.2 !important;
 }
 
-.timer-card-clock:hover {
-    border-color: rgba(56, 189, 248, 0.7) !important;
-    background: rgba(56, 189, 248, 0.12) !important;
-    transform: scale(1.01) !important;
+#master-live-clock:hover {
+    border-color: rgba(0, 229, 255, 0.6) !important;
+    background: rgba(0, 229, 255, 0.08) !important;
+    transform: scale(1.02) !important;
 }
 
 .timer-card-actions {
@@ -3436,20 +3443,20 @@ input:checked + .slider:before {
 }
 
 .btn-timer-icon-btn {
-    width: 42px !important;
-    height: 42px !important;
-    min-width: 42px !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
     padding: 0 !important;
     border-radius: 50% !important;
-    display: flex !important;
+    display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-size: 1.1rem !important;
-    background: linear-gradient(135deg, #ea580c, #c2410c) !important;
+    font-size: 0.95rem !important;
+    background: linear-gradient(135deg, #ff5252, #d50000) !important;
     color: white !important;
-    border: none !important;
+    border: 1px solid rgba(255, 82, 82, 0.5) !important;
     cursor: pointer !important;
-    box-shadow: 0 3px 10px rgba(234, 88, 12, 0.45) !important;
+    box-shadow: 0 0 12px rgba(255, 23, 68, 0.4) !important;
     transition: all 0.2s ease !important;
     user-select: none !important;
     flex-shrink: 0 !important;
@@ -3457,7 +3464,7 @@ input:checked + .slider:before {
 
 .btn-timer-icon-btn:hover {
     transform: scale(1.08) !important;
-    box-shadow: 0 5px 15px rgba(234, 88, 12, 0.65) !important;
+    box-shadow: 0 0 18px rgba(255, 23, 68, 0.75) !important;
 }
 
 .btn-timer-add-compact {
