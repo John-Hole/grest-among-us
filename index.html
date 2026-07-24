@@ -72,16 +72,16 @@
         </div>
 
         <!-- TEMPLATES DASHBOARD -->
-        <div id="section-templates" class="hidden template-edit-container" style="max-width: 1200px; width: 100%;">
-            <div class="glass-card" style="margin-bottom: 0.85rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                    <h2 style="margin: 0; font-size: clamp(1.1rem, 4vw, 1.3rem);">I Tuoi Template</h2>
-                    <button id="btn-tpl-back" class="btn btn-danger" style="padding: 0.4rem 0.85rem; font-size: 0.8rem; border-radius: 50px;">Indietro</button>
+        <div id="section-templates" class="hidden glass-card" style="max-width: 700px; width: 100%; margin: 0 auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 0.75rem;">
+                <div>
+                    <h2 style="margin: 0; font-size: clamp(1.1rem, 4vw, 1.3rem); color: #ffffff;">I Tuoi Template</h2>
+                    <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.25rem; margin-bottom: 0; line-height: 1.35;">Seleziona un template per avviare istantaneamente la stanza, oppure creane uno nuovo.</p>
                 </div>
-                <p style="font-size: 0.8rem; color: #94a3b8; margin: 0; line-height: 1.35;">Seleziona un template per avviare istantaneamente la stanza, oppure creane uno nuovo.</p>
+                <button id="btn-tpl-back" class="btn btn-danger" style="padding: 0.4rem 0.85rem; font-size: 0.8rem; border-radius: 50px; flex-shrink: 0;">Indietro</button>
             </div>
             
-            <div id="templates-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.85rem; width: 100%;">
+            <div id="templates-grid" style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%; margin-top: 0.85rem;">
                 <!-- Template cards dynamically injected here -->
             </div>
         </div>

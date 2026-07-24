@@ -3030,6 +3030,53 @@ input:checked + .slider:before {
     max-width: 600px;
 }
 
+/* INNER TEMPLATE ITEM CARDS (NESTED INSIDE MAIN GLASS CARD CONTAINER) */
+.template-item-card {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 12px !important;
+    padding: 0.85rem 1rem !important;
+    position: relative;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.template-item-card:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(56, 189, 248, 0.35) !important;
+    transform: translateY(-1px);
+}
+
+.template-create-btn {
+    border: 2px dashed rgba(56, 189, 248, 0.4) !important;
+    border-radius: 12px !important;
+    padding: 1rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    color: #38bdf8 !important;
+    font-weight: 800 !important;
+    flex-direction: column !important;
+    min-height: 80px !important;
+    transition: all 0.2s ease !important;
+    background: rgba(56, 189, 248, 0.04) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.template-create-btn:hover {
+    background: rgba(56, 189, 248, 0.12) !important;
+    border-color: #38bdf8 !important;
+    transform: translateY(-2px) !important;
+}
+
 .task-row {
     display: flex;
     gap: 0.5rem;

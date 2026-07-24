@@ -438,18 +438,8 @@ function renderAllTemplates() {
     // 3. Render "+ CREA NUOVO" Button LAST (Only if logged in with a real account)
     if (currentUser && !currentUser.isAnonymous) {
         const createBtn = document.createElement('div');
-        createBtn.style = `border: 2px dashed var(--accent-cyan); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--accent-cyan); font-weight: bold; flex-direction: column; min-height: 120px; transition: all 0.2s; background: rgba(0, 229, 255, 0.03);`;
-        createBtn.onmouseover = () => {
-            createBtn.style.background = 'rgba(0, 229, 255, 0.1)';
-            createBtn.style.borderColor = '#33eaff';
-            createBtn.style.transform = 'translateY(-2px)';
-        };
-        createBtn.onmouseout = () => {
-            createBtn.style.background = 'rgba(0, 229, 255, 0.03)';
-            createBtn.style.borderColor = 'var(--accent-cyan)';
-            createBtn.style.transform = 'none';
-        };
-        createBtn.innerHTML = `<span style="font-size: 2.5rem; line-height: 1; margin-bottom: 0.3rem;">+</span><span style="font-size: 0.85rem; letter-spacing: 0.5px;">CREA NUOVO</span>`;
+        createBtn.className = 'template-create-btn';
+        createBtn.innerHTML = `<span style="font-size: 1.8rem; line-height: 1; margin-bottom: 0.2rem;">+</span><span style="font-size: 0.85rem; letter-spacing: 0.5px; font-weight: 800;">CREA NUOVO</span>`;
         createBtn.onclick = () => openCreateSettings(null, null);
         templatesGrid.appendChild(createBtn);
     }
@@ -477,9 +467,7 @@ async function loadUserTemplates(uid) {
 
 function createTemplateCard(id, data, isCustom) {
     const card = document.createElement('div');
-    card.style = `background: rgba(18, 24, 37, 0.85); border-radius: 14px; padding: 1rem; position: relative; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.2s ease; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.3);`;
-    card.onmouseover = () => card.style.borderColor = 'rgba(56, 189, 248, 0.4)';
-    card.onmouseout = () => card.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+    card.className = 'template-item-card';
     card.onclick = () => startRoomWithConfig(data);
 
     // Header Flex Row (Title + 3 Dots Menu Button)
