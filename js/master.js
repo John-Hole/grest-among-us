@@ -610,6 +610,10 @@ function updateUI(state, players) {
             statusText = "🗳️ VOTAZIONE";
             statusBg = "rgba(156, 39, 176, 0.25)";
             statusColor = "#ce93d8";
+        } else if (state.game_status === 'voting_results') {
+            statusText = "📊 ESITO VOTI";
+            statusBg = "rgba(192, 132, 252, 0.25)";
+            statusColor = "#c084fc";
         } else if (state.game_status === 'crewmates_win') {
             statusText = "🏆 VITTORIA CREWMATE";
             statusBg = "rgba(0, 229, 255, 0.2)";
@@ -846,18 +850,26 @@ async function checkWinCondition(state, players) {
 }
 
 async function checkVotes(state, players, votes) {
-    if (state.game_status !== 'voting') return;
+    if (!state || state.game_status !== 'voting' || resolvingMeeting) return;
 
     let aliveCount = 0;
-    for (const p in players) {
-        if (players[p].status === 'alive') aliveCount++;
+    let aliveVotedCount = 0;
+
+    for (const name in players) {
+        if (players[name] && players[name].status === 'alive') {
+            aliveCount++;
+            if (votes && votes[name] !== undefined && votes[name] !== null) {
+                aliveVotedCount++;
+            }
+        }
     }
 
-    const voteKeys = Object.keys(votes || {});
-    if (voteKeys.length >= aliveCount && aliveCount > 0) {
+    if (aliveCount > 0 && aliveVotedCount >= aliveCount) {
         await resolveMeeting(players, votes || {}, state);
     }
 }
+
+let finalizingMeeting = false;
 
 async function resolveMeeting(players, votes, state) {
     if (resolvingMeeting || state.game_status !== 'voting') return;
@@ -888,16 +900,33 @@ async function resolveMeeting(players, votes, state) {
         ejected = 'SKIP';
     }
 
-    // Now build updates
-    let nextRound = (state.round || 1) + 1;
+    const resultsEndTime = Date.now() + 7000; // 7 secondi di visione dell'esito voti
 
-    if (ejected !== 'SKIP' && players[ejected]) {
+    const updates = {};
+    updates['state/game_status'] = 'voting_results';
+    updates['state/last_ejected'] = ejected;
+    updates['state/last_votes'] = votes || {};
+    updates['state/results_endtime'] = resultsEndTime;
+
+    await update(roomRef, updates);
+    addLog(`🗳️ Votazione conclusa! Esito voti in visione per 7s...`);
+}
+
+async function finalizeMeetingToPlaying() {
+    if (!currentState || currentState.game_status !== 'voting_results' || finalizingMeeting) return;
+    finalizingMeeting = true;
+
+    const ejected = currentState.last_ejected;
+    const players = currentState.players || currentPlayers || {};
+    let nextRound = (currentState.round || 1) + 1;
+
+    if (ejected && ejected !== 'SKIP' && players[ejected]) {
         players[ejected].status = 'killed_revealed';
     }
 
     // Convert killed_hidden to killed_revealed
     for (const name in players) {
-        if (players[name].status === 'killed_hidden') {
+        if (players[name] && players[name].status === 'killed_hidden') {
             players[name].status = 'killed_revealed';
         }
     }
@@ -911,8 +940,7 @@ async function resolveMeeting(players, votes, state) {
     updates['state/timer'] = endTime;
     updates['state/timer_paused'] = false;
     updates['state/timer_remaining'] = 0;
-    updates['state/last_ejected'] = ejected;
-    updates['votes'] = null; // Clear votes
+    updates['votes'] = null; // Clear active votes
 
     for (const name in players) {
         updates[`players/${name}`] = players[name];
@@ -920,7 +948,12 @@ async function resolveMeeting(players, votes, state) {
 
     await update(roomRef, updates);
     resolvingMeeting = false;
+    finalizingMeeting = false;
+
+    addLog(`🚀 Transizione a gioco avviata, esito espulsione in corso.`);
+    await checkWinConditions(currentState, players);
 }
+
 
 // Config save button
 if (btnSaveTimeCfg) {
@@ -1212,9 +1245,14 @@ btnReset.addEventListener('click', async () => {
 });
 
 setInterval(async () => {
-    if (currentState && currentState.game_status === 'voting' && currentState.voting_endtime && !resolvingMeeting) {
-        if (Date.now() >= currentState.voting_endtime) {
+    if (currentState && currentState.game_status === 'voting' && !resolvingMeeting) {
+        await checkVotes(currentState, currentPlayers, currentVotes || {});
+        if (currentState.voting_endtime && Date.now() >= currentState.voting_endtime && !resolvingMeeting) {
             await resolveMeeting(currentPlayers, currentVotes || {}, currentState);
         }
+    } else if (currentState && currentState.game_status === 'voting_results' && !finalizingMeeting) {
+        if (currentState.results_endtime && Date.now() >= currentState.results_endtime) {
+            await finalizeMeetingToPlaying();
+        }
     }
-}, 1000);
+}, 500);

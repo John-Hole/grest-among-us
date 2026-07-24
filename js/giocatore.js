@@ -281,12 +281,27 @@ function updateUI(state, playersMap) {
         }
         return;
     } else if (state.game_status === 'voting') {
+        if (previousStatus !== 'voting') {
+            selectedVoteTarget = null;
+            autoVotedOnTimeout = false;
+            lastRenderedVotesSignature = '';
+        }
         overlayMeeting.classList.add('hidden');
         overlayDead.classList.add('hidden');
         roleScreen.classList.add('hidden');
         gameScreen.classList.add('hidden');
         votingUI.classList.remove('hidden');
         renderVotingUI(playersMap);
+        return;
+    } else if (state.game_status === 'voting_results') {
+        overlayMeeting.classList.remove('hidden');
+        overlayDead.classList.add('hidden');
+        roleScreen.classList.add('hidden');
+        gameScreen.classList.add('hidden');
+        votingUI.classList.add('hidden');
+        overlayMeetingH1.textContent = "📊 ESITO VOTI";
+        overlayMeetingH1.style.color = "#c084fc";
+        overlayMeetingP.textContent = "Votazione conclusa! Guarda il maxischermo per vedere chi ha votato chi!";
         return;
     } else if (state.game_status === 'crewmates_win') {
         overlayMeeting.classList.remove('hidden');
@@ -427,6 +442,43 @@ if (playerNameBox) {
 
 let selectedVoteTarget = null;
 let lastRenderedVotesSignature = '';
+let autoVotedOnTimeout = false;
+
+function updatePlayerVotingTimer() {
+    if (!votingTimer) return;
+    if (!currentState || currentState.game_status !== 'voting') {
+        return;
+    }
+
+    if (!currentState.voting_endtime || currentState.voting_endtime === 0) {
+        votingTimer.textContent = '⏱️ Libera';
+        votingTimer.style.color = '#c084fc';
+        votingTimer.style.borderColor = '#a855f7';
+    } else {
+        const remaining = Math.max(0, currentState.voting_endtime - Date.now());
+        const sec = Math.ceil(remaining / 1000);
+        votingTimer.textContent = `⏱️ ${sec}s`;
+
+        if (remaining <= 10000) {
+            votingTimer.style.color = '#ef4444';
+            votingTimer.style.borderColor = '#ef4444';
+        } else {
+            votingTimer.style.color = '#c084fc';
+            votingTimer.style.borderColor = '#a855f7';
+        }
+
+        // Timer expiration auto-vote check
+        if (remaining <= 0 && selectedVoteTarget && !autoVotedOnTimeout) {
+            const isAlive = myData && myData.status === 'alive';
+            const myVote = currentVotes ? currentVotes[myPlayerName] : null;
+            if (isAlive && !myVote) {
+                autoVotedOnTimeout = true;
+                castVote(selectedVoteTarget);
+            }
+        }
+    }
+}
+setInterval(updatePlayerVotingTimer, 250);
 
 function renderVotingUI(playersMap) {
     const isAlive = myData && myData.status === 'alive';
@@ -434,15 +486,8 @@ function renderVotingUI(playersMap) {
 
     if (!isAlive) {
         votingOptions.innerHTML = '';
-        votingStatus.innerHTML = '<h3 style="color: var(--accent-red); margin-top: 1rem;">Sei morto, non puoi votare. Attendi l\'esito.</h3>';
+        votingStatus.innerHTML = '<h3 style="color: var(--accent-red); margin-top: 0.5rem; text-align: center;">Sei morto, non puoi votare. Attendi l\'esito.</h3>';
         lastRenderedVotesSignature = 'dead';
-        return;
-    }
-
-    if (myVote) {
-        votingOptions.innerHTML = '';
-        votingStatus.innerHTML = `<h3 style="color: var(--accent-green); margin-top: 1rem;">✔ Hai votato: <strong>${escapeHtml(myVote)}</strong></h3><p style="color: #94a3b8; margin-top: 0.5rem;">Attendi il termine della votazione...</p>`;
-        lastRenderedVotesSignature = `voted_${myVote}`;
         return;
     }
 
@@ -454,7 +499,7 @@ function renderVotingUI(playersMap) {
     }
     alivePlayers.sort();
 
-    const currentSig = `alive_${alivePlayers.join(',')}_selected_${selectedVoteTarget || 'none'}`;
+    const currentSig = `alive_${alivePlayers.join(',')}_selected_${selectedVoteTarget || 'none'}_myvote_${myVote || 'none'}`;
     if (lastRenderedVotesSignature === currentSig && votingOptions.children.length > 0) {
         return;
     }
@@ -462,6 +507,72 @@ function renderVotingUI(playersMap) {
     lastRenderedVotesSignature = currentSig;
     votingStatus.innerHTML = '';
     votingOptions.innerHTML = '';
+
+    // If player has already voted: show confirmed state with final yellow/red colors
+    if (myVote) {
+        votingStatus.innerHTML = `<div style="background: rgba(16, 185, 129, 0.15); border: 1.5px solid #10b981; color: #34d399; padding: 0.75rem 1rem; border-radius: 12px; font-weight: 800; font-size: 0.95rem; text-align: center; margin-bottom: 1rem; box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);">✔ Voto confermato per: <strong>${escapeHtml(myVote)}</strong></div>`;
+
+        alivePlayers.forEach(name => {
+            const isTarget = myVote === name;
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.disabled = true;
+            btn.style.width = '100%';
+            btn.style.padding = '0.95rem';
+            btn.style.fontSize = '0.95rem';
+            btn.style.fontWeight = 'bold';
+            btn.style.borderRadius = '12px';
+
+            if (isTarget) {
+                // Final voted color: yellow/red/gold accent gradient
+                btn.style.background = 'linear-gradient(135deg, rgba(234, 179, 8, 0.35), rgba(220, 38, 38, 0.35))';
+                btn.style.border = '2px solid #eab308';
+                btn.style.color = '#fef08a';
+                btn.style.boxShadow = '0 0 12px rgba(234, 179, 8, 0.4)';
+                btn.textContent = name === myPlayerName ? `✔ VOTATO: ${name} (Tu)` : `✔ VOTATO: ${name}`;
+            } else {
+                btn.style.background = 'rgba(255, 255, 255, 0.04)';
+                btn.style.border = '1px solid rgba(255,255,255,0.08)';
+                btn.style.color = '#64748b';
+                btn.style.opacity = '0.6';
+                btn.textContent = name === myPlayerName ? `${name} (Tu)` : name;
+            }
+            votingOptions.appendChild(btn);
+        });
+
+        // Skip option display when voted
+        const skipBtn = document.createElement('button');
+        skipBtn.className = 'btn';
+        skipBtn.disabled = true;
+        skipBtn.style.width = '100%';
+        skipBtn.style.padding = '0.95rem';
+        skipBtn.style.fontSize = '0.95rem';
+        skipBtn.style.fontWeight = 'bold';
+        skipBtn.style.borderRadius = '12px';
+
+        if (myVote === 'SKIP') {
+            skipBtn.style.background = 'linear-gradient(135deg, rgba(234, 179, 8, 0.35), rgba(220, 38, 38, 0.35))';
+            skipBtn.style.border = '2px solid #eab308';
+            skipBtn.style.color = '#fef08a';
+            skipBtn.style.boxShadow = '0 0 12px rgba(234, 179, 8, 0.4)';
+            skipBtn.textContent = '✔ VOTATO: ⏭️ SKIP';
+        } else {
+            skipBtn.style.background = 'rgba(255, 255, 255, 0.04)';
+            skipBtn.style.border = '1px solid rgba(255,255,255,0.08)';
+            skipBtn.style.color = '#64748b';
+            skipBtn.style.opacity = '0.6';
+            skipBtn.textContent = '⏭️ SKIP';
+        }
+        votingOptions.appendChild(skipBtn);
+        return;
+    }
+
+    // Active Voting Selection State
+    if (selectedVoteTarget) {
+        votingStatus.innerHTML = `<div style="background: rgba(245, 158, 11, 0.25); border: 1.5px solid #f59e0b; color: #fbbf24; padding: 0.75rem 1rem; border-radius: 12px; font-weight: 800; font-size: 0.95rem; text-align: center; margin-bottom: 0.8rem; box-shadow: 0 0 12px rgba(245, 158, 11, 0.3); animation: pulse 1.5s infinite;">⚠️ Clicca di nuovo su <strong>${escapeHtml(selectedVoteTarget)}</strong> per CONFERMARE!</div>`;
+    } else {
+        votingStatus.innerHTML = `<div style="color: #94a3b8; font-size: 0.88rem; font-weight: 600; text-align: center; margin-bottom: 0.5rem;">💡 Seleziona un giocatore per votarlo</div>`;
+    }
 
     alivePlayers.forEach(name => {
         const isSelected = selectedVoteTarget === name;
@@ -475,21 +586,32 @@ function renderVotingUI(playersMap) {
         btn.style.transition = 'all 0.2s ease';
         
         if (isSelected) {
-            btn.style.background = 'rgba(0, 229, 255, 0.2)';
-            btn.style.border = '2px solid var(--accent-cyan)';
-            btn.style.color = '#38bdf8';
-            btn.textContent = name === myPlayerName ? `✔ ${name} (Tu)` : `✔ ${name}`;
+            // Colore medio per la pre-selezione (ambra / arancione medio)
+            btn.style.background = 'linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(217, 119, 6, 0.35))';
+            btn.style.border = '2px solid #f59e0b';
+            btn.style.color = '#fbbf24';
+            btn.style.boxShadow = '0 0 12px rgba(245, 158, 11, 0.4)';
+            btn.textContent = name === myPlayerName ? `⚠️ RICLICCA PER CONFERMARE: ${name} (Tu)` : `⚠️ RICLICCA PER CONFERMARE: ${name}`;
         } else {
-            btn.style.background = name === myPlayerName ? 'rgba(255, 255, 255, 0.1)' : 'var(--card-bg)';
-            btn.style.border = name === myPlayerName ? '1px solid rgba(255,255,255,0.25)' : '1px solid rgba(255,255,255,0.1)';
+            // Senza colore (Stato normale)
+            btn.style.background = name === myPlayerName ? 'rgba(255, 255, 255, 0.08)' : 'var(--card-bg)';
+            btn.style.border = name === myPlayerName ? '1px solid rgba(255,255,255,0.25)' : '1px solid rgba(255,255,255,0.15)';
             btn.style.color = '#fff';
             btn.textContent = name === myPlayerName ? `${name} (Tu)` : name;
         }
 
-        btn.onclick = () => {
-            selectedVoteTarget = name;
-            lastRenderedVotesSignature = '';
-            renderVotingUI(playersMap);
+        btn.onclick = async () => {
+            if (selectedVoteTarget === name) {
+                // 2nd click on same target -> Confirm vote!
+                btn.disabled = true;
+                btn.textContent = 'CONFERMA IN CORSO...';
+                await castVote(name);
+            } else {
+                // 1st click -> Pre-select target
+                selectedVoteTarget = name;
+                lastRenderedVotesSignature = '';
+                renderVotingUI(playersMap);
+            }
         };
         votingOptions.appendChild(btn);
     });
@@ -506,32 +628,42 @@ function renderVotingUI(playersMap) {
     skipBtn.style.transition = 'all 0.2s ease';
 
     if (isSkipSelected) {
-        skipBtn.style.background = 'rgba(239, 68, 68, 0.25)';
-        skipBtn.style.border = '2px solid #ef4444';
-        skipBtn.style.color = '#fca5a5';
-        skipBtn.textContent = '✔ ⏭️ SKIP (Non espellere)';
+        // Colore medio per la pre-selezione dello SKIP
+        skipBtn.style.background = 'linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(220, 38, 38, 0.35))';
+        skipBtn.style.border = '2px solid #f59e0b';
+        skipBtn.style.color = '#fbbf24';
+        skipBtn.style.boxShadow = '0 0 12px rgba(245, 158, 11, 0.4)';
+        skipBtn.textContent = '⚠️ RICLICCA PER CONFERMARE: ⏭️ SKIP';
     } else {
-        skipBtn.style.background = 'rgba(117, 117, 117, 0.3)';
-        skipBtn.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+        skipBtn.style.background = 'rgba(117, 117, 117, 0.2)';
+        skipBtn.style.border = '1px solid rgba(255, 255, 255, 0.15)';
         skipBtn.style.color = '#e2e8f0';
         skipBtn.textContent = '⏭️ SKIP (Non espellere)';
     }
 
-    skipBtn.onclick = () => {
-        selectedVoteTarget = 'SKIP';
-        lastRenderedVotesSignature = '';
-        renderVotingUI(playersMap);
+    skipBtn.onclick = async () => {
+        if (selectedVoteTarget === 'SKIP') {
+            // 2nd click on SKIP -> Confirm vote!
+            skipBtn.disabled = true;
+            skipBtn.textContent = 'CONFERMA IN CORSO...';
+            await castVote('SKIP');
+        } else {
+            // 1st click -> Pre-select SKIP
+            selectedVoteTarget = 'SKIP';
+            lastRenderedVotesSignature = '';
+            renderVotingUI(playersMap);
+        }
     };
     votingOptions.appendChild(skipBtn);
 
-    // Confirm button
+    // Explicit Confirm Button at bottom (secondary touch target)
     if (selectedVoteTarget) {
         const confirmBtn = document.createElement('button');
         confirmBtn.className = 'btn';
         confirmBtn.style.width = '100%';
-        confirmBtn.style.padding = '1.1rem';
-        confirmBtn.style.marginTop = '0.8rem';
-        confirmBtn.style.fontSize = '1.05rem';
+        confirmBtn.style.padding = '1rem';
+        confirmBtn.style.marginTop = '0.5rem';
+        confirmBtn.style.fontSize = '1rem';
         confirmBtn.style.fontWeight = '800';
         confirmBtn.style.borderRadius = '14px';
         confirmBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
@@ -587,15 +719,37 @@ function parseTaskDesc(descStr, defaultIdx) {
     return { num: defaultIdx, title: descStr.trim(), location: '' };
 }
 
+function getSortedTaskEntries(tasksObj) {
+    if (!tasksObj) return [];
+    let entries = [];
+    if (Array.isArray(tasksObj)) {
+        entries = tasksObj.map((taskData, index) => ({ id: index, data: taskData }));
+    } else {
+        entries = Object.keys(tasksObj).map(key => ({ id: key, data: tasksObj[key] }));
+    }
+    
+    // Sort: uncompleted (completed == false) first, completed (completed == true) last
+    entries.sort((a, b) => {
+        const aDone = a.data && a.data.completed ? 1 : 0;
+        const bDone = b.data && b.data.completed ? 1 : 0;
+        return aDone - bDone;
+    });
+
+    return entries;
+}
+
 function renderRealTasks(tasksObj) {
     taskList.innerHTML = '';
-    if(!tasksObj) return;
+    if (!tasksObj) return;
     
-    let idx = 1;
-    for(const taskId in tasksObj) {
-        const taskData = tasksObj[taskId];
-        const isDone = taskData.completed;
-        const parsed = parseTaskDesc(taskData.desc, idx);
+    const sortedEntries = getSortedTaskEntries(tasksObj);
+    
+    sortedEntries.forEach((entry, idx) => {
+        const taskId = entry.id;
+        const taskData = entry.data;
+        if (!taskData) return;
+        const isDone = !!taskData.completed;
+        const parsed = parseTaskDesc(taskData.desc, idx + 1);
         const li = document.createElement('li');
         li.className = `giocatore-task-item ${isDone ? 'completed' : ''}`;
         
@@ -603,7 +757,6 @@ function renderRealTasks(tasksObj) {
             <div class="giocatore-task-main">
                 <div class="giocatore-task-header">
                     <span class="task-num">#${escapeHtml(parsed.num)}</span>
-                    <span class="task-status-pill ${isDone ? 'done' : 'pending'}">${isDone ? '✔ COMPLETATO' : 'IN CORSO'}</span>
                 </div>
                 <div class="task-info">
                     <div class="task-title">${escapeHtml(parsed.title)}</div>
@@ -622,37 +775,32 @@ function renderRealTasks(tasksObj) {
                 targetBtn.disabled = true;
                 targetBtn.classList.add('btn-done');
                 targetBtn.textContent = '✔ DONE';
-                const pill = li.querySelector('.task-status-pill');
-                if (pill) {
-                    pill.classList.remove('pending');
-                    pill.classList.add('done');
-                    pill.textContent = '✔ COMPLETATO';
-                }
                 li.classList.add('completed');
                 await completeTask(taskId);
             };
         }
         taskList.appendChild(li);
-        idx++;
-    }
+    });
 }
 
 function renderImpostorTasks(tasksObj) {
     taskList.innerHTML = '';
-    if(!tasksObj) return;
+    if (!tasksObj) return;
     
-    let idx = 1;
-    for(const taskId in tasksObj) {
-        const taskData = tasksObj[taskId];
-        const isDone = taskData.completed;
-        const parsed = parseTaskDesc(taskData.desc, idx);
+    const sortedEntries = getSortedTaskEntries(tasksObj);
+    
+    sortedEntries.forEach((entry, idx) => {
+        const taskId = entry.id;
+        const taskData = entry.data;
+        if (!taskData) return;
+        const isDone = !!taskData.completed;
+        const parsed = parseTaskDesc(taskData.desc, idx + 1);
         const li = document.createElement('li');
         li.className = `giocatore-task-item ${isDone ? 'completed' : ''}`;
         li.innerHTML = `
             <div class="giocatore-task-main">
                 <div class="giocatore-task-header">
                     <span class="task-num">#${escapeHtml(parsed.num)}</span>
-                    <span class="task-status-pill ${isDone ? 'done' : 'pending'}" id="fake-pill-${taskId}">${isDone ? '✔ COMPLETATO' : 'IN CORSO'}</span>
                 </div>
                 <div class="task-info">
                     <div class="task-title">${escapeHtml(parsed.title)}</div>
@@ -670,19 +818,12 @@ function renderImpostorTasks(tasksObj) {
                 targetBtn.disabled = true;
                 targetBtn.classList.add('btn-done');
                 targetBtn.textContent = '✔ DONE';
-                const pill = li.querySelector(`#fake-pill-${taskId}`);
-                if (pill) {
-                    pill.classList.remove('pending');
-                    pill.classList.add('done');
-                    pill.textContent = '✔ COMPLETATO';
-                }
                 li.classList.add('completed');
                 completeTask(taskId);
             };
         }
         taskList.appendChild(li);
-        idx++;
-    }
+    });
 }
 
 function updateKillSelector(players) {

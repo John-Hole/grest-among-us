@@ -410,6 +410,64 @@ function startConnection() {
     }
 
     let isDeadRevealActive = false;
+    let currentGameState = 'waiting';
+    let latestPlayersData = null;
+    let latestVotesData = null;
+    let latestMaxPlayers = null;
+
+    // Initialize players list & limit
+    function renderPlayers(playersData, votesData, maxPlayers) {
+        if (!playersListContainer) return;
+        playersListContainer.innerHTML = '';
+        
+        let playerCount = 0;
+        const targetData = playersData || latestPlayersData;
+        const targetVotes = votesData || latestVotesData;
+
+        if (targetData) {
+            for (const playerName in targetData) {
+                playerCount++;
+                const pData = targetData[playerName];
+                const isRevealedDead = pData.status === 'killed_revealed' || 
+                                       pData.status === 'dead' || 
+                                       pData.status === 'ghost' || 
+                                       ((currentGameState === 'discussion' || currentGameState === 'voting') && pData.status === 'killed_hidden');
+
+                const hasVoted = targetVotes && targetVotes[playerName] !== undefined;
+                
+                const div = document.createElement('div');
+                div.className = `player-card ${isRevealedDead ? 'dead' : ''}`;
+                
+                let statusHtml = '';
+                if (isRevealedDead) {
+                    statusHtml = '<span class="player-status dead-badge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); padding: 2px 8px; border-radius: 10px; font-weight: 700; font-size: 0.75rem;">❌ DEFUNTO</span>';
+                } else if (currentGameState === 'voting' || previousStatus === 'voting') {
+                    statusHtml = hasVoted 
+                        ? '<span class="player-status voted-badge">VOTATO</span>' 
+                        : '<span class="player-status waiting-badge">IN ATTESA</span>';
+                }
+
+                div.innerHTML = `
+                    <div class="player-avatar">👨‍🚀</div>
+                    <span class="player-name">${escapeHtml(playerName)}</span>
+                    ${statusHtml}
+                `;
+                playersListContainer.appendChild(div);
+            }
+        }
+        
+        const countDisplay = document.getElementById('waiting-players-count');
+        if (countDisplay) {
+            if (maxPlayers && maxPlayers !== 'unlimited' && !isNaN(parseInt(maxPlayers))) {
+                countDisplay.textContent = `(${playerCount}/${maxPlayers})`;
+            } else {
+                countDisplay.textContent = `(${playerCount})`;
+            }
+        }
+
+        const playersScroll = document.getElementById('players-scroll-container');
+        if (playersScroll) setupAutoScroll(playersScroll);
+    }
 
     function showDeadRevealOverlay(playersData, votesData, maxPlayers) {
         const overlayDeadReveal = document.getElementById('overlay-dead-reveal');
@@ -459,18 +517,21 @@ function startConnection() {
                 cards.forEach(c => c.classList.add('slashed'));
             }, 350);
 
-            // Update Firebase status from killed_hidden to killed_revealed
+            // Update local & Firebase status from killed_hidden to killed_revealed
             const dbUpdates = {};
             deadHiddenPlayers.forEach(name => {
                 dbUpdates[`rooms/${roomCode}/players/${name}/status`] = 'killed_revealed';
+                if (playersData && playersData[name]) {
+                    playersData[name].status = 'killed_revealed';
+                }
             });
             update(ref(db), dbUpdates).catch(err => console.error("Firebase update status error:", err));
 
-            // Hide overlay after 4.5s
+            // Hide overlay after 4.5s and refresh sidebar player list
             setTimeout(() => {
                 overlayDeadReveal.classList.add('hidden');
                 isDeadRevealActive = false;
-                renderPlayers(playersData, votesData, maxPlayers);
+                renderPlayers(latestPlayersData || playersData, latestVotesData || votesData, latestMaxPlayers || maxPlayers);
             }, 4500);
         } else {
             const noDeadDiv = document.createElement('div');
@@ -484,9 +545,122 @@ function startConnection() {
             setTimeout(() => {
                 overlayDeadReveal.classList.add('hidden');
                 isDeadRevealActive = false;
-                renderPlayers(playersData, votesData, maxPlayers);
+                renderPlayers(latestPlayersData || playersData, latestVotesData || votesData, latestMaxPlayers || maxPlayers);
             }, 2500);
         }
+    }
+
+    function showVotingResultsOverlay(playersData, votesData, ejectedPlayer) {
+        const overlay = document.getElementById('overlay-voting-results');
+        const container = document.getElementById('voting-results-cards-container');
+        if (!overlay || !container) return;
+
+        container.innerHTML = '';
+        
+        const votesByTarget = {};
+        if (playersData) {
+            for (const pName in playersData) {
+                votesByTarget[pName] = [];
+            }
+        }
+        votesByTarget['SKIP'] = [];
+
+        if (votesData) {
+            for (const voterName in votesData) {
+                const target = votesData[voterName];
+                if (target) {
+                    if (!votesByTarget[target]) votesByTarget[target] = [];
+                    votesByTarget[target].push(voterName);
+                }
+            }
+        }
+
+        const targetsArray = [];
+        for (const targetName in votesByTarget) {
+            if (targetName === 'SKIP') {
+                if (votesByTarget['SKIP'].length > 0) {
+                    targetsArray.push({
+                        name: 'SALTA VOTO (SKIP)',
+                        key: 'SKIP',
+                        isSkip: true,
+                        voters: votesByTarget['SKIP'],
+                        count: votesByTarget['SKIP'].length
+                    });
+                }
+            } else {
+                const pData = playersData ? playersData[targetName] : null;
+                targetsArray.push({
+                    name: targetName,
+                    key: targetName,
+                    isSkip: false,
+                    pData: pData,
+                    voters: votesByTarget[targetName],
+                    count: votesByTarget[targetName].length
+                });
+            }
+        }
+
+        // Ordina: più voti prima, l'espulso prima a parità di voti, skip, infine alfabetico
+        targetsArray.sort((a, b) => {
+            if (b.count !== a.count) return b.count - a.count;
+            if (a.key === ejectedPlayer) return -1;
+            if (b.key === ejectedPlayer) return 1;
+            return a.name.localeCompare(b.name);
+        });
+
+        targetsArray.forEach(item => {
+            const card = document.createElement('div');
+            const isEjected = item.key === ejectedPlayer && item.key !== 'SKIP';
+            
+            card.className = `voting-results-card ${isEjected ? 'ejected-highlight' : ''} ${item.isSkip ? 'skip-card' : ''}`;
+
+            let avatarIcon = item.isSkip ? '⏭️' : (item.pData && item.pData.status === 'killed_revealed' ? '💀' : '👨‍🚀');
+            let countText = item.count === 1 ? '1 Voto' : `${item.count} Voti`;
+            let badgeHtml = item.count > 0 
+                ? `<span class="vote-count-badge active">${countText}</span>` 
+                : `<span class="vote-count-badge zero">0 Voti</span>`;
+
+            let votersHtml = '';
+            if (item.voters && item.voters.length > 0) {
+                votersHtml = `
+                    <div class="voters-list-container">
+                        <span class="voters-label">Votato da:</span>
+                        <div class="voters-pills">
+                            ${item.voters.map(v => `<span class="voter-pill">👨‍🚀 ${escapeHtml(v)}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                votersHtml = `<div class="no-voters-label">Nessun voto ricevuto</div>`;
+            }
+
+            let ejectedBadgeHtml = isEjected 
+                ? `<div class="ejected-ribbon">🚨 PIÙ VOTATO</div>` 
+                : '';
+
+            card.innerHTML = `
+                ${ejectedBadgeHtml}
+                <div class="voting-card-top">
+                    <div class="voting-card-user">
+                        <span class="voting-card-avatar">${avatarIcon}</span>
+                        <span class="voting-card-name">${escapeHtml(item.name)}</span>
+                    </div>
+                    ${badgeHtml}
+                </div>
+                <div class="voting-card-bottom">
+                    ${votersHtml}
+                </div>
+            `;
+
+            container.appendChild(card);
+        });
+
+        overlay.classList.remove('hidden');
+    }
+
+    function hideVotingResultsOverlay() {
+        const overlay = document.getElementById('overlay-voting-results');
+        if (overlay) overlay.classList.add('hidden');
     }
 
     // Init QR Code with simplified error correction level
@@ -531,9 +705,14 @@ function startConnection() {
 
             if (data.state) {
                 const status = data.state.game_status;
+                currentGameState = status;
                 const players = data.players || {};
                 const votes = data.votes || {};
                 const maxPlayers = data.config ? data.config.maxPlayers : null;
+
+                latestPlayersData = players;
+                latestVotesData = votes;
+                latestMaxPlayers = maxPlayers;
 
                 // Real-time taskbar update on any room change
                 updateTaskBar(players);
@@ -574,6 +753,7 @@ function startConnection() {
                 }
 
                 if (status === 'waiting') {
+                    hideVotingResultsOverlay();
                     if(overlayMeeting) overlayMeeting.classList.add('hidden');
                     if(overlayEjected) overlayEjected.classList.add('hidden');
                     
@@ -584,6 +764,7 @@ function startConnection() {
                     renderPlayers(players, votes, maxPlayers);
                 } 
                 else if (status === 'playing') {
+                    hideVotingResultsOverlay();
                     if(overlayMeeting) overlayMeeting.classList.add('hidden');
                     
                     const mainDashboard = document.getElementById('main-dashboard-layout');
@@ -599,7 +780,7 @@ function startConnection() {
                         }
                     }
                     
-                    if (previousStatus === 'voting' || previousStatus === 'discussion' || previousStatus === 'emergency') {
+                    if (previousStatus === 'voting_results' || previousStatus === 'voting' || previousStatus === 'discussion' || previousStatus === 'emergency') {
                         if(overlayEjected) {
                             overlayEjected.classList.remove('hidden');
                             if(ejectedText) ejectedText.textContent = data.state.last_ejected && data.state.last_ejected !== 'SKIP' 
@@ -615,6 +796,7 @@ function startConnection() {
                     updateTimerUI(data.state.timer, data.state.timer_paused, data.state.timer_remaining);
                 }
                 else if (status === 'emergency') {
+                    hideVotingResultsOverlay();
                     clearTimerFlashing();
                     if(overlayMeeting) overlayMeeting.classList.remove('hidden');
                     if(overlayText) {
@@ -630,6 +812,7 @@ function startConnection() {
                     }
                 }
                 else if (status === 'discussion') {
+                    hideVotingResultsOverlay();
                     clearTimerFlashing();
                     if(overlayMeeting) overlayMeeting.classList.add('hidden'); 
                     if (globalTimer) {
@@ -650,6 +833,7 @@ function startConnection() {
                     }
                 }
                 else if (status === 'voting') {
+                    hideVotingResultsOverlay();
                     if(overlayMeeting) overlayMeeting.classList.add('hidden');
                     const headerCard = globalTimer ? globalTimer.closest('.center-header-card') : null;
                     clearInterval(timerInterval);
@@ -683,6 +867,17 @@ function startConnection() {
                         }, 100);
                     }
                     renderPlayers(players, votes, maxPlayers);
+                }
+                else if (status === 'voting_results') {
+                    clearTimerFlashing();
+                    if(overlayMeeting) overlayMeeting.classList.add('hidden');
+                    if(overlayEjected) overlayEjected.classList.add('hidden');
+                    if (globalTimer) {
+                        globalTimer.textContent = "ESITO VOTI";
+                        globalTimer.style.color = "#c084fc";
+                    }
+                    clearInterval(timerInterval);
+                    showVotingResultsOverlay(players, data.state.last_votes || votes, data.state.last_ejected);
                 }
                 else if (status === 'impostors_win') {
                     clearTimerFlashing();

@@ -83,7 +83,7 @@
 <body>
     <div class="hub-layout">
         <!-- HOME SECTION -->
-        <div id="section-home" class="section-container" style="text-align: center; margin-top: 0.5rem;">
+        <div id="section-home" class="glass-card" style="text-align: center; max-width: 600px; width: 100%;">
             <div class="home-buttons">
                 <button id="btn-go-create" class="btn btn-hub-action" style="background: var(--accent-cyan); color: black;">CREA<br><span style="font-size:0.8rem">Manager</span></button>
                 <button id="btn-go-join" class="btn btn-hub-action" style="background: var(--accent-green);">UNISCITI<br><span style="font-size:0.8rem">Giocatore</span></button>
@@ -101,7 +101,7 @@
 
         <!-- AUTH MODAL (Popup) -->
         <div id="modal-auth-prompt" class="overlay-screen hidden" style="background: rgba(0,0,0,0.8); z-index: 100;">
-            <div class="section-container" style="background: #222; border: 2px solid var(--accent-cyan); padding: 1.25rem;">
+            <div class="glass-card" style="background: #222; border: 2px solid var(--accent-cyan); padding: 1.25rem; max-width: 420px;">
                 <h2 style="text-align: center; margin-bottom: 0.75rem;">Vuoi accedere?</h2>
                 <p style="text-align: center; font-size: 0.9rem; color: #ccc; margin-bottom: 1.25rem;">Accedendo potrai salvare i tuoi template per le prossime partite.</p>
                 <div style="display: flex; gap: 0.75rem; justify-content: center;">
@@ -112,7 +112,7 @@
         </div>
 
         <!-- AUTH SECTION (Login/Register Form) -->
-        <div id="section-auth" class="section-container hidden">
+        <div id="section-auth" class="glass-card hidden" style="max-width: 600px; width: 100%;">
             <h2>Account / Accesso</h2>
             
             <!-- INLINE AUTH ERROR BANNER -->
@@ -146,20 +146,22 @@
         </div>
 
         <!-- TEMPLATES DASHBOARD -->
-        <div id="section-templates" class="section-container hidden" style="max-width: 800px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                <h2 style="margin: 0; font-size: clamp(1.1rem, 4vw, 1.3rem);">I Tuoi Template</h2>
-                <button id="btn-tpl-back" class="btn btn-danger" style="padding: 0.4rem 0.85rem; font-size: 0.8rem; border-radius: 50px;">Indietro</button>
+        <div id="section-templates" class="hidden template-edit-container" style="max-width: 1200px; width: 100%;">
+            <div class="glass-card" style="margin-bottom: 0.85rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                    <h2 style="margin: 0; font-size: clamp(1.1rem, 4vw, 1.3rem);">I Tuoi Template</h2>
+                    <button id="btn-tpl-back" class="btn btn-danger" style="padding: 0.4rem 0.85rem; font-size: 0.8rem; border-radius: 50px;">Indietro</button>
+                </div>
+                <p style="font-size: 0.8rem; color: #94a3b8; margin: 0; line-height: 1.35;">Seleziona un template per avviare istantaneamente la stanza, oppure creane uno nuovo.</p>
             </div>
-            <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 1rem; line-height: 1.35;">Seleziona un template per avviare istantaneamente la stanza, oppure creane uno nuovo.</p>
             
-            <div id="templates-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem;">
+            <div id="templates-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.85rem; width: 100%;">
                 <!-- Template cards dynamically injected here -->
             </div>
         </div>
 
         <!-- JOIN ROOM SECTION -->
-        <div id="section-join" class="section-container hidden">
+        <div id="section-join" class="glass-card hidden" style="max-width: 600px; width: 100%;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <h2>Unisciti a una Stanza</h2>
                 <button id="btn-join-back" class="btn btn-danger" style="padding: 0.5rem 1rem;">Indietro</button>
@@ -174,7 +176,7 @@
         </div>
 
         <!-- CREATE NEW / EDIT TEMPLATE SETTINGS -->
-        <div id="section-create" class="section-container hidden template-edit-container">
+        <div id="section-create" class="hidden template-edit-container">
 
             <!-- MAIN TEMPLATE EDIT GRID -->
             <div class="template-edit-grid">
