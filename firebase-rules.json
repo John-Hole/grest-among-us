@@ -24,7 +24,7 @@
           ".validate": "newData.isNumber() && newData.val() <= now"
         },
         "status": {
-          ".validate": "newData.isString() && ['waiting', 'playing', 'finished'].indexOf(newData.val()) !== -1"
+          ".validate": "newData.isString() && (newData.val() === 'waiting' || newData.val() === 'playing' || newData.val() === 'finished')"
         },
         "currentRound": {
           ".validate": "newData.isNumber() && newData.val() >= 0"
@@ -32,12 +32,12 @@
         "state": {
           ".read": "auth != null",
           ".write": "auth != null",
-          ".validate": "newData.isObject()",
+          ".validate": "newData.hasChildren()",
           "round": {
             ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
           },
           "game_status": {
-            ".validate": "!newData.exists() || (newData.isString() && ['waiting', 'playing', 'emergency', 'discussion', 'voting', 'crewmates_win', 'impostors_win'].indexOf(newData.val()) !== -1)"
+            ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'waiting' || newData.val() === 'playing' || newData.val() === 'emergency' || newData.val() === 'discussion' || newData.val() === 'voting' || newData.val() === 'crewmates_win' || newData.val() === 'impostors_win'))"
           }
         },
         "players": {
@@ -48,10 +48,10 @@
               ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0 && newData.val().length <= 50)"
             },
             "role": {
-              ".validate": "newData.isString() && ['crewmate', 'impostor', 'scientist'].indexOf(newData.val()) !== -1"
+              ".validate": "newData.isString() && (newData.val() === 'crewmate' || newData.val() === 'impostor' || newData.val() === 'scientist')"
             },
             "status": {
-              ".validate": "newData.isString() && ['alive', 'killed_hidden', 'killed_revealed', 'dead', 'ghost'].indexOf(newData.val()) !== -1"
+              ".validate": "newData.isString() && (newData.val() === 'alive' || newData.val() === 'killed_hidden' || newData.val() === 'killed_revealed' || newData.val() === 'dead' || newData.val() === 'ghost')"
             },
             "joinedAt": {
               ".validate": "newData.isNumber() && newData.val() <= now"
@@ -93,7 +93,7 @@
           ".read": "auth != null",
           ".write": "auth != null && (root.child('rooms').child($roomId).child('creatorId').val() === auth.uid || (root.child('rooms').child($roomId).child('createdAt').exists() && root.child('rooms').child($roomId).child('createdAt').val() < now - 86400000))",
           "roundTimes": {
-            ".validate": "newData.isArray()"
+            ".validate": "newData.hasChildren()"
           },
           "discussionTime": {
             ".validate": "newData.isNumber() && newData.val() > 0"
@@ -108,7 +108,7 @@
       "$userId": {
         ".read": "auth != null && auth.uid === $userId",
         ".write": "auth != null && auth.uid === $userId",
-        ".validate": "newData.isObject()",
+        ".validate": "newData.hasChildren()",
         "lastRoomCreation": {
           ".validate": "newData.isNumber()"
         }

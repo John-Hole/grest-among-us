@@ -706,10 +706,12 @@ function updateUI(state, players) {
         }
         if (btnTimerPauseCard) {
             if (state.timer_paused) {
-                btnTimerPauseCard.textContent = "▶️ RIPRENDI";
+                btnTimerPauseCard.textContent = "▶️";
+                btnTimerPauseCard.title = "Riprendi Timer";
                 btnTimerPauseCard.style.background = "#00c853";
             } else {
-                btnTimerPauseCard.textContent = "⏸️ PAUSA";
+                btnTimerPauseCard.textContent = "⏸️";
+                btnTimerPauseCard.title = "Pausa Timer";
                 btnTimerPauseCard.style.background = "#ea580c";
             }
         }

@@ -3053,18 +3053,26 @@ input:checked + .slider:before {
 }
 
 .ejected-ribbon {
-    position: absolute;
-    top: 8px;
-    right: 12px;
-    background: #ef4444;
+    position: relative;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
     color: white;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 900;
-    padding: 2px 8px;
+    padding: 0.3rem 0.65rem;
     border-radius: 10px;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
-    box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    white-space: nowrap;
+    animation: ribbonPulse 1.5s infinite alternate;
+}
+
+@keyframes ribbonPulse {
+    0% { transform: scale(1); box-shadow: 0 0 8px rgba(239, 68, 68, 0.6); }
+    100% { transform: scale(1.04); box-shadow: 0 0 16px rgba(239, 68, 68, 0.9); }
 }
 
 .voting-card-top {
@@ -3073,6 +3081,14 @@ input:checked + .slider:before {
     align-items: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 0.6rem;
+}
+
+.voting-card-badges {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .voting-card-user {
@@ -3380,7 +3396,7 @@ input:checked + .slider:before {
 }
 
 .timer-card-clock {
-    font-size: clamp(1.15rem, 4vw, 1.45rem) !important;
+    font-size: clamp(1.1rem, 3.8vw, 1.4rem) !important;
     font-weight: 900 !important;
     color: #38bdf8;
     background: rgba(0, 0, 0, 0.4) !important;
@@ -3396,7 +3412,7 @@ input:checked + .slider:before {
     min-width: 0 !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
     user-select: none !important;
     transition: all 0.2s ease !important;
 }
@@ -3410,28 +3426,32 @@ input:checked + .slider:before {
 .timer-card-actions {
     display: flex !important;
     align-items: center !important;
-    gap: 0.45rem !important;
+    gap: 0.5rem !important;
     flex-shrink: 0 !important;
 }
 
-.btn-timer-pause-compact {
-    background: linear-gradient(135deg, #ea580c, #c2410c) !important;
+.btn-timer-icon-btn {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.95rem !important;
+    background: #ea580c !important;
     color: white !important;
-    border-radius: 50px !important;
-    font-weight: 800 !important;
-    padding: 0.45rem 0.85rem !important;
-    font-size: 0.8rem !important;
     border: none !important;
     cursor: pointer !important;
-    white-space: nowrap !important;
-    box-shadow: 0 2px 8px rgba(234, 88, 12, 0.35) !important;
+    box-shadow: 0 2px 8px rgba(234, 88, 12, 0.4) !important;
     transition: all 0.2s ease !important;
     user-select: none !important;
 }
 
-.btn-timer-pause-compact:hover {
-    transform: translateY(-1px) !important;
-    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.5) !important;
+.btn-timer-icon-btn:hover {
+    transform: scale(1.08) !important;
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.6) !important;
 }
 
 .btn-timer-add-compact {

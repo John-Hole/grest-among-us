@@ -589,6 +589,15 @@ function startConnection() {
                 }
             } else {
                 const pData = playersData ? playersData[targetName] : null;
+                // Exclude players who were dead before the vote and received no votes (unless they are the ejected player)
+                const isDeadBeforeVote = pData && 
+                    (pData.status === 'killed_revealed' || pData.status === 'dead' || pData.status === 'ghost') && 
+                    targetName !== ejectedPlayer;
+
+                if (isDeadBeforeVote && votesByTarget[targetName].length === 0) {
+                    continue;
+                }
+
                 targetsArray.push({
                     name: targetName,
                     key: targetName,
@@ -635,17 +644,19 @@ function startConnection() {
             }
 
             let ejectedBadgeHtml = isEjected 
-                ? `<div class="ejected-ribbon">🚨 PIÙ VOTATO</div>` 
+                ? `<span class="ejected-ribbon">🚨 PIÙ VOTATO</span>` 
                 : '';
 
             card.innerHTML = `
-                ${ejectedBadgeHtml}
                 <div class="voting-card-top">
                     <div class="voting-card-user">
                         <span class="voting-card-avatar">${avatarIcon}</span>
                         <span class="voting-card-name">${escapeHtml(item.name)}</span>
                     </div>
-                    ${badgeHtml}
+                    <div class="voting-card-badges">
+                        ${ejectedBadgeHtml}
+                        ${badgeHtml}
+                    </div>
                 </div>
                 <div class="voting-card-bottom">
                     ${votersHtml}
