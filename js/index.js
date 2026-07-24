@@ -457,9 +457,9 @@ async function loadUserTemplates(uid) {
 
 function createTemplateCard(id, data, isCustom) {
     const card = document.createElement('div');
-    card.style = `background: var(--card-bg); border-radius: 12px; padding: 1.2rem; position: relative; border: 2px solid #333; transition: all 0.2s; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between;`;
-    card.onmouseover = () => card.style.borderColor = 'var(--accent-cyan)';
-    card.onmouseout = () => card.style.borderColor = '#333';
+    card.style = `background: rgba(18, 24, 37, 0.85); border-radius: 14px; padding: 1rem; position: relative; border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.2s ease; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.3);`;
+    card.onmouseover = () => card.style.borderColor = 'rgba(56, 189, 248, 0.4)';
+    card.onmouseout = () => card.style.borderColor = 'rgba(255, 255, 255, 0.08)';
     card.onclick = () => startRoomWithConfig(data);
 
     // Header Flex Row (Title + 3 Dots Menu Button)

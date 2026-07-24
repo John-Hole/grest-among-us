@@ -274,6 +274,11 @@ function updateUI(state, playersMap) {
         overlayMeetingH1.textContent = "DISCUSSIONE";
         overlayMeetingH1.style.color = "#ffeb3b";
         overlayMeetingP.textContent = "Discuti! Guarda il maxischermo per i dettagli.";
+        // Stop siren if it was playing during emergency
+        if (sirenAudio) {
+            sirenAudio.pause();
+            sirenAudio.currentTime = 0;
+        }
         return;
     } else if (state.game_status === 'voting') {
         overlayMeeting.classList.add('hidden');
@@ -560,6 +565,28 @@ async function completeTask(taskId) {
     await update(ref(db), updates);
 }
 
+function parseTaskDesc(descStr, defaultIdx) {
+    if (!descStr) return { num: defaultIdx, title: '', location: '' };
+    // Matches "10. Descrizione | Luogo" or "10. Descrizione" or "Descrizione | Luogo"
+    const matchWithNum = descStr.match(/^(\d+)\.\s*([^|]+)(?:\|\s*(.+))?$/);
+    if (matchWithNum) {
+        return {
+            num: matchWithNum[1],
+            title: matchWithNum[2].trim(),
+            location: matchWithNum[3] ? matchWithNum[3].trim() : ''
+        };
+    }
+    const matchPipe = descStr.match(/^([^|]+)\|\s*(.+)$/);
+    if (matchPipe) {
+        return {
+            num: defaultIdx,
+            title: matchPipe[1].trim(),
+            location: matchPipe[2].trim()
+        };
+    }
+    return { num: defaultIdx, title: descStr.trim(), location: '' };
+}
+
 function renderRealTasks(tasksObj) {
     taskList.innerHTML = '';
     if(!tasksObj) return;
@@ -568,17 +595,19 @@ function renderRealTasks(tasksObj) {
     for(const taskId in tasksObj) {
         const taskData = tasksObj[taskId];
         const isDone = taskData.completed;
+        const parsed = parseTaskDesc(taskData.desc, idx);
         const li = document.createElement('li');
         li.className = `giocatore-task-item ${isDone ? 'completed' : ''}`;
         
         li.innerHTML = `
             <div class="giocatore-task-main">
                 <div class="giocatore-task-header">
-                    <span class="task-num">#${idx}</span>
+                    <span class="task-num">#${escapeHtml(parsed.num)}</span>
                     <span class="task-status-pill ${isDone ? 'done' : 'pending'}">${isDone ? '✔ COMPLETATO' : 'IN CORSO'}</span>
                 </div>
                 <div class="task-info">
-                    <div class="task-title">${escapeHtml(taskData.desc)}</div>
+                    <div class="task-title">${escapeHtml(parsed.title)}</div>
+                    ${parsed.location ? `<div class="task-location">📍 ${escapeHtml(parsed.location)}</div>` : ''}
                 </div>
             </div>
             <button class="task-btn ${isDone ? 'btn-done' : ''}" ${isDone ? 'disabled' : ''} id="task-btn-${taskId}">
@@ -616,16 +645,18 @@ function renderImpostorTasks(tasksObj) {
     for(const taskId in tasksObj) {
         const taskData = tasksObj[taskId];
         const isDone = taskData.completed;
+        const parsed = parseTaskDesc(taskData.desc, idx);
         const li = document.createElement('li');
         li.className = `giocatore-task-item ${isDone ? 'completed' : ''}`;
         li.innerHTML = `
             <div class="giocatore-task-main">
                 <div class="giocatore-task-header">
-                    <span class="task-num">#${idx}</span>
+                    <span class="task-num">#${escapeHtml(parsed.num)}</span>
                     <span class="task-status-pill ${isDone ? 'done' : 'pending'}" id="fake-pill-${taskId}">${isDone ? '✔ COMPLETATO' : 'IN CORSO'}</span>
                 </div>
                 <div class="task-info">
-                    <div class="task-title">${escapeHtml(taskData.desc)}</div>
+                    <div class="task-title">${escapeHtml(parsed.title)}</div>
+                    ${parsed.location ? `<div class="task-location">📍 ${escapeHtml(parsed.location)}</div>` : ''}
                 </div>
             </div>
             <button class="task-btn ${isDone ? 'btn-done' : ''}" ${isDone ? 'disabled' : ''} id="fake-btn-${taskId}">

@@ -198,16 +198,25 @@ function startConnection() {
         } else {
             // Default fallback to TASKS_LIST from game-logic.js
             tasksArray = TASKS_LIST.map((tStr, idx) => {
-                const match = tStr.match(/^(\d+)\.\s*([^:]+)(?::\s*(.+))?$/);
-                if (match) {
+                const matchPipe = tStr.match(/^(\d+)\.\s*([^|]+)(?:\|\s*(.+))?$/);
+                if (matchPipe) {
                     return {
-                        num: match[1],
-                        name: match[2].trim(),
-                        obj: match[3] ? match[3].trim() : "",
-                        pos: "Navicella"
+                        num: matchPipe[1],
+                        name: matchPipe[2].trim(),
+                        obj: "",
+                        pos: matchPipe[3] ? matchPipe[3].trim() : ""
                     };
                 }
-                return { num: idx + 1, name: tStr, obj: "", pos: "Navicella" };
+                const matchColon = tStr.match(/^(\d+)\.\s*([^:]+)(?::\s*(.+))?$/);
+                if (matchColon) {
+                    return {
+                        num: matchColon[1],
+                        name: matchColon[2].trim(),
+                        obj: matchColon[3] ? matchColon[3].trim() : "",
+                        pos: ""
+                    };
+                }
+                return { num: idx + 1, name: tStr, obj: "", pos: "" };
             });
         }
 
@@ -633,6 +642,11 @@ function startConnection() {
                         showDeadRevealOverlay(players, votes, maxPlayers);
                     } else if (!isDeadRevealActive) {
                         renderPlayers(players, votes, maxPlayers);
+                    }
+                    // Stop siren if it was playing during emergency
+                    if (sirenAudio) {
+                        sirenAudio.pause();
+                        sirenAudio.currentTime = 0;
                     }
                 }
                 else if (status === 'voting') {
